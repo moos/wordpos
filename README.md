@@ -8,6 +8,9 @@ Installation
 ------------
 
 Get the script and use it.  (npm module may be coming.)
+
+Note: wordpos-bench requires customized bench module (forthcoming). 
+
     
 Usage
 ----------
