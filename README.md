@@ -1,9 +1,9 @@
 wordpos
 =======
 
-wordpos is a set of part-of-speech utilities for Node.js using [natural's] http://github.com/NaturalNode/natural) WordNet module.
+wordpos is a set of part-of-speech utilities for Node.js using [natural's](http://github.com/NaturalNode/natural) WordNet module.
 
-There is no lexigraphical intelligence here.  Only dictionary lookup.
+There is no lexigraphical intelligence here (eg, see [pos-js](https://github.com/fortnightlabs/pos-js)).  Only dictionary lookup.
 
 Usage
 -------
@@ -30,8 +30,8 @@ Installation
 
 Get the script `wordpos.js` and use it.  (npm module may be coming.)
 
-You may also want to manually download WordNet files from [here](http://wordnet.princeton.edu/wordnet/download/current-version/).  Unpack into folder (say `dict`, see below).  [natrual](http://github.com/NaturalNode/natural) will auto-download WordNet files -- 
-but I've found this to be unreliable as some of the files get truncated and the core program hangs.
+You may also want to manually download WordNet files from [here](http://wordnet.princeton.edu/wordnet/download/current-version/).  Unpack into folder (say `dict`).  [natrual](http://github.com/NaturalNode/natural) will auto-download WordNet files -- 
+but I've found this to be unreliable as some of the files get truncated, leading the core program to hang.
 
 Note: `wordpos-bench` requires a customized [uubench](https://github.com/moos/uubench) module (forthcoming). 
     
@@ -55,7 +55,7 @@ wordpos.getPOS(str, callback) -- callback receives a result object:
       verbs:[],       Array of str words that are verbs
       adjectives:[],  Array of str words that are adjectives
       adverbs:[],     Array of str words that are adverbs
-      rest:[]         Array of str words that are not in dict
+      rest:[]         Array of str words that are not in dict or could not be categorized as a POS
     }
         
     Note: a word may appear in multiple POS (eg, 'great' is both a noun and an adjective) 
@@ -80,12 +80,32 @@ Example:
 ```js
 wordpos.getNouns('The angry bear chased the frightened little squirrel.', console.log)
 // [ 'bear', 'squirrel', 'little', 'chased' ]
-```
 
-getNouns() returns all words within given (context-free) string of words that can be considered nouns (via 
-WordNet lookup).  This has no relation to correct grammer of given sentence, where here only 'bear' and 'squirrel' 
+wordpos.getPOS('The angry bear chased the frightened little squirrel.', console.log)
+// output:
+  { 
+    nouns: [ 'bear', 'squirrel', 'little', 'chased' ],
+    verbs: [ 'bear' ],
+    adjectives: [ 'little', 'angry', 'frightened' ],
+    adverbs: [ 'little' ],
+    rest: [ 'the' ]
+  }
+
+```
+This has no relation to correct grammer of given sentence, where here only 'bear' and 'squirrel' 
 would be considered nouns.  (see http://nltk.googlecode.com/svn/trunk/doc/book/ch08.html#ex-recnominals)
- 
+
+[pos-js](https://github.com/fortnightlabs/pos-js), e.g., shows only 'squirrel' as noun:
+
+    The / DT
+    angry / JJ
+    bear / VB
+    chased / VBN
+    the / DT
+    frightened / VBN
+    little / JJ
+    squirrel / NN
+
 
 ### isX()
 
@@ -152,7 +172,7 @@ oul beneath"- Melville; "Westminster Hall\'s awing majesty, so vast, so high, so
 In this case only one lookup was found.  But there could be several.
      
 
-Or use WordNet's inherited method directly:
+Or use WordNet's inherited method:
 
 ```js
 wordpos.lookup('great', console.log);
