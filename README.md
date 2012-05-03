@@ -30,7 +30,7 @@ Installation
 
 Get the script `wordpos.js` and use it.  (npm module may be coming.)
 
-You may also want to manually download WordNet files from [here](http://wordnet.princeton.edu/wordnet/download/current-version/).  Unpack into folder (say `dict`).  [natrual](http://github.com/NaturalNode/natural) will auto-download WordNet files -- 
+You may also want to manually download WordNet files from [here](http://wordnet.princeton.edu/wordnet/download/current-version/).  Unpack into folder (say `dict`).  [natural](http://github.com/NaturalNode/natural) will auto-download WordNet files -- 
 but I've found this to be unreliable as some of the files get truncated, leading the core program to hang.
 
 Note: `wordpos-bench` requires a customized [uubench](https://github.com/moos/uubench) module (forthcoming). 
@@ -41,7 +41,7 @@ API
 
 Please note: all API are async since the underlying WordNet library is async.
 
-WordPOS is a subclass of natural's [WordNet class](https://github.com/NaturalNode/natural#wordnet) and inherits call its methods.
+WordPOS is a subclass of natural's [WordNet class](https://github.com/NaturalNode/natural#wordnet) and inherits all its methods.
 
 
 ### getX()
