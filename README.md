@@ -28,7 +28,7 @@ See `wordpos_spec.js` for full usage.
 Installation
 ------------
 
-Get the script `wordpos.js` and use it.  (npm module may be coming.)
+Get the script `wordpos.js` and use it.  (npm package may be coming.)
 
 or use a git path in your package.json dependencies:
 ```
@@ -39,7 +39,7 @@ or use a git path in your package.json dependencies:
   ...
 ```
 
-As of version 0.1.1, WordNet DB files are obtained off-line through dependency provided by moos/WBdb module.
+As of version 0.1.1, WordNet DB files are obtained off-line through dependency provided by [WNdb](https://github.com/moos/WNdb) module.
 
 Note: `wordpos-bench.js` requires a [forked uubench](https://github.com/moos/uubench) module.
 
