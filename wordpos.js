@@ -12,7 +12,8 @@ var _ = require('underscore')._,
   natural = require('natural'),
   WordNet = natural.WordNet,
   tokenizer = new natural.WordTokenizer(),
-  stopwords = ' '+ natural.stopwords.join(' ') +' ';
+  stopwords = ' '+ natural.stopwords.join(' ') +' ',
+  WNdb = require('WNdb');
 
 function normalize(word) {
   return word.toLowerCase().replace(/\s+/g, '_');
@@ -65,7 +66,11 @@ function get(isFn) {
 
 
 var WordPOS = function() {
-  WordPOS.super_.apply(this, arguments);
+  if (arguments.length == 0) {
+    WordPOS.super_.call(this, WNdb.path);
+  } else {
+    WordPOS.super_.apply(this, arguments);
+  }
 };
 util.inherits(WordPOS, WordNet);
 

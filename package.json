@@ -1,21 +1,22 @@
 {
   "name": "wordpos",
   "description": "wordpos is a set of part-of-speech utilities for Node.js using natural's WordNet module.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "homepage": "https://github.com/moos/wordpos",
   "engines": {
     "node": ">=0.4.10"
   },
   "dependencies": {
     "natural": "latest",
-    "underscore": ">=1.3.1"
+    "underscore": ">=1.3.1",
+    "WNdb": "git://github.com/moos/WNdb.git"
   },
   "devDependencies": {
     "uubench": "git://github.com/moos/uubench.git"
   },
   "repository" : {
     "type" : "git",
-    "url" : "http://github.com/moos/wordpos.git"
+    "url" : "git://github.com/moos/wordpos.git"
   },
   "author": "Moos <mooster@42at.com>",
   "keywords": ["natural", "language", "wordnet", "pos"],

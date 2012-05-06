@@ -10,7 +10,7 @@ Usage
 
 ```js
 var WordPOS = require('./wordpos'),
-    wordpos = new WordPOS('dict');
+    wordpos = new WordPOS();
 
 wordpos.getAdjectives('The angry bear chased the frightened little squirrel.', function(result){
     console.log(result);
@@ -30,8 +30,16 @@ Installation
 
 Get the script `wordpos.js` and use it.  (npm module may be coming.)
 
-You may also want to manually download [WordNet files](http://wordnet.princeton.edu/wordnet/download/current-version/).  Unpack into folder (say `dict`).  [natural](http://github.com/NaturalNode/natural) will auto-download WordNet files --
-but I've found this to be unreliable as some of the files get truncated, leading the program to hang.
+or use a git path in your package.json dependencies:
+```
+  ...
+  "dependencies": {
+    "wordpos": "git://github.com/moos/wordpos.git"
+  },
+  ...
+```
+
+As of version 0.1.1, WordNet DB files are obtained off-line through dependency provided by moos/WBdb module.
 
 Note: `wordpos-bench.js` requires a [forked uubench](https://github.com/moos/uubench) module.
 
@@ -212,22 +220,3 @@ License
 (The MIT License)
 
 Copyright (c) 2012, mooster@42at.com
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-'Software'), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

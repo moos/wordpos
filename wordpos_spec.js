@@ -6,7 +6,7 @@
  */
 
 var WordPOS = require('./wordpos'),
-  wordpos = new WordPOS('dict');
+  wordpos = new WordPOS();
 
 var str = "The angry bear chased the frightened little squirrel",
   expected = {

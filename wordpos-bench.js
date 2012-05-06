@@ -3,7 +3,7 @@ var uubench = require('uubench'), // from: https://github.com/moos/uubench
   fs = require('fs'),
   _ = require('underscore')._,
   WordPOS = require('./wordpos'),
-  wordpos = new WordPOS('dict');
+  wordpos = new WordPOS();
 
 suite = new uubench.Suite({
   type: 'fixed',
