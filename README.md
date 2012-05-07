@@ -9,7 +9,7 @@ Usage
 -------
 
 ```js
-var WordPOS = require('./wordpos'),
+var WordPOS = require('wordpos'),
     wordpos = new WordPOS();
 
 wordpos.getAdjectives('The angry bear chased the frightened little squirrel.', function(result){
@@ -28,20 +28,14 @@ See `wordpos_spec.js` for full usage.
 Installation
 ------------
 
-Get the script `wordpos.js` and use it.  (npm package may be coming.)
-
-or use a git path in your package.json dependencies:
-```
-  ...
-  "dependencies": {
-    "wordpos": "git://github.com/moos/wordpos.git"
-  },
-  ...
-```
-
-As of version 0.1.1, WordNet DB files are obtained off-line through dependency provided by [WNdb](https://github.com/moos/WNdb) module.
+     npm install wordpos
 
 Note: `wordpos-bench.js` requires a [forked uubench](https://github.com/moos/uubench) module.
+
+To run spec:
+
+    npm install jasmine-node -g
+    jasmine-node wordpos_spec.js --verbose
 
 
 API
@@ -189,6 +183,8 @@ wordpos.lookup('great', console.log);
 
 Benchmark
 ----------
+
+    node wordpos-bench.js
 
 Generally slow as it requires loading and searching large WordNet index files.
 
