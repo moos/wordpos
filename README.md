@@ -3,7 +3,6 @@ wordpos
 
 wordpos is a set of part-of-speech utilities for Node.js using [natural's](http://github.com/NaturalNode/natural) WordNet module.
 
-There is no lexigraphical intelligence here (eg, see [pos-js](https://github.com/fortnightlabs/pos-js)).  Only dictionary lookup.
 
 Usage
 -------
