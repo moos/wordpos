@@ -190,13 +190,13 @@ WordPOS.defaults = {
   profile: false
 };
 ```
-To override, pass an options hash to the constructor:
+To override, pass an options hash to the constructor. With the `profile` option, all callbacks receive a second argument that is the execution time in msec of the call.
 
 ```js
     wordpos = new WordPOS({profile: true});
+    wordpos.isAdjective('fast', console.log);
+    // true 29
 ```
-
-With the `profile` option, all callbacks receive a second argument that is the execution time in msec of the call.
 
 
 Benchmark
