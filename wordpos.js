@@ -29,50 +29,80 @@ function prepText(text) {
 
 function lookup(pos) {
   return function(word, callback) {
+    var profile = this.options.profile,
+      start = profile && new Date(),
+      args = [];
     word = normalize(word);
     this.lookupFromFiles([
         {index: this.getIndexFile(pos), data: this.getDataFile(pos)}
-        ], [], word, callback);
+        ], [], word, function(results){
+        args.push(results);
+        profile && args.push(new Date() - start);
+        callback.apply(null, args);
+    });
   };
 }
 
 function is(pos){
-  return function(word, callback) {
-    var index = this.getIndexFile(pos);
+  return function(word, callback, _noprofile) {
+    // disable profiling when isX() used internally
+    var profile = this.options.profile && !_noprofile,
+      start = profile && new Date(),
+      args = [],
+      index = this.getIndexFile(pos);
     word = normalize(word);
     index.lookup(word, function(record) {
-      callback(!!record);
+      args.push(!!record);
+      profile && args.push(new Date() - start);
+      callback.apply(null, args);
     });
   };
 }
 
 function get(isFn) {
   return function(text, callback) {
-    var words = prepText(text),
+    var profile = this.options.profile,
+      start = profile && new Date(),
+      words = prepText(text),
       n = words.length,
       i = 0,
       self = this,
-      results = [];
-
-    if (!n) return callback(results);
+      results = [],
+      args = [results];
+    profile && args.push(0);
+    if (!n) return callback.apply(null, args);
     words.forEach(function(word,j){
       self[isFn](word, function(yes){
         yes && results.push(word);
-        (++i==n) && callback(results);
-      });
+        if (++i==n) {
+          profile && (args[1] = new Date() - start);
+          callback.apply(null, args);
+        }
+      }, /*_noprofile*/ true);
     });
   };
 }
 
-
-var WordPOS = function() {
-  if (arguments.length == 0) {
+/**
+ * @class WordPOS
+ * @constructor
+ */
+var WordPOS = function(options) {
+  if (arguments.length == 0 || _.isObject(options)) {
     WordPOS.super_.call(this, WNdb.path);
   } else {
     WordPOS.super_.apply(this, arguments);
   }
+  this.options = _.defaults({}, _.isObject(options) && options || {}, WordPOS.defaults);
 };
 util.inherits(WordPOS, WordNet);
+
+WordPOS.defaults = {
+  /**
+   * enable profiling, time in msec returned as second argument in callback
+   */
+  profile: false
+};
 
 var wordposProto = WordPOS.prototype;
 
@@ -142,6 +172,9 @@ if (!wordposProto.getIndexFile) {
  */
 wordposProto.getPOS = function(text, callback) {
   var data = {nouns:[], verbs:[], adjectives:[], adverbs:[], rest:[]},
+    profile = this.options.profile,
+    start = profile && new Date(),
+    args = [data],
     testFns = 'isNoun isVerb isAdjective isAdverb'.split(' '),
     parts = 'nouns verbs adjectives adverbs'.split(' '),
     words = prepText(text),
@@ -150,7 +183,8 @@ wordposProto.getPOS = function(text, callback) {
     self = this,
     c = 0;
 
-  if (!nWords) return callback(data);
+  profile && args.push(0);
+  if (!nWords) return callback.apply(null, args);
   words.forEach(lookup);
 
   function lookup(word){
@@ -177,7 +211,8 @@ wordposProto.getPOS = function(text, callback) {
 
   function done(){
     if (++c == nWords) {
-      callback(data);
+      profile && (args[1] = new Date() - start);
+      callback.apply(null, args);
     }
   }
 };

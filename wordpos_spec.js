@@ -175,3 +175,48 @@ describe('lookup POS', function() {
   });
 });
 
+describe('options passed to constructor', function() {
+    var wp, origProfile = WordPOS.defaults.profile;
+
+    it('should override default option', function(){
+      wp = new WordPOS({profile:123});
+      expect(wp.options.profile).toEqual(123);
+      expect(WordPOS.defaults.profile).toEqual(origProfile);
+    });
+
+    it('should not erase default option', function(){
+      wp = new WordPOS({aaa:123});
+      expect(wp.options.aaa).toEqual(123);
+      expect(wp.options.profile).toEqual(WordPOS.defaults.profile);
+    });
+});
+
+describe('profile option', function() {
+
+  var wp = new WordPOS({profile : true});
+
+  it('should return time argument for isX()', function(){
+    wp.isNoun(garble, function(result, time) {
+      expect(time).toBeDefined();
+      asyncSpecDone();
+    });
+    asyncSpecWait();
+  });
+
+  it('should return time argument for getX()', function(){
+    wp.getNouns(garble, function(result, time) {
+      expect(time).toBeDefined();
+      asyncSpecDone();
+    });
+    asyncSpecWait();
+  });
+
+  it('should return time argument for lookupX()', function(){
+    wp.isNoun(garble, function(result, time) {
+      expect(time).toBeDefined();
+      asyncSpecDone();
+    });
+    asyncSpecWait();
+  });
+});
+

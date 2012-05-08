@@ -180,6 +180,24 @@ Or use WordNet's inherited method:
 wordpos.lookup('great', console.log);
 // ...
 ```
+### Options
+
+```js
+WordPOS.defaults = {
+  /**
+   * enable profiling, time in msec returned as second argument in callback
+   */
+  profile: false
+};
+```
+To override, pass an options hash to the constructor:
+
+```js
+    wordpos = new WordPOS({profile: true});
+```
+
+With the `profile` option, all callbacks receive a second argument that is the execution time in msec of the call.
+
 
 Benchmark
 ----------
