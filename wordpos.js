@@ -68,18 +68,19 @@ function get(isFn) {
       i = 0,
       self = this,
       results = [],
-      args = [results];
-    profile && args.push(0);
-    if (!n) return callback.apply(null, args);
+      args = [results],
+      done = function(){
+        profile && (args[1] = new Date() - start);
+        callback.apply(null, args)
+      };
+    if (!n) return (process.nextTick(done),0);
     words.forEach(function(word,j){
       self[isFn](word, function(yes){
         yes && results.push(word);
-        if (++i==n) {
-          profile && (args[1] = new Date() - start);
-          callback.apply(null, args);
-        }
+        (++i==n) && done();
       }, /*_noprofile*/ true);
     });
+    return n;
   };
 }
 
@@ -146,6 +147,8 @@ wordposProto.getAdverbs = get('isAdverb');
 wordposProto.getNouns = get('isNoun');
 wordposProto.getVerbs = get('isVerb');
 
+wordposProto.parse = prepText;
+
 if (!wordposProto.getIndexFile) {
     wordposProto.getIndexFile = function getIndexFile(pos) {
       switch(pos) {
@@ -181,16 +184,18 @@ wordposProto.getPOS = function(text, callback) {
     nTests = testFns.length,
     nWords = words.length,
     self = this,
-    c = 0;
+    c = 0,
+    done = function(){
+      profile && (args[1] = new Date() - start);
+      callback.apply(null, args)
+    };
 
-  profile && args.push(0);
-  if (!nWords) return callback.apply(null, args);
+  if (!nWords) return (process.nextTick(done),0);
   words.forEach(lookup);
 
   function lookup(word){
     var any = false,
       t=0;
-    word = normalize(word);
     testFns.forEach(lookupPOS);
 
     function lookupPOS(isFn,i,list){
@@ -204,17 +209,13 @@ wordposProto.getPOS = function(text, callback) {
     function donePOS() {
       if (++t == nTests) {
         !any && data['rest'].push(word);
-        done();
+        (++c == nWords) && done();
       }
     }
   }
-
-  function done(){
-    if (++c == nWords) {
-      profile && (args[1] = new Date() - start);
-      callback.apply(null, args);
-    }
-  }
+  return nWords;
 };
+
+WordPOS.WNdb = WNdb;
 
 module.exports = WordPOS;

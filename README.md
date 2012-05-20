@@ -45,7 +45,7 @@ Please note: all API are async since the underlying WordNet library is async.
 WordPOS is a subclass of natural's [WordNet class](https://github.com/NaturalNode/natural#wordnet) and inherits all its methods.
 
 
-### getX()
+### getX()...
 
 Get POS from text.
 
@@ -75,6 +75,8 @@ than getPOS() which looks up the word in all index files.
 
 NB: [stopwords] (https://github.com/NaturalNode/natural/blob/master/lib/natural/util/stopwords.js)
 are stripped out from str before lookup.
+
+All getX() functions return the number of parsed words that will be looked up (less duplicates and stopwords).
 
 Example:
 
@@ -108,7 +110,7 @@ would be considered nouns.  (see http://nltk.googlecode.com/svn/trunk/doc/book/c
     squirrel / NN
 
 
-### isX()
+### isX()...
 
 Determine if a word is a particular POS.
 
@@ -138,7 +140,7 @@ wordpos.isAdverb('fishly', console.log);
 // false
 ```
 
-### lookupX()
+### lookupX()...
 
 These calls are similar to natural's [lookup()](https://github.com/NaturalNode/natural#wordnet) call, except they can be faster if you
 already know the POS of the word.
@@ -179,6 +181,15 @@ Or use WordNet's inherited method:
 wordpos.lookup('great', console.log);
 // ...
 ```
+
+### Other methods
+
+```
+WordPOS.WNdp -- access to the WNdb object
+
+wordpos.parse(str) -- returns tokenized array of words, less duplicates and stopwords.  This method is called on all getX() calls internally.
+```
+
 ### Options
 
 ```js
