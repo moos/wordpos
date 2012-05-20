@@ -241,7 +241,7 @@ Single word lookup:
   getAdverbs : 2 ops/s { iterations: 1, elapsed: 407 }
 ```
 
-128-word lookup (fastIndex) :
+128-word lookup (fastIndex, as of v0.1.4) :
 ```
   getPOS : 36 ops/s { iterations: 1, elapsed: 28 }
   getNouns : 125 ops/s { iterations: 1, elapsed: 8 }

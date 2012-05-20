@@ -3,6 +3,10 @@
  *
  * 		override natural.WordNet's IndexFile to use fast index data
  *
+ * Copyright (c) 2012 mooster@42at.com
+ * https://github.com/moos/wordpos
+ *
+ * Released under MIT license *
  */
 
 var _ = require('underscore')._,
@@ -11,7 +15,11 @@ var _ = require('underscore')._,
   fs = require('fs'),
   KEY_LENGTH = 3;
 
-// load fast index bucket data
+/**
+ * load fast index bucket data
+ * @param dir - dir path of index files
+ * @param name - name of index file, eg, 'index.verb'
+ */
 function loadFastIndex(dir, name) {
   var jsonFile = path.join(dir, 'fast-' + name + '.json'),
     data = null;
@@ -24,6 +32,12 @@ function loadFastIndex(dir, name) {
   return data;
 }
 
+/**
+ * read index file using fast index data at key
+ * @param key - 3-char key into fast index
+ * @param index - index file name (eg, 'index.verb')
+ * @param callback - function receives buffer of data read
+ */
 function readIndexForKey(key, index, callback) {
   var data = index.fastIndex,
     offset = data.offsets[key][0],
@@ -39,6 +53,12 @@ function readIndexForKey(key, index, callback) {
   });
 }
 
+/**
+ * function that overrides WordNet's IndexFile.find()
+ * @param search - word to search for
+ * @param callback - callback receives found line and tokens
+ * @returns none
+ */
 function find(search, callback) {
   var self = this,
     data = this.fastIndex,
@@ -94,56 +114,16 @@ function find(search, callback) {
   });
 }
 
-function find____(search, callback) {
-//  console.log('   >> ', search, this.fileName, this.fd);
-  var self = this,
-    data = this.fastIndex,
-    miss = {status: 'miss'};
-
-  var key = search.slice(0, KEY_LENGTH);
-  if (!(key in data.offsets)) return callback(miss);
-
-  if (!this.fd) {
-//    console.log(' ... opening', this.filePath);
-    this.fd = fs.openSync(this.filePath, 'r');
-  }
-
-  // ref count so we know when to close the main index file
-  ++this.refcount;
-
-  var offset = data.offsets[key][0],
-    nextKey = data.offsets[key][1],
-    nextOffset = data.offsets[nextKey][0],
-    len = nextOffset - offset - 1,
-    buffer = new Buffer(len),
-    pos = Math.ceil(len / 2) - 0;
-
-  console.log('--', offset, len, offset+len, offset+pos);
-
-  // call base class's _findAt to search only relevant portion
-  this._findAt(this.fd, // fd
-      offset+len * 1,	// size (more like 'end' of buffer)
-      offset+pos, 	// pos
-      null, 		// lastPos
-      pos * 1, 		// adjustment
-      search, 		// key
-      done);		// callback
-
-  function done(result) {
-    //console.log(self.refcount, search, result && result.line);
-    if (--self.refcount == 0) {
-      //console.log(' ... closing', self.filePath);
-      fs.close(self.fd);
-      self.fd = null;
-    }
-    callback(result);
-  }
-}
-
 // cache of fast index data across instances of WordPOS class
 var cache = {};
 
 module.exports = {
+  /**
+   * loads fast index data and return fast index find function
+   *
+   * @param index is the IndexFile instance
+   * @return function - fast index find or origin find if errors
+   */
   find: function(index){
 
     var key = index.filePath,
