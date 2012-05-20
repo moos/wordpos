@@ -185,7 +185,7 @@ wordpos.lookup('great', console.log);
 ### Other methods
 
 ```
-WordPOS.WNdp -- access to the WNdb object
+WordPOS.WNdb -- access to the WNdb object
 
 wordpos.parse(str) -- returns tokenized array of words, less duplicates and stopwords.  This method is called on all getX() calls internally.
 ```
