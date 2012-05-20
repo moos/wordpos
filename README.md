@@ -197,7 +197,12 @@ WordPOS.defaults = {
   /**
    * enable profiling, time in msec returned as second argument in callback
    */
-  profile: false
+  profile: false,
+
+  /**
+   * use fast index if available
+   */
+  fastIndex: true
 };
 ```
 To override, pass an options hash to the constructor. With the `profile` option, all callbacks receive a second argument that is the execution time in msec of the call.
@@ -207,6 +212,8 @@ To override, pass an options hash to the constructor. With the `profile` option,
     wordpos.isAdjective('fast', console.log);
     // true 29
 ```
+
+Version 0.1.4 introduces `fastIndex` option.  This uses a secondary index on the index files and is much faster. It is on by default.  Secondary index files are generated at install time and placed in the same directory as WNdb.path.  Details can be found in tool/stat.js.
 
 
 Benchmark
@@ -225,7 +232,7 @@ Single word lookup:
   getAdverbs : 137 ops/s { iterations: 10, elapsed: 73 }
 ```
 
-128-word lookup:
+128-word lookup (orig) :
 ```
   getPOS : 0 ops/s { iterations: 1, elapsed: 2210 }
   getNouns : 2 ops/s { iterations: 1, elapsed: 666 }
@@ -234,9 +241,17 @@ Single word lookup:
   getAdverbs : 2 ops/s { iterations: 1, elapsed: 407 }
 ```
 
+128-word lookup (fastIndex) :
+```
+  getPOS : 36 ops/s { iterations: 1, elapsed: 28 }
+  getNouns : 125 ops/s { iterations: 1, elapsed: 8 }
+  getVerbs : 500 ops/s { iterations: 1, elapsed: 2 }
+  getAdjectives : 500 ops/s { iterations: 1, elapsed: 2 }
+  getAdverbs : 1000 ops/s { iterations: 1, elapsed: 1 }
+```
+
 On a win7/64-bit/dual-core/3GHz.  getPOS() is slowest as it searches through all four index files.
 
-There is probably room for optimization in the underlying library.
 
 License
 -------

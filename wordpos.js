@@ -4,6 +4,8 @@
 *    Node.js part-of-speech utilities using natural's WordNet module.
 *
 * Copyright (c) 2012 mooster@42at.com
+* https://github.com/moos/wordpos
+*
 * Released under MIT license
 */
 
@@ -13,7 +15,12 @@ var _ = require('underscore')._,
   WordNet = natural.WordNet,
   tokenizer = new natural.WordTokenizer(),
   stopwords = ' '+ natural.stopwords.join(' ') +' ',
-  WNdb = require('WNdb');
+  WNdb = require('WNdb'),
+  fastIndex = null;
+
+try {
+  fastIndex = require('./tools/fastIndex');
+} catch(e) {}
 
 function normalize(word) {
   return word.toLowerCase().replace(/\s+/g, '_');
@@ -95,6 +102,14 @@ var WordPOS = function(options) {
     WordPOS.super_.apply(this, arguments);
   }
   this.options = _.defaults({}, _.isObject(options) && options || {}, WordPOS.defaults);
+
+  if (this.options.fastIndex && fastIndex) {
+    // override find
+    this.nounIndex.find = fastIndex.find(this.nounIndex);
+    this.verbIndex.find = fastIndex.find(this.verbIndex);
+    this.adjIndex.find = fastIndex.find(this.adjIndex);
+    this.advIndex.find = fastIndex.find(this.advIndex);
+  }
 };
 util.inherits(WordPOS, WordNet);
 
@@ -102,7 +117,12 @@ WordPOS.defaults = {
   /**
    * enable profiling, time in msec returned as second argument in callback
    */
-  profile: false
+  profile: false,
+
+  /**
+   * use fast index if available
+   */
+  fastIndex: true
 };
 
 var wordposProto = WordPOS.prototype;
