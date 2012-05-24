@@ -213,7 +213,7 @@ To override, pass an options hash to the constructor. With the `profile` option,
     // true 'fast' 29
 ```
 
-## FastINdex
+## Fast Index
 
 Version 0.1.4 introduces `fastIndex` option.  This uses a secondary index on the index files and is much faster. It is on by default.  Secondary index files are generated at install time and placed in the same directory as WNdb.path.  Details can be found in tools/stat.js.
 
@@ -225,7 +225,7 @@ See blog article [Optimizing WordPos](http://blog.42at.com/optimizing-wordpos).
 
 Generally slow as it requires loading and searching large WordNet index files.
 
-512-word corpus (orig) :
+512-word corpus (< v0.1.4) :
 ```
   getPOS : 0 ops/s { iterations: 1, elapsed: 9039 }
   getNouns : 0 ops/s { iterations: 1, elapsed: 2347 }
@@ -235,7 +235,7 @@ Generally slow as it requires loading and searching large WordNet index files.
 done in 20359 msecs
 ```
 
-512-word corpus (fastIndex, as of v0.1.4) :
+512-word corpus (as of v0.1.4, with fastIndex) :
 ```
   getPOS : 18 ops/s { iterations: 1, elapsed: 57 }
   getNouns : 48 ops/s { iterations: 1, elapsed: 21 }
@@ -245,7 +245,7 @@ done in 20359 msecs
 done in 1375 msecs
 ```
 
-On a win7/64-bit/dual-core/3GHz.  220 words are looked-up (less stopwords and duplicates. getPOS() is slowest as it searches through all four index files.
+220 words are looked-up (less stopwords and duplicates) on a win7/64-bit/dual-core/3GHz.  getPOS() is slowest as it searches through all four index files.
 
 
 License
