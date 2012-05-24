@@ -1,5 +1,5 @@
 /**
-* wordpos
+* wordpos.js
 *
 *    Node.js part-of-speech utilities using natural's WordNet module.
 *
@@ -19,7 +19,7 @@ var _ = require('underscore')._,
   fastIndex = null;
 
 try {
-  fastIndex = require('./tools/fastIndex');
+  fastIndex = require('./fastIndex');
 } catch(e) {}
 
 function normalize(word) {
@@ -59,7 +59,7 @@ function is(pos){
       index = this.getIndexFile(pos);
     word = normalize(word);
     index.lookup(word, function(record) {
-      args.push(!!record);
+      args.push(!!record, word);
       profile && args.push(new Date() - start);
       callback.apply(null, args);
     });

@@ -2,7 +2,7 @@
 var uubench = require('uubench'), // from: https://github.com/moos/uubench
   fs = require('fs'),
   _ = require('underscore')._,
-  WordPOS = require('./wordpos'),
+  WordPOS = require('../src/wordpos'),
   wordpos = new WordPOS();
 
 suite = new uubench.Suite({
@@ -23,6 +23,7 @@ suite = new uubench.Suite({
   },
 
   done: function(time){
+    console.log('looked up %d words', nwords);
     console.log('done in %d msecs', time );
   },
 
@@ -39,13 +40,14 @@ function out(res){
 
 
 var	text1 = 'laksasdf',
-  text128 = fs.readFileSync('text-128.txt', 'utf8'),
-  text,
+//  text128 = fs.readFileSync('text-128.txt', 'utf8'),
+  text512 = fs.readFileSync('text-512.txt', 'utf8'),
+  text, nwords,
   pos;
 
 
 function getPOS(next){
-  wordpos.getPOS(text, function(res){
+  nwords = wordpos.getPOS(text, function(res){
     pos = res;
     next();
   });
@@ -79,9 +81,6 @@ function getAdverbs(next){
   });
 }
 
-/*
- * one word
- */
 suite.section('--1 word--', function(next){
   text = text1;
   next();
@@ -93,12 +92,9 @@ suite.bench('getAdjectives', getAdjectives);
 suite.bench('getAdverbs', getAdverbs);
 
 
-/*
- * 128 words
- */
-suite.section('--128 words--', function(next){
+suite.section('--512 words--', function(next){
   suite.options.iterations = 1;
-  text = text128;
+  text = text512;
   next();
 });
 suite.bench('getPOS', getPOS);

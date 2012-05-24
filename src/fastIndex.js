@@ -6,7 +6,7 @@
  * Copyright (c) 2012 mooster@42at.com
  * https://github.com/moos/wordpos
  *
- * Released under MIT license *
+ * Released under MIT license
  */
 
 var _ = require('underscore')._,
@@ -19,6 +19,7 @@ var _ = require('underscore')._,
  * load fast index bucket data
  * @param dir - dir path of index files
  * @param name - name of index file, eg, 'index.verb'
+ * @returns Object - fast index data object
  */
 function loadFastIndex(dir, name) {
   var jsonFile = path.join(dir, 'fast-' + name + '.json'),
@@ -37,6 +38,7 @@ function loadFastIndex(dir, name) {
  * @param key - 3-char key into fast index
  * @param index - index file name (eg, 'index.verb')
  * @param callback - function receives buffer of data read
+ * @returns none
  */
 function readIndexForKey(key, index, callback) {
   var data = index.fastIndex,
@@ -55,6 +57,9 @@ function readIndexForKey(key, index, callback) {
 
 /**
  * function that overrides WordNet's IndexFile.find()
+ *
+ * calls to same bucket are queued for callback.
+ *
  * @param search - word to search for
  * @param callback - callback receives found line and tokens
  * @returns none
@@ -67,7 +72,7 @@ function find(search, callback) {
     args = [search, callback];
 
   var key = search.slice(0, KEY_LENGTH);
-  if (!(key in data.offsets)) return callback(miss);
+  if (!(key in data.offsets)) return process.nextTick(function(){ callback(miss) });
 
   // queue up if already reading file for this key
   if (key in readCallbacks){
@@ -122,7 +127,7 @@ module.exports = {
    * loads fast index data and return fast index find function
    *
    * @param index is the IndexFile instance
-   * @return function - fast index find or origin find if errors
+   * @returns function - fast index find or origin find if errors
    */
   find: function(index){
 

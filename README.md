@@ -124,20 +124,22 @@ wordpos.isAdjective(word, callback) -- callback receives result (true/false) if 
 wordpos.isAdverb(word, callback) -- callback receives result (true/false) if word is an adverb.
 ```
 
+isX() methods return the looked-up word as the second argument to the callback.
+
 Examples:
 
 ```js
 wordpos.isVerb('fish', console.log);
-// true
+// true 'fish'
 
 wordpos.isNoun('fish', console.log);
-// true
+// true 'fish'
 
 wordpos.isAdjective('fishy', console.log);
-// true
+// true 'fishy'
 
 wordpos.isAdverb('fishly', console.log);
-// false
+// false 'fishly'
 ```
 
 ### lookupX()...
@@ -182,7 +184,7 @@ wordpos.lookup('great', console.log);
 // ...
 ```
 
-### Other methods
+### Other methods/properties
 
 ```
 WordPOS.WNdb -- access to the WNdb object
@@ -195,7 +197,7 @@ wordpos.parse(str) -- returns tokenized array of words, less duplicates and stop
 ```js
 WordPOS.defaults = {
   /**
-   * enable profiling, time in msec returned as second argument in callback
+   * enable profiling, time in msec returned as last argument in callback
    */
   profile: false,
 
@@ -210,10 +212,10 @@ To override, pass an options hash to the constructor. With the `profile` option,
 ```js
     wordpos = new WordPOS({profile: true});
     wordpos.isAdjective('fast', console.log);
-    // true 29
+    // true 'fast' 29
 ```
 
-Version 0.1.4 introduces `fastIndex` option.  This uses a secondary index on the index files and is much faster. It is on by default.  Secondary index files are generated at install time and placed in the same directory as WNdb.path.  Details can be found in tool/stat.js.
+Version 0.1.4 introduces `fastIndex` option.  This uses a secondary index on the index files and is much faster. It is on by default.  Secondary index files are generated at install time and placed in the same directory as WNdb.path.  Details can be found in tools/stat.js.
 
 
 Benchmark

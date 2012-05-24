@@ -1,14 +1,17 @@
 /**
+ * stat.js
+ *
  * generate fast index for WordNet index files
  *
  * Usage:
  *    node stat [--no-stats] index.adv ...
  *
- * --no-stats prevents writing stat data to file
- * Fast index is based on buckets keyed off first THREE characters in the index word,
- * eg, 'awesome' goes into bucket 'awe'
+ * --no-stats prevents writing bucket size statistics to file.
  *
- * Format of the fast index:
+ * Fast index is based on buckets keyed off first THREE characters in the index word,
+ * eg, 'awesome' goes into bucket 'awe'.
+ *
+ * Format of the fast index JSON object:
  *  {
  *   "firstKey":".22",				// first key value
  *   "keyLength":3,					// #characters in key
@@ -36,9 +39,14 @@
  *  	get offset of key and offset of next key
  *      read index file between the two offsets
  *  	binary search read data O(log avg)
+ *
+ * Copyright (c) 2012 mooster@42at.com
+ * https://github.com/moos/wordpos
+ *
+ * Released under MIT license
  */
 var
-  WNdb = require('../wordpos').WNdb,
+  WNdb = require('../src/wordpos').WNdb,
   util = require('util'),
   BufferedReader = require ("./buffered-reader"),
   _ = require('underscore')._,
@@ -109,9 +117,6 @@ _(process.argv.slice(2)).filter(function(arg){
         avg = (sum/size).toFixed(2),
         info = util.format('buckets %d, max %d at %s, sum %d, avg %d, median %d', size, max, maxkey, sum, avg, median);
 
-//      console.log(sorted);
-//      return;
-
       console.log(basename, info);
 
       if (stats) {
@@ -144,6 +149,7 @@ _(process.argv.slice(2)).filter(function(arg){
       };
 
       fs.writeFileSync(jsonFile, JSON.stringify(data), 'utf8');
+      console.log('  wrote %s\n', jsonFile);
     })
     .read();
 });

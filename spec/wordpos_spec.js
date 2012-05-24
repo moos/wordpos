@@ -1,11 +1,18 @@
-// npm install jasmine-node -g
-// jasmine-node wordpos_spec.js --verbose
-
-/* Note: 'dict' folder should contain WordNet files.
- * Download and unpack manually from http://wordnet.princeton.edu/wordnet/download/current-version/
+/**
+ * wordpos_spec.js
+ *
+ * spec file for main wordpos functionality
+ *
+ * Usage:
+ *   npm install jasmine-node -g
+ *   jasmine-node wordpos_spec.js --verbose
+ *
+ * Copyright (c) 2012 mooster@42at.com
+ * https://github.com/moos/wordpos
+ *
+ * Released under MIT license
  */
-
-var WordPOS = require('./wordpos'),
+var WordPOS = require('../src/wordpos'),
   wordpos = new WordPOS();
 
 var str = "The angry bear chased the frightened little squirrel",
@@ -19,7 +26,7 @@ var str = "The angry bear chased the frightened little squirrel",
   garble = 'garblegarble';	// expect not to find word
 
 
-describe('get POS', function() {
+describe('getX()...', function() {
 
   beforeEach(function() {
     this.addMatchers({
@@ -78,7 +85,7 @@ describe('get POS', function() {
   });
 });
 
-describe('is POS', function() {
+describe('isX()...', function() {
   it('should check if noun', function() {
     wordpos.isNoun(expected.nouns[0], function(result) {
       expect(result).toBeTruthy();
@@ -109,7 +116,7 @@ describe('is POS', function() {
   });
 });
 
-describe('is !POS', function() {
+describe('!isX()...', function() {
   it('should check if !noun', function() {
     wordpos.isNoun(garble, function(result) {
       expect(result).not.toBeTruthy();
@@ -140,7 +147,7 @@ describe('is !POS', function() {
   });
 });
 
-describe('lookup POS', function() {
+describe('lookupX()...', function() {
   it('should lookup noun', function() {
     wordpos.lookupNoun('squirrel', function(result) {
       expect(result[0].pos).toBe('n');
@@ -196,7 +203,8 @@ describe('profile option', function() {
   var wp = new WordPOS({profile : true});
 
   it('should return time argument for isX()', function(){
-    wp.isNoun(garble, function(result, time) {
+    wp.isNoun(garble, function(result, word, time) {
+      expect(word).toEqual(garble);
       expect(time).toBeDefined();
       asyncSpecDone();
     });
