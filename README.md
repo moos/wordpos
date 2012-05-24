@@ -4,8 +4,7 @@ wordpos
 wordpos is a set of part-of-speech utilities for Node.js using [natural's](http://github.com/NaturalNode/natural) WordNet module.
 
 
-Usage
--------
+## Usage
 
 ```js
 var WordPOS = require('wordpos'),
@@ -24,8 +23,7 @@ wordpos.isAdjective('awesome', function(result){
 
 See `wordpos_spec.js` for full usage.
 
-Installation
-------------
+## Installation
 
      npm install wordpos
 
@@ -35,10 +33,10 @@ To run spec:
 
     npm install jasmine-node -g
     jasmine-node wordpos_spec.js --verbose
+    jasmine-node validate_spec.js --verbose
 
 
-API
--------
+## API
 
 Please note: all API are async since the underlying WordNet library is async.
 
@@ -215,44 +213,39 @@ To override, pass an options hash to the constructor. With the `profile` option,
     // true 'fast' 29
 ```
 
+## FastINdex
+
 Version 0.1.4 introduces `fastIndex` option.  This uses a secondary index on the index files and is much faster. It is on by default.  Secondary index files are generated at install time and placed in the same directory as WNdb.path.  Details can be found in tools/stat.js.
 
+See blog article [Optimizing WordPos](http://blog.42at.com/optimizing-wordpos).
 
-Benchmark
-----------
+## Benchmark
 
     node wordpos-bench.js
 
 Generally slow as it requires loading and searching large WordNet index files.
 
-Single word lookup:
+512-word corpus (orig) :
 ```
-  getPOS : 30 ops/s { iterations: 10, elapsed: 329 }
-  getNouns : 106 ops/s { iterations: 10, elapsed: 94 }
-  getVerbs : 111 ops/s { iterations: 10, elapsed: 90 }
-  getAdjectives : 132 ops/s { iterations: 10, elapsed: 76 }
-  getAdverbs : 137 ops/s { iterations: 10, elapsed: 73 }
-```
-
-128-word lookup (orig) :
-```
-  getPOS : 0 ops/s { iterations: 1, elapsed: 2210 }
-  getNouns : 2 ops/s { iterations: 1, elapsed: 666 }
-  getVerbs : 2 ops/s { iterations: 1, elapsed: 638 }
-  getAdjectives : 2 ops/s { iterations: 1, elapsed: 489 }
-  getAdverbs : 2 ops/s { iterations: 1, elapsed: 407 }
+  getPOS : 0 ops/s { iterations: 1, elapsed: 9039 }
+  getNouns : 0 ops/s { iterations: 1, elapsed: 2347 }
+  getVerbs : 0 ops/s { iterations: 1, elapsed: 2434 }
+  getAdjectives : 1 ops/s { iterations: 1, elapsed: 1698 }
+  getAdverbs : 0 ops/s { iterations: 1, elapsed: 2698 }
+done in 20359 msecs
 ```
 
-128-word lookup (fastIndex, as of v0.1.4) :
+512-word corpus (fastIndex, as of v0.1.4) :
 ```
-  getPOS : 36 ops/s { iterations: 1, elapsed: 28 }
-  getNouns : 125 ops/s { iterations: 1, elapsed: 8 }
-  getVerbs : 500 ops/s { iterations: 1, elapsed: 2 }
-  getAdjectives : 500 ops/s { iterations: 1, elapsed: 2 }
-  getAdverbs : 1000 ops/s { iterations: 1, elapsed: 1 }
+  getPOS : 18 ops/s { iterations: 1, elapsed: 57 }
+  getNouns : 48 ops/s { iterations: 1, elapsed: 21 }
+  getVerbs : 125 ops/s { iterations: 1, elapsed: 8 }
+  getAdjectives : 111 ops/s { iterations: 1, elapsed: 9 }
+  getAdverbs : 143 ops/s { iterations: 1, elapsed: 7 }
+done in 1375 msecs
 ```
 
-On a win7/64-bit/dual-core/3GHz.  getPOS() is slowest as it searches through all four index files.
+On a win7/64-bit/dual-core/3GHz.  220 words are looked-up (less stopwords and duplicates. getPOS() is slowest as it searches through all four index files.
 
 
 License
