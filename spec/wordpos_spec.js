@@ -40,145 +40,128 @@ describe('getX()...', function() {
     });
   });
 
-  it('should get all POS', function() {
+  it('should get all POS', function(done) {
     wordpos.getPOS(str, function(result) {
       expect(result.nouns).toEqualUnordered(expected.nouns);
       expect(result.verbs).toEqualUnordered(expected.verbs);
       expect(result.adjectives).toEqualUnordered(expected.adjectives);
       expect(result.adverbs).toEqualUnordered(expected.adverbs);
       expect(result.rest).toEqualUnordered(expected.rest);
-      asyncSpecDone();
+      done();
     });
-    asyncSpecWait();
   });
 
-  it('should get nouns', function() {
+  it('should get nouns', function(done) {
     wordpos.getNouns(str, function(result) {
       expect(result).toEqualUnordered(expected.nouns);
-      asyncSpecDone();
+      done();
     });
-    asyncSpecWait();
   });
 
-  it('should get verbs', function() {
+  it('should get verbs', function(done) {
     wordpos.getVerbs(str, function(result) {
       expect(result).toEqualUnordered(expected.verbs);
-      asyncSpecDone();
+      done();
     });
-    asyncSpecWait();
   });
 
-  it('should get adjectives', function() {
+  it('should get adjectives', function(done) {
     wordpos.getAdjectives(str, function(result) {
       expect(result).toEqualUnordered(expected.adjectives);
-      asyncSpecDone();
+      done();
     });
-    asyncSpecWait();
   });
 
-  it('should get adverbs', function() {
+  it('should get adverbs', function(done) {
     wordpos.getAdverbs(str, function(result) {
       expect(result).toEqualUnordered(expected.adverbs);
-      asyncSpecDone();
+      done();
     });
-    asyncSpecWait();
   });
 });
 
 describe('isX()...', function() {
-  it('should check if noun', function() {
+  it('should check if noun', function(done) {
     wordpos.isNoun(expected.nouns[0], function(result) {
       expect(result).toBeTruthy();
-      asyncSpecDone();
+      done();
     });
-    asyncSpecWait();
   });
-  it('should check if verb', function() {
+  it('should check if verb', function(done) {
     wordpos.isVerb(expected.verbs[0], function(result) {
       expect(result).toBeTruthy();
-      asyncSpecDone();
+      done();
     });
-    asyncSpecWait();
   });
-  it('should check if adjective', function() {
+  it('should check if adjective', function(done) {
     wordpos.isAdjective(expected.adjectives[0], function(result) {
       expect(result).toBeTruthy();
-      asyncSpecDone();
+      done();
     });
-    asyncSpecWait();
   });
-  it('should check if adverb', function() {
+  it('should check if adverb', function(done) {
     wordpos.isAdverb(expected.adverbs[0], function(result) {
       expect(result).toBeTruthy();
-      asyncSpecDone();
+      done();
     });
-    asyncSpecWait();
   });
 });
 
 describe('!isX()...', function() {
-  it('should check if !noun', function() {
+  it('should check if !noun', function(done) {
     wordpos.isNoun(garble, function(result) {
       expect(result).not.toBeTruthy();
-      asyncSpecDone();
+      done();
     });
-    asyncSpecWait();
   });
-  it('should check if !verb', function() {
+  it('should check if !verb', function(done) {
     wordpos.isVerb(garble, function(result) {
       expect(result).not.toBeTruthy();
-      asyncSpecDone();
+      done();
     });
-    asyncSpecWait();
   });
-  it('should check if !adjective', function() {
+  it('should check if !adjective', function(done) {
     wordpos.isAdjective(garble, function(result) {
       expect(result).not.toBeTruthy();
-      asyncSpecDone();
+      done();
     });
-    asyncSpecWait();
   });
-  it('should check if !adverb', function() {
+  it('should check if !adverb', function(done) {
     wordpos.isAdverb(garble, function(result) {
       expect(result).not.toBeTruthy();
-      asyncSpecDone();
+      done();
     });
-    asyncSpecWait();
   });
 });
 
 describe('lookupX()...', function() {
-  it('should lookup noun', function() {
+  it('should lookup noun', function(done) {
     wordpos.lookupNoun('squirrel', function(result) {
       expect(result[0].pos).toBe('n');
       expect(result[0].lemma).toBe('squirrel');
-      asyncSpecDone();
+      done();
     });
-    asyncSpecWait();
   });
-  it('should lookup verb', function() {
+  it('should lookup verb', function(done) {
     wordpos.lookupVerb('bear', function(result) {
       expect(result[0].pos).toBe('v');
       expect(result[0].lemma).toBe('have_a_bun_in_the_oven');
-      asyncSpecDone();
+      done();
     });
-    asyncSpecWait();
   });
-  it('should lookup adjective', function() {
+  it('should lookup adjective', function(done) {
     wordpos.lookupAdjective('angry', function(result) {
       expect(result[0].pos).toBe('s');
       expect(result[0].lemma).toBe('angry');
-      asyncSpecDone();
+      done();
     });
-    asyncSpecWait();
   });
-  it('should lookup adverb', function() {
+  it('should lookup adverb', function(done) {
     wordpos.lookupAdverb('little', function(result) {
       expect(result[0].pos).toBe('r');
       expect(result[0].lemma).toBe('little');
-      asyncSpecDone();
+      done();
     });
-    asyncSpecWait();
   });
 });
 
@@ -202,29 +185,26 @@ describe('profile option', function() {
 
   var wp = new WordPOS({profile : true});
 
-  it('should return time argument for isX()', function(){
+  it('should return time argument for isX()', function(done){
     wp.isNoun(garble, function(result, word, time) {
       expect(word).toEqual(garble);
       expect(time).toBeDefined();
-      asyncSpecDone();
+      done();
     });
-    asyncSpecWait();
   });
 
-  it('should return time argument for getX()', function(){
+  it('should return time argument for getX()', function(done){
     wp.getNouns(garble, function(result, time) {
       expect(time).toBeDefined();
-      asyncSpecDone();
+      done();
     });
-    asyncSpecWait();
   });
 
-  it('should return time argument for lookupX()', function(){
+  it('should return time argument for lookupX()', function(done){
     wp.isNoun(garble, function(result, time) {
       expect(time).toBeDefined();
-      asyncSpecDone();
+      done();
     });
-    asyncSpecWait();
   });
 });
 

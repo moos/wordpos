@@ -18,22 +18,22 @@ var
 describe('validate isX() using fastIndex', function() {
 
   it('should validate index.noun', function() {
-    exec('node validate index.noun', callback);
+    exec('node ../tools/validate index.noun', callback);
     asyncSpecWait();
   });
 
   it('should validate index.verb', function() {
-    exec('node validate index.verb', callback);
+    exec('node ../tools/validate index.verb', callback);
     asyncSpecWait();
   });
 
   it('should validate index.adv', function() {
-    exec('node validate index.adv', callback);
+    exec('node ../tools/validate index.adv', callback);
     asyncSpecWait();
   });
 
   it('should validate index.adj', function() {
-    exec('node validate index.adj', callback);
+    exec('node ../tools/validate index.adj', callback);
     asyncSpecWait();
   });
 

@@ -38,9 +38,7 @@ To run spec:
 
 ## API
 
-Please note: all API are async since the underlying WordNet library is async.
-
-WordPOS is a subclass of natural's [WordNet class](https://github.com/NaturalNode/natural#wordnet) and inherits all its methods.
+Please note: all API are async since the underlying WordNet library is async. WordPOS is a subclass of natural's [WordNet class](https://github.com/NaturalNode/natural#wordnet) and inherits all its methods.
 
 
 ### getX()...
@@ -68,10 +66,8 @@ wordpos.getAdjectives(str, callback) -- callback receives an array of adjectives
 wordpos.getAdverbs(str, callback) -- callback receives an array of adverbs in str
 ```
 
-NB: If you're only interested in a certain POS (say, adjectives), using the particular getX() is faster
-than getPOS() which looks up the word in all index files.
-
-NB: [stopwords] (https://github.com/NaturalNode/natural/blob/master/lib/natural/util/stopwords.js)
+If you're only interested in a certain POS (say, adjectives), using the particular getX() is faster
+than getPOS() which looks up the word in all index files. [stopwords] (https://github.com/NaturalNode/natural/blob/master/lib/natural/util/stopwords.js)
 are stripped out from str before lookup.
 
 All getX() functions return the number of parsed words that will be looked up (less duplicates and stopwords).
@@ -223,7 +219,6 @@ See blog article [Optimizing WordPos](http://blog.42at.com/optimizing-wordpos).
 
     node wordpos-bench.js
 
-Generally slow as it requires loading and searching large WordNet index files.
 
 512-word corpus (< v0.1.4) :
 ```
