@@ -251,7 +251,7 @@ Just the counts: (nouns, adjectives, verbs, adverbs, total parsed words)
 $ wordpos get -c The angry bear chased the frightened little squirrel
 4 3 1 1 7
 ```
-Just the adjective count: (nouns, adjectives, verbs, adverbs, total parsed words)
+Just the adjective count: (0, adjectives, 0, 0, total parsed words)
 ```bash
 $ wordpos get --adj -c The angry bear chased the frightened little squirrel
 0 3 0 0 7
