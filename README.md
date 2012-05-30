@@ -177,7 +177,6 @@ wordpos.lookup('great', console.log);
 WordPOS.WNdb -- access to the WNdb object
 WordPOS.natural -- access to underlying 'natural' module
 wordpos.parse(str) -- returns tokenized array of words, less duplicates and stopwords.  This method is called on all getX() calls internally.
-
 ```
 E.g., WordPOS.natural.stopwords is the list of stopwords.
 
