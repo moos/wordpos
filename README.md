@@ -106,7 +106,7 @@ would be considered nouns.  (see http://nltk.googlecode.com/svn/trunk/doc/book/c
 Determine if a word is a particular POS.
 
 ```
-wordpos.<b>isNoun</b>(word, callback) -- callback receives result (true/false) if word is a noun.
+wordpos.isNoun(word, callback) -- callback receives result (true/false) if word is a noun.
 wordpos.isVerb(word, callback) -- callback receives result (true/false) if word is a verb.
 wordpos.isAdjective(word, callback) -- callback receives result (true/false) if word is an adjective.
 wordpos.isAdverb(word, callback) -- callback receives result (true/false) if word is an adverb.
