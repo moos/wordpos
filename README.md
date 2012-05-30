@@ -211,11 +211,113 @@ To override, pass an options hash to the constructor. With the `profile` option,
     // true 'fast' 29
 ```
 
-## Fast Index
+### Fast Index
 
 Version 0.1.4 introduces `fastIndex` option.  This uses a secondary index on the index files and is much faster. It is on by default.  Secondary index files are generated at install time and placed in the same directory as WNdb.path.  Details can be found in tools/stat.js.
 
 See blog article [Optimizing WordPos](http://blog.42at.com/optimizing-wordpos).
+
+## CLI
+
+Version 0.1.6 introduces the command-line interface (./bin/wordpos-cli.js), available as 'wordpos' when using npm install.
+
+```bash
+$ wordpos get The angry bear chased the frightened little squirrel
+# Noun 4:
+bear
+chased
+little
+squirrel
+
+# Adjective 3:
+angry
+frightened
+little
+
+# Verb 1:
+bear
+
+# Adverb 1:
+little
+```
+Just the nouns, brief output:
+```bash
+$ wordpos get --noun -b The angry bear chased the frightened little squirrel
+bear chased little squirrel
+```
+Just the counts: (nouns, adjectives, verbs, adverbs, total parsed words)
+```bash
+$ wordpos get -c The angry bear chased the frightened little squirrel
+4 3 1 1 7
+```
+Just the adjective count: (nouns, adjectives, verbs, adverbs, total parsed words)
+```bash
+$ wordpos get --adj -c The angry bear chased the frightened little squirrel
+0 3 0 0 7
+```
+
+Get definitions:
+```bash
+$ wordpos def git
+git
+  n: a person who is deemed to be despicable or contemptible; "only a rotter would do that"; "kill the rat"; "throw the bum out"; "you cowardly little pukes!"; "the British call a contemptible persona `git'"
+```
+Get full result object:
+```bash
+$ wordpos def git -f
+{ git:
+   [ { synsetOffset: 10539715,
+       lexFilenum: 18,
+       pos: 'n',
+       wCnt: 0,
+       lemma: 'rotter',
+       synonyms: [],
+       lexId: '0',
+       ptrs: [],
+       gloss: 'a person who is deemed to be despicable or contemptible; "only a rotter would do that
+"; "kill the rat"; "throw the bum out"; "you cowardly little pukes!"; "the British call a contemptib
+le person a `git\'"  ' } ] }
+```
+As JSON:
+```bash
+$ wordpos def git -j
+{"git":[{"synsetOffset":10539715,"lexFilenum":18,"pos":"n","wCnt":0,"lemma":"rotter","synonyms":[],"
+lexId":"0","ptrs":[],"gloss":"a person who is deemed to be despicable or contemptible; \"only a rotter
+would do that\"; \"kill the rat\"; \"throw the bum out\"; \"you cowardly little pukes!\"; \"the British
+call a contemptible person a `git'\"  "}]}
+```
+Usage:
+```bash
+$ wordpos
+
+  Usage: wordpos-cli.js [options] <command> [word ... | -i <file> | <stdin>]
+
+  Commands:
+
+    get
+    get list of words for particular POS
+
+    def
+    lookup definitions
+
+    parse
+    show parsed words, deduped and less stopwords
+
+  Options:
+
+    -h, --help         output usage information
+    -V, --version      output the version number
+    -n, --noun         Get nouns
+    -a, --adj          Get adjectives
+    -v, --verb         Get verbs
+    -r, --adv          Get adverbs
+    -c, --count        count only (noun, adj, verb, adv, total parsed words)
+    -b, --brief        brief output (all on one line, no headers)
+    -f, --full         full results object
+    -j, --json         full results object as JSON
+    -i, --file <file>  input file
+    -s, --stopwords    include stopwords
+```
 
 ## Benchmark
 
