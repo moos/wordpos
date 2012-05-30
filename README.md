@@ -18,7 +18,7 @@ wordpos.getAdjectives('The angry bear chased the frightened little squirrel.', f
 wordpos.isAdjective('awesome', function(result){
     console.log(result);
 });
-// true
+// true 'awesome'
 ```
 
 See `wordpos_spec.js` for full usage.
@@ -46,31 +46,33 @@ Please note: all API are async since the underlying WordNet library is async. Wo
 Get POS from text.
 
 ```
-wordpos.getPOS(str, callback) -- callback receives a result object:
+wordpos.getPOS(text, callback) -- callback receives a result object:
     {
-      nouns:[],       Array of str words that are nouns
-      verbs:[],       Array of str words that are verbs
-      adjectives:[],  Array of str words that are adjectives
-      adverbs:[],     Array of str words that are adverbs
-      rest:[]         Array of str words that are not in dict or could not be categorized as a POS
+      nouns:[],       Array of text words that are nouns
+      verbs:[],       Array of text words that are verbs
+      adjectives:[],  Array of text words that are adjectives
+      adverbs:[],     Array of text words that are adverbs
+      rest:[]         Array of text words that are not in dict or could not be categorized as a POS
     }
 
     Note: a word may appear in multiple POS (eg, 'great' is both a noun and an adjective)
 
-wordpos.getNouns(str, callback) -- callback receives an array of nouns in str
+wordpos.getNouns(text, callback) -- callback receives an array of nouns in text
 
-wordpos.getVerbs(str, callback) -- callback receives an array of verbs in str
+wordpos.getVerbs(text, callback) -- callback receives an array of verbs in text
 
-wordpos.getAdjectives(str, callback) -- callback receives an array of adjectives in str
+wordpos.getAdjectives(text, callback) -- callback receives an array of adjectives in text
 
-wordpos.getAdverbs(str, callback) -- callback receives an array of adverbs in str
+wordpos.getAdverbs(text, callback) -- callback receives an array of adverbs in text
 ```
 
 If you're only interested in a certain POS (say, adjectives), using the particular getX() is faster
 than getPOS() which looks up the word in all index files. [stopwords] (https://github.com/NaturalNode/natural/blob/master/lib/natural/util/stopwords.js)
-are stripped out from str before lookup.
+are stripped out from text before lookup.
 
-All getX() functions return the number of parsed words that will be looked up (less duplicates and stopwords).
+If text is an array, all words are looked-up -- no deduplication, stopword filter or tokenization is applied.
+
+getX() functions return the number of parsed words that will be looked up (less duplicates and stopwords).
 
 Example:
 
@@ -151,6 +153,8 @@ wordpos.lookupAdjective(word, callback) -- callback receives array of lookup obj
 wordpos.lookupAdverb(word, callback) -- callback receives array of lookup objects for an adverb
 ```
 
+lookupX() methods return the looked-up word as the second argument to the callback.
+
 Example:
 
 ```js
@@ -166,7 +170,7 @@ wordpos.lookupAdjective('awesome', console.log);
     ptrs: [],
     gloss: 'inspiring awe or admiration or wonder; "New York is an amazing city"; "the Grand Canyon is an awe-inspiring
 sight"; "the awesome complexity of the universe"; "this sea, whose gently awful stirrings seem to speak of some hidden s
-oul beneath"- Melville; "Westminster Hall\'s awing majesty, so vast, so high, so silent"  ' } ]
+oul beneath"- Melville; "Westminster Hall\'s awing majesty, so vast, so high, so silent"  ' } ], 'awesome'
 ```
 In this case only one lookup was found.  But there could be several.
 
@@ -182,9 +186,12 @@ wordpos.lookup('great', console.log);
 
 ```
 WordPOS.WNdb -- access to the WNdb object
-
+WordPOS.natural -- access to underlying 'natural' module
 wordpos.parse(str) -- returns tokenized array of words, less duplicates and stopwords.  This method is called on all getX() calls internally.
+
 ```
+E.g., WordPOS.natural.stopwords is the list of stopwords.
+
 
 ### Options
 
@@ -198,7 +205,13 @@ WordPOS.defaults = {
   /**
    * use fast index if available
    */
-  fastIndex: true
+  fastIndex: true,
+
+  /**
+   * if true, exclude standard stopwords, or array of stop words to exclude.
+   * Set to false to not filter for any stopwords.
+   */
+  stopwords: true
 };
 ```
 To override, pass an options hash to the constructor. With the `profile` option, all callbacks receive a second argument that is the execution time in msec of the call.

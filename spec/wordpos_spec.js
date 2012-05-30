@@ -206,5 +206,22 @@ describe('profile option', function() {
       done();
     });
   });
+
+  it('should disable stopword filtering', function(){
+    var wp = new WordPOS({stopwords : false}),
+      strWithStopwords = 'about after all';  // 3 adjective stopwords
+    expect(wp.getAdjectives(strWithStopwords, noop)).toBe(3);
+  });
+
+  it('should use custom stopwords', function(){
+    var wp = new WordPOS({stopwords : ['all']}),
+      strWithStopwords = 'about after all';  // 3 adjective stopwords
+    // 'all' should be filtered
+    expect(wp.getAdjectives(strWithStopwords, noop)).toBe(2);
+  });
+
 });
+
+
+function noop(){}
 

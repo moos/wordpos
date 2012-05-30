@@ -14,7 +14,7 @@ var _ = require('underscore')._,
   natural = require('natural'),
   WordNet = natural.WordNet,
   tokenizer = new natural.WordTokenizer(),
-  stopwords = ' '+ natural.stopwords.join(' ') +' ',
+  natural_stopwords = makeStopwordString(natural.stopwords),
   WNdb = require('WNdb'),
   fastIndex = null;
 
@@ -26,12 +26,21 @@ function normalize(word) {
   return word.toLowerCase().replace(/\s+/g, '_');
 }
 
-function isStopword(word) {
+function makeStopwordString(stopwords) {
+  return ' '+ stopwords.join(' ') +' ';
+}
+
+function isStopword(stopwords, word) {
   return stopwords.indexOf(' '+word+' ') >= 0;
 }
 
 function prepText(text) {
-  return _.reject(_.uniq(tokenizer.tokenize(text)), isStopword);
+  if (_.isArray(text)) return text;
+  var deduped = _.uniq(tokenizer.tokenize(text));
+  if (!this.options.stopwords) return deduped;
+  return _.reject(deduped, _.bind(isStopword, null,
+      _.isString(this.options.stopwords) ? this.options.stopwords : natural_stopwords
+      ));
 }
 
 function lookup(pos) {
@@ -43,7 +52,7 @@ function lookup(pos) {
     this.lookupFromFiles([
         {index: this.getIndexFile(pos), data: this.getDataFile(pos)}
         ], [], word, function(results){
-        args.push(results);
+        args.push(results, word);
         profile && args.push(new Date() - start);
         callback.apply(null, args);
     });
@@ -70,7 +79,7 @@ function get(isFn) {
   return function(text, callback) {
     var profile = this.options.profile,
       start = profile && new Date(),
-      words = prepText(text),
+      words = this.parse(text),
       n = words.length,
       i = 0,
       self = this,
@@ -110,6 +119,10 @@ var WordPOS = function(options) {
     this.adjIndex.find = fastIndex.find(this.adjIndex);
     this.advIndex.find = fastIndex.find(this.advIndex);
   }
+
+  if (_.isArray(this.options.stopwords)) {
+    this.options.stopwords = makeStopwordString(this.options.stopwords);
+  }
 };
 util.inherits(WordPOS, WordNet);
 
@@ -122,7 +135,13 @@ WordPOS.defaults = {
   /**
    * use fast index if available
    */
-  fastIndex: true
+  fastIndex: true,
+
+  /**
+   * if true, exclude standard stopwords, or array of stop words to exclude.
+   * Set to false to not filter for any stopwords.
+   */
+  stopwords: true
 };
 
 var wordposProto = WordPOS.prototype;
@@ -200,7 +219,7 @@ wordposProto.getPOS = function(text, callback) {
     args = [data],
     testFns = 'isNoun isVerb isAdjective isAdverb'.split(' '),
     parts = 'nouns verbs adjectives adverbs'.split(' '),
-    words = prepText(text),
+    words = this.parse(text),
     nTests = testFns.length,
     nWords = words.length,
     self = this,
@@ -237,5 +256,7 @@ wordposProto.getPOS = function(text, callback) {
 };
 
 WordPOS.WNdb = WNdb;
+WordPOS.natural = natural;
+
 
 module.exports = WordPOS;
