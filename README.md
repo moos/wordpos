@@ -219,7 +219,8 @@ See blog article [Optimizing WordPos](http://blog.42at.com/optimizing-wordpos).
 
 ## CLI
 
-Version 0.1.6 introduces the command-line interface (./bin/wordpos-cli.js), available as 'wordpos' when using npm install.
+Version 0.1.6 introduces the command-line interface (./bin/wordpos-cli.js), available as 'wordpos' if installed globally
+"npm install wordpos -g", otherwise as 'node_modules/.bin/wordpos' if installed without the -g.
 
 ```bash
 $ wordpos get The angry bear chased the frightened little squirrel

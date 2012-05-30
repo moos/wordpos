@@ -15,11 +15,14 @@
 
 var program = require('commander'),
   _ = require('underscore')._,
+  fs = require('fs'),
   POS = {noun:'Noun', adj:'Adjective', verb:'Verb', adv:'Adverb'},
-  nWords;
+  version = JSON.parse(fs.readFileSync('../package.json', 'utf8')).version
+  nWords,
+  ;
 
 program
-  .version('0.1.0')
+  .version(version)
   .usage('[options] <command> [word ... | -i <file> | <stdin>]')
 
   .option('-n, --noun', 'Get nouns')
@@ -52,7 +55,6 @@ program.command('parse')
 
 var
   WordPos = require('../src/wordpos'),
-  fs = require('fs'),
   util = require('util'),
   results = {},
   cmd = null;
