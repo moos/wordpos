@@ -54,15 +54,10 @@ wordpos.getPOS(text, callback) -- callback receives a result object:
       adverbs:[],     Array of text words that are adverbs
       rest:[]         Array of text words that are not in dict or could not be categorized as a POS
     }
-
     Note: a word may appear in multiple POS (eg, 'great' is both a noun and an adjective)
-
 wordpos.getNouns(text, callback) -- callback receives an array of nouns in text
-
 wordpos.getVerbs(text, callback) -- callback receives an array of verbs in text
-
 wordpos.getAdjectives(text, callback) -- callback receives an array of adjectives in text
-
 wordpos.getAdverbs(text, callback) -- callback receives an array of adverbs in text
 ```
 
@@ -112,11 +107,8 @@ Determine if a word is a particular POS.
 
 ```
 wordpos.isNoun(word, callback) -- callback receives result (true/false) if word is a noun.
-
 wordpos.isVerb(word, callback) -- callback receives result (true/false) if word is a verb.
-
 wordpos.isAdjective(word, callback) -- callback receives result (true/false) if word is an adjective.
-
 wordpos.isAdverb(word, callback) -- callback receives result (true/false) if word is an adverb.
 ```
 
@@ -145,11 +137,8 @@ already know the POS of the word.
 
 ```
 wordpos.lookupNoun(word, callback) -- callback receives array of lookup objects for a noun
-
 wordpos.lookupVerb(word, callback) -- callback receives array of lookup objects for a verb
-
 wordpos.lookupAdjective(word, callback) -- callback receives array of lookup objects for an adjective
-
 wordpos.lookupAdverb(word, callback) -- callback receives array of lookup objects for an adverb
 ```
 
@@ -208,8 +197,9 @@ WordPOS.defaults = {
   fastIndex: true,
 
   /**
-   * if true, exclude standard stopwords, or array of stop words to exclude.
-   * Set to false to not filter for any stopwords.
+   * if true, exclude standard stopwords.
+   * if array, stopwords to exclude, eg, ['all','of','this',...]
+   * if false, do not filter any stopwords.
    */
   stopwords: true
 };

@@ -138,8 +138,9 @@ WordPOS.defaults = {
   fastIndex: true,
 
   /**
-   * if true, exclude standard stopwords, or array of stop words to exclude.
-   * Set to false to not filter for any stopwords.
+   * if true, exclude standard stopwords.
+   * if array, stopwords to exclude, eg, ['all','of','this',...]
+   * if false, do not filter any stopwords.
    */
   stopwords: true
 };
