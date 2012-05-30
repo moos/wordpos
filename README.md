@@ -27,7 +27,7 @@ See `wordpos_spec.js` for full usage.
 
      npm install wordpos
 
-Note: `wordpos-bench.js` requires a [forked uubench](https://github.com/moos/uubench) module.
+Note: `wordpos-bench.js` requires a [forked uubench](https://github.com/moos/uubench) module.  To use the CLI (see below), it is recommended to installed globally with -g option.
 
 To run spec:
 
