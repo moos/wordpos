@@ -17,9 +17,8 @@ var program = require('commander'),
   _ = require('underscore')._,
   fs = require('fs'),
   POS = {noun:'Noun', adj:'Adjective', verb:'Verb', adv:'Adverb'},
-  version = JSON.parse(fs.readFileSync('../package.json', 'utf8')).version
-  nWords,
-  ;
+  version = JSON.parse(fs.readFileSync(__dirname + '/../package.json', 'utf8')).version,
+  nWords;
 
 program
   .version(version)

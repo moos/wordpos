@@ -13,27 +13,28 @@
  * Released under MIT license
  */
 var
-  exec = require('child_process').exec;
+  exec = require('child_process').exec,
+  cmd = 'node ' + __dirname + '/../tools/validate ';
 
 describe('validate isX() using fastIndex', function() {
 
   it('should validate index.noun', function() {
-    exec('node ../tools/validate index.noun', callback);
+    exec(cmd + 'index.noun', callback);
     asyncSpecWait();
   });
 
   it('should validate index.verb', function() {
-    exec('node ../tools/validate index.verb', callback);
+    exec(cmd + 'index.verb', callback);
     asyncSpecWait();
   });
 
   it('should validate index.adv', function() {
-    exec('node ../tools/validate index.adv', callback);
+    exec(cmd + 'index.adv', callback);
     asyncSpecWait();
   });
 
   it('should validate index.adj', function() {
-    exec('node ../tools/validate index.adj', callback);
+    exec(cmd + 'index.adj', callback);
     asyncSpecWait();
   });
 
