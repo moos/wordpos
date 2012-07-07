@@ -26,7 +26,7 @@ if (process.argv.length < 3) return usage();
 var basename = process.argv.slice(2).shift(),
   indexFile = path.join(WNdb.path, basename);
 
-if (!path.existsSync(indexFile)) {
+if (!fs.existsSync(indexFile)) {
   console.error('Error: no such file %s', indexFile);
   process.exit(10);
 }
