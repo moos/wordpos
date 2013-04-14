@@ -44,7 +44,7 @@ program.command('get')
 program.command('def')
   .description('lookup definitions')
   .action(function(){
-    _.last(arguments).name = 'lookup';
+    _.last(arguments)._name = 'lookup';
     exec.apply(this, arguments);
   });
 
@@ -65,7 +65,7 @@ if (!cmd) console.log(program.helpInformation());
 
 function exec(/* args, ..., program.command */){
   var args = _.initial(arguments);
-  cmd = _.last(arguments).name;
+  cmd = _.last(arguments)._name;
 
   if (program.file) {
     fs.readFile(program.file, 'utf8', function(err, data){
@@ -105,7 +105,7 @@ function run(data) {
   var
     opts = {stopwords: !program.stopwords},
     wordpos = new WordPos(opts),
-    words = wordpos.parse(data),
+    words = wordpos.parse(data.split(' ')),    // make array
     fns = optToFn(),
     plural = (cmd=='get' ? 's':''),
     results = {},
