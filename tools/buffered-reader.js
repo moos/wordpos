@@ -69,6 +69,9 @@ BufferedReader.prototype.interrupt = function (){
 BufferedReader.prototype.read = function (){
   var stream = FS.createReadStream (this._fileName, this._settings);
 
+  // node version change: stream.encoding no longer exposed
+  stream.encoding = this._settings.encoding;
+
   var lastChunk;
   var buffer;
   var me = this;

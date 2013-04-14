@@ -18,6 +18,7 @@ var
   BufferedReader = require ("../tools/buffered-reader"),
   _ = require('underscore')._,
   path = require('path'),
+  fs = require('fs'),
   results = {},
   puts = _.compose(function(a){ process.stdout.write(a)}, util.format);
 
@@ -32,7 +33,7 @@ if (!fs.existsSync(indexFile)) {
 }
 
 function usage() {
-  console.log('#Usage:\nnode stat index.adv');
+  console.log('#Usage:\nnode validate.js index.adv');
   process.exit(1);
 }
 
