@@ -28,7 +28,8 @@ function loadFastIndex(dir, name) {
     data = JSON.parse( fs.readFileSync(jsonFile,'utf8') );
     //console.log('loaded %d buckets for %s', data.stats.buckets, data.name);
   } catch(e) {
-    console.error('Error with fast index file %s\n  ', jsonFile, e);
+    console.error('Error with fast index file. Try reinstalling from npm!');
+    throw e;
   }
   return data;
 }
@@ -94,7 +95,13 @@ function find(search, callback) {
         return line.substring(0,line.indexOf(' '));
       });
 
-    readCallbacks[key].forEach( test );
+    // live access callbacks cache in case nested cb's
+    // add to the array.
+    while (readCallbacks[key].length) {
+      test(readCallbacks[key].shift());
+    }
+
+    // now done - delete cb cache
     delete readCallbacks[key];
 
     if (--self.refcount == 0) {

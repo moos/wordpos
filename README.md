@@ -1,7 +1,7 @@
 wordpos
 =======
 
-wordpos is a set of part-of-speech utilities for Node.js using [natural's](http://github.com/NaturalNode/natural) WordNet module.
+wordpos is a set of part-of-speech (POS) utilities for Node.js using [natural's](http://github.com/NaturalNode/natural) WordNet module.
 
 
 ## Usage
@@ -353,4 +353,4 @@ License
 
 (The MIT License)
 
-Copyright (c) 2012, mooster@42at.com
+Copyright (c) 2012, 2014 mooster@42at.com

@@ -182,7 +182,6 @@ describe('options passed to constructor', function() {
 });
 
 describe('profile option', function() {
-
   var wp = new WordPOS({profile : true});
 
   it('should return time argument for isX()', function(done){
@@ -222,6 +221,24 @@ describe('profile option', function() {
 
 });
 
+
+describe('nested callbacks on same index key', function() {
+  var wp = new WordPOS(),
+    word1 = 'head',
+    word2 =  word1 + 'er';
+
+  it('should call inner callback', function(done){
+    wp.getPOS(word1, function(result) {
+      expect(result.nouns[0]).toEqual(word1);
+
+      // inner call on word2
+      wp.getPOS(word2, function(result) {
+        expect(result.nouns[0]).toEqual(word2);
+        done();
+      });
+    });
+  });
+});
 
 function noop(){}
 
