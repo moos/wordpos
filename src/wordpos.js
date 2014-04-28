@@ -75,6 +75,24 @@ function is(pos){
   };
 }
 
+
+function rand(pos){
+  return function(startsWith, callback, _noprofile) {
+    // disable profiling when isX() used internally
+    var profile = this.options.profile && !_noprofile,
+      start = profile && new Date(),
+      args = [],
+      index = this.getIndexFile(pos);
+//    word = normalize(word);
+    index.rand(startsWith, function(record) {
+      args.push(record, startsWith);
+      profile && args.push(new Date() - start);
+      callback.apply(null, args);
+    });
+  };
+}
+
+
 function get(isFn) {
   return function(text, callback) {
     var profile = this.options.profile,
@@ -118,6 +136,12 @@ var WordPOS = function(options) {
     this.verbIndex.find = fastIndex.find(this.verbIndex);
     this.adjIndex.find = fastIndex.find(this.adjIndex);
     this.advIndex.find = fastIndex.find(this.advIndex);
+
+    // rand
+    this.nounIndex.rand = fastIndex.rand(this.nounIndex);
+    this.verbIndex.rand = fastIndex.rand(this.verbIndex);
+    this.adjIndex.rand = fastIndex.rand(this.adjIndex);
+    this.advIndex.rand = fastIndex.rand(this.advIndex);
   }
 
   if (_.isArray(this.options.stopwords)) {
@@ -173,6 +197,15 @@ wordposProto.isAdjective = is('a');
 wordposProto.isAdverb = is('r');
 wordposProto.isNoun = is('n');
 wordposProto.isVerb = is('v');
+
+/**
+ * randX()
+ */
+wordposProto.randAdjective = rand('a');
+wordposProto.randAdverb = rand('r');
+wordposProto.randNoun = rand('n');
+wordposProto.randVerb = rand('v');
+
 
 /**
  * getX()

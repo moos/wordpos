@@ -56,6 +56,85 @@ function readIndexForKey(key, index, callback) {
   });
 }
 
+
+function readIndexBetweenKeys(keyStart, keyEnd, index, callback) {
+  var data = index.fastIndex,
+    offset = data.offsets[keyStart][0],
+    nextKey = keyEnd || data.offsets[keyStart][1],
+    nextOffset = data.offsets[nextKey][0],
+    len = nextOffset - offset - 1,
+    buffer = new Buffer(len);
+
+  console.log('### readIndexBetweenKeys', keyStart, keyEnd, nextKey, len, index.fd, offset)
+
+  fs.read(index.fd, buffer, 0, len, offset, function(err, count){
+     if (err) return console.log(err);
+     // console.log('  read %d bytes for <%s>', count, keyStart);
+     callback(buffer);
+  });
+}
+
+/**
+ * run single 'task' method sharing callbacks.  method MUST take callback as LAST arg.
+ *
+ * @param task {string} - task name unique to method!
+ * @param method {function} - method to execute, gets (key, ... , callback)
+ * @param args {arrray} - args to pass to method
+ * @param context {object} - other params to remember
+ * @param callback {function} - result callback
+ */
+function piper(task, method, args, context, callback){
+  var readCallbacks = this.cache,
+    memoArgs = _.rest(arguments, 2),
+    wrappedCallback; //_.partial(piper.wrapper, this, task, context, callback);
+
+  console.log('piper', task, args[0], args[1], context[0]);
+
+  // queue up if already reading file for this task:key
+  if (task in readCallbacks){
+    readCallbacks[task].push(memoArgs);
+    return;
+  }
+  readCallbacks[task] = [memoArgs];
+
+  if (!this.fd) {
+    console.log(' ... opening', this.filePath);
+    this.fd = fs.openSync(this.filePath, 'r');
+  }
+
+  // ref count so we know when to close the main index file
+  ++this.refcount;
+
+  wrappedCallback = _.partial(piper.wrapper, this, task);
+
+  // call method -- replace original callback (last arg) with wrapped one
+  method.apply(null, [].concat( args, wrappedCallback ));
+}
+
+// result is the *same* for same task
+piper.wrapper = function(self, task, result){//, context, callback, result){
+  var readCallbacks = self.cache,
+    callback, args;
+
+  // live access callbacks cache in case nested cb's
+  // add to the array.
+  while (args = readCallbacks[task].shift()) {
+    callback = args.pop();
+//    console.log('>>>> pper wrapper', self.fastIndex.name, task, result.toString())
+
+    callback.apply(null, [].concat(_.flatten(args), result));
+  }
+
+  // now done - delete cb cache
+  delete readCallbacks[task];
+
+  if (--self.refcount == 0) {
+    console.log(' ... closing', self.filePath);
+    fs.close(self.fd);
+    self.fd = null;
+  }
+};
+
 /**
  * function that overrides WordNet's IndexFile.find()
  *
@@ -126,6 +205,78 @@ function find(search, callback) {
   });
 }
 
+function rand(startsWith, callback){
+
+  var self = this,
+    key, nextKey = null, ikey;
+
+  if (startsWith){
+    key = startsWith.slice(0, KEY_LENGTH);
+
+    console.log('-- ', startsWith, key, self.indexKeys.length);
+
+    if (!(key in self.fastIndex.offsets)) return process.nextTick(function(){ callback('not found') });
+
+    // 'a' -> nextKey 'b',   'go' -> 'gp'
+    if (key.length < 3) {
+      nextKey = key.replace(/.$/, String.fromCharCode( key.charCodeAt(key.length-1) + 1));
+      ikey = _.sortedIndex(self.indexKeys, nextKey);
+      nextKey = self.indexKeys[ ikey ];  // assures nextKey is in index keys
+    }
+
+
+    var args = [key, nextKey, this],
+      task = 'rand' + key + nextKey,
+      context = arguments;
+
+    this.piper(task, readIndexBetweenKeys, args, context, function(key, nextKey, index, context, buffer){
+
+      console.log(context,  '====', key, nextKey);
+
+      var startsWith = context[0],
+        callback = context[1];
+
+
+      var lines = buffer.toString().split('\n'),
+        r = Math.floor(Math.random() * lines.length),
+        line = lines[r],
+        word = line.substring(0, line.indexOf(' ')),
+        keys;
+
+      console.log(' got lines ', lines.length);
+
+      console.log(11111, self.natural)
+
+
+      if (startsWith !== key) {
+        keys = lines.map(function(line){
+          return line.substring(0,line.indexOf(' '));
+        });
+
+        var ind = _.sortedIndex(keys, startsWith);
+
+        console.log(3333 ,ind, keys[ind], startsWith)
+
+        if (ind >= lines.length || keys[ind].indexOf(startsWith) === -1){
+          return callback('not found', startsWith);
+        }
+
+        var natural = require('natural')
+//          trie = new natural.Trie();
+
+        console.log(4444, natural.Trie)
+//        trie.addStrings(keys);
+//        console.log(55555, trie.keysWithPrefix( startsWith ));
+
+      }
+
+
+      callback(word, startsWith);
+    });
+  }
+
+}
+
 // cache of fast index data across instances of WordPOS class
 var cache = {};
 
@@ -149,10 +300,23 @@ module.exports = {
     // if no fast index data was found or was corrupt, use original find
     if (!cache[key]) return index.find;
 
+
+    index.indexKeys = Object.keys(cache[key].offsets);
+
     index.fastIndex = cache[key];
     index.refcount = 0;
     index.cache = {};
 
+    index.piper = _.bind(piper, index);
+
     return find;
+  },
+
+  rand: function(index){
+
+    if (!index.fastIndex) throw 'rand requires fastIndex';
+
+    return _.bind(rand, index);
   }
 };
+

@@ -49,7 +49,11 @@ program.command('def')
   });
 
 program.command('parse')
-  .description('show parsed words, deduped and less stopwords')
+.description('show parsed words, deduped and less stopwords')
+.action(exec);
+
+program.command('rand')
+  .description('get random words')
   .action(exec);
 
 var
@@ -72,7 +76,7 @@ function exec(/* args, ..., program.command */){
       if (err) return console.log(err);
       run(data);
     });
-  } else if (args.length){
+  } else if (args.length || cmd == 'rand'){
     run(args.join(' '));
   } else {
     read_stdin(run);
@@ -113,6 +117,9 @@ function run(data) {
         plural ? fns.length : words.length * fns.length,
         _.bind(output, null, results)),
     collect = function(what, result, word){
+
+      console.log('collect ----', arguments);
+
       if (word) {	// lookup
         results[word] = [].concat(results[word] || [], result);
       } else {		// get
@@ -128,10 +135,14 @@ function run(data) {
   _(fns).each(function(fn){
     var method = cmd + fn + plural,
       cb = _.bind(collect, null, fn);
+
     if (cmd == 'get') {
       wordpos[method](words, cb);
     } else {
       words.forEach(function(word){
+
+        console.log(' calling rand', method, word);
+
         wordpos[method](word, cb);
       });
     }
