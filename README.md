@@ -3,6 +3,7 @@ wordpos
 
 wordpos is a set of part-of-speech (POS) utilities for Node.js using [natural's](http://github.com/NaturalNode/natural) WordNet module.
 
+*Update*: New version 0.1.10 - get random word(s).
 
 ## Usage
 
@@ -171,6 +172,55 @@ wordpos.lookup('great', console.log);
 // ...
 ```
 
+### randX()
+
+Get random words.
+
+```
+wordpos.rand([options,] callback)
+wordpos.randNoun([options,] callback)
+wordpos.randVerb([options,[ callback)
+wordpos.randAdjective([options,] callback)
+wordpos.randAdverb([options,] callback)
+```
+Callback receives array of random words and the startsWith option.
+Options, if given, is:
+```
+{
+  startsWith : <string> -- get random words starting with string
+  count : <number> -- number of words to return (default = 1)
+}
+```
+Examples:
+```js
+wordpos.rand(console.log)
+// ['wulfila'] ''
+
+wordpos.randNoun(console.log)
+// ['bamboo_palm'] ''
+
+// with options:
+
+wordpos.rand({starstWith: 'foo'}, console.log)
+// ['foot'] 'foo'
+
+wordpos.rand({starstWith: 'foo', count: 3}, console.log)
+// ['footsure', 'foolish', 'footsore'] 'foo'
+
+wordpos.randVerb({starstWith: 'bar', count: 3}, console.log)
+// ['barge', 'barf', 'barter_away'] 'bar'
+
+wordpos.rand({starsWith: 'zzz'}, console.log)
+// [] 'zzz'
+```
+
+Note on performance: random lookups could involve heavy disk reads.  It is better to use the 'count' option to get words
+in batches.  This may benefit from the cached reads of similarly keyed entries as well as shared open/close of the file.
+
+Getting random POS (randX) is generally faster than rand(), which may look at multiple POS files until 'count' requirement
+is met.
+
+
 ### Other methods/properties
 
 ```
@@ -287,6 +337,32 @@ lexId":"0","ptrs":[],"gloss":"a person who is deemed to be despicable or contemp
 would do that\"; \"kill the rat\"; \"throw the bum out\"; \"you cowardly little pukes!\"; \"the British
 call a contemptible person a `git'\"  "}]}
 ```
+
+Get random words:
+```bash
+$ wordpos rand
+#  1:
+hopelessly
+
+$ wordpos rand -N 2 foot
+# foot 2:
+footprint
+footlights
+
+$ wordpos rand -N 2 foot hand
+# foot 2:
+footlocker
+footmark
+
+# hand 2:
+hand-hewn
+handstitched
+
+$ wordpos rand --adj foot
+# foot 1:
+foot-shaped
+```
+
 Usage:
 ```bash
 $ wordpos
@@ -304,6 +380,9 @@ $ wordpos
     parse
     show parsed words, deduped and less stopwords
 
+    rand
+    get random words (optionally starting with 'word')
+
   Options:
 
     -h, --help         output usage information
@@ -312,12 +391,13 @@ $ wordpos
     -a, --adj          Get adjectives
     -v, --verb         Get verbs
     -r, --adv          Get adverbs
-    -c, --count        count only (noun, adj, verb, adv, total parsed words)
+    -c, --count        get counts only (noun, adj, verb, adv, total parsed words)
     -b, --brief        brief output (all on one line, no headers)
     -f, --full         full results object
     -j, --json         full results object as JSON
     -i, --file <file>  input file
     -s, --stopwords    include stopwords
+    -N, --num <num>    number of random words to get
 ```
 
 ## Benchmark

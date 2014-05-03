@@ -1,16 +1,16 @@
 {
   "name": "wordpos",
   "author": "Moos <mooster@42at.com>",
-  "keywords": ["natural", "language", "wordnet", "pos"],
+  "keywords": ["natural", "language", "wordnet", "adjectives", "nouns", "adverbs", "verbs"],
   "description": "wordpos is a set of part-of-speech utilities for Node.js using natural's WordNet module.",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "homepage": "https://github.com/moos/wordpos",
   "engines": {
     "node": ">=0.6"
   },
   "bin": "./bin/wordpos-cli.js",
   "dependencies": {
-    "natural": "latest",
+    "natural": "NaturalNode/natural",
     "underscore": ">=1.3.1",
     "WNdb": "latest",
     "commander": "1.1.1"

@@ -5,7 +5,7 @@
  * command-line interface to wordpos
  *
  * Usage:
- *    wordpos [options] <get|parse|def> <stdin|words*>
+ *    wordpos [options] <get|parse|def|rand> <stdin|words*>
  *
  * Copyright (c) 2012 mooster@42at.com
  * https://github.com/moos/wordpos
@@ -35,6 +35,7 @@ program
   .option('-j, --json', 'full results object as JSON')
   .option('-i, --file <file>', 'input file')
   .option('-s, --stopwords', 'include stopwords')
+  .option('-N, --num <num>', 'number of random words to return')
   ;
 
 program.command('get')
@@ -53,7 +54,7 @@ program.command('parse')
 .action(exec);
 
 program.command('rand')
-  .description('get random words')
+  .description('get random words (starting with word, optionally)')
   .action(exec);
 
 var
@@ -100,6 +101,7 @@ function read_stdin(callback) {
 
 function optToFn() {
   var fns = _.reject(POS, function(fn, opt) { return !program[opt] });
+  if (!fns.length && cmd === 'rand') return fns = ['']; // run rand()
   if (!fns.length) fns = _.values(POS); //default to all if no POS given
   return fns;
 }
@@ -117,9 +119,6 @@ function run(data) {
         plural ? fns.length : words.length * fns.length,
         _.bind(output, null, results)),
     collect = function(what, result, word){
-
-      console.log('collect ----', arguments);
-
       if (word) {	// lookup
         results[word] = [].concat(results[word] || [], result);
       } else {		// get
@@ -138,11 +137,12 @@ function run(data) {
 
     if (cmd == 'get') {
       wordpos[method](words, cb);
+    } else if (cmd == 'rand') {
+      words.forEach(function(word){
+        wordpos[method]({startsWith: word, count: program.num || 1}, cb);
+      });
     } else {
       words.forEach(function(word){
-
-        console.log(' calling rand', method, word);
-
         wordpos[method](word, cb);
       });
     }

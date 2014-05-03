@@ -26,6 +26,9 @@ var str = "The angry bear chased the frightened little squirrel",
   garble = 'garblegarble';	// expect not to find word
 
 
+function noop(){}
+
+
 describe('getX()...', function() {
 
   beforeEach(function() {
@@ -240,5 +243,67 @@ describe('nested callbacks on same index key', function() {
   });
 });
 
-function noop(){}
 
+describe('rand()...', function() {
+  it('should get random word', function(done) {
+    wordpos.randNoun(function(result) {
+      expect(result).toBeTruthy();
+      done();
+    });
+  });
+  it('should get N random words', function(done) {
+    wordpos.rand({count: 3}, function(result) {
+      expect(result.length).toEqual(3);
+      done();
+    });
+  });
+  it('should get random word starting with', function(done) {
+    wordpos.rand({startsWith: 'foo'}, function(result, startsWith) {
+      expect(result[0].indexOf('foo')).toEqual(0);
+      expect(startsWith).toEqual('foo');
+      done();
+    });
+  });
+  it('should get nothing starting with not fount', function(done) {
+    wordpos.rand({startsWith: 'zzzz'}, function(result) {
+      expect(result.length).toEqual(0);
+      done();
+    });
+  });
+});
+
+describe('randX()...', function() {
+  it('should get random noun', function(done) {
+    wordpos.randNoun(function(result) {
+      expect(result.length).toEqual(1);
+      done();
+    });
+  });
+  it('should get random verb', function(done) {
+    wordpos.randVerb(function(result) {
+      expect(result.length).toEqual(1);
+      done();
+    });
+  });
+  it('should get random adjective', function(done) {
+    wordpos.randAdjective(function(result) {
+      expect(result.length).toEqual(1);
+      done();
+    });
+  });
+  it('should get random adverb', function(done) {
+    wordpos.randAdverb(function(result) {
+      expect(result.length).toEqual(1);
+      done();
+    });
+  });
+
+  // not found
+  it('should NOT get random noun starting with', function(done) {
+    wordpos.randNoun({startsWith: 'zzzz'},function(result, startsWith) {
+      expect(result.length).toEqual(0);
+      done();
+    });
+  });
+
+});

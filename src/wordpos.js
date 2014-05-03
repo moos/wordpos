@@ -3,7 +3,7 @@
 *
 *    Node.js part-of-speech utilities using natural's WordNet module.
 *
-* Copyright (c) 2012 mooster@42at.com
+* Copyright (c) 2012-2014 mooster@42at.com
 * https://github.com/moos/wordpos
 *
 * Released under MIT license
@@ -77,14 +77,20 @@ function is(pos){
 
 
 function rand(pos){
-  return function(startsWith, callback, _noprofile) {
+  return function(opts, callback, _noprofile) {
     // disable profiling when isX() used internally
     var profile = this.options.profile && !_noprofile,
       start = profile && new Date(),
       args = [],
-      index = this.getIndexFile(pos);
-//    word = normalize(word);
-    index.rand(startsWith, function(record) {
+      index = this.getIndexFile(pos),
+      startsWith = opts && opts.startsWith || '',
+      count = opts && opts.count || 1;
+
+    if (typeof opts === 'function') {
+      callback = opts;
+    }
+
+    index.rand(startsWith, count, function(record) {
       args.push(record, startsWith);
       profile && args.push(new Date() - start);
       callback.apply(null, args);
@@ -223,26 +229,26 @@ wordposProto.getVerbs = get('isVerb');
 wordposProto.parse = prepText;
 
 if (!wordposProto.getIndexFile) {
-    wordposProto.getIndexFile = function getIndexFile(pos) {
-      switch(pos) {
-        case 'n':
-          return this.nounIndex;
-        case 'v':
-          return this.verbIndex;
-        case 'a': case 's':
-          return this.adjIndex;
-        case 'r':
-          return this.advIndex;
-      }
-  };
+  wordposProto.getIndexFile = function getIndexFile(pos) {
+    switch(pos) {
+      case 'n':
+        return this.nounIndex;
+      case 'v':
+        return this.verbIndex;
+      case 'a': case 's':
+        return this.adjIndex;
+      case 'r':
+        return this.advIndex;
+    }
+};
 }
 
 /**
  * getPOS()
  * Find all POS for all words in given string
  *
- * @param string text - words to lookup for POS
- * @param function callback - receives object with words broken into POS or 'rest':
+ * @param {string} text - words to lookup for POS
+ * @param {function} callback - receives object with words broken into POS or 'rest', ie,
  * 	    Object: {nouns:[], verbs:[], adjectives:[], adverbs:[], rest:[]}
  * @return none
  */
@@ -289,8 +295,65 @@ wordposProto.getPOS = function(text, callback) {
   return nWords;
 };
 
+/**
+ * rand()
+ */
+wordposProto.rand = function(opts, callback) {
+  var
+    profile = this.options.profile,
+    start = profile && new Date(),
+    results = [],
+    startsWith = opts && opts.startsWith || '',
+    count = opts && opts.count || 1,
+    args = [null, startsWith],
+    parts = 'Noun Verb Adjective Adverb'.split(' '),
+    self = this,
+    done = function(){
+      profile && (args.push(new Date() - start));
+      args[0] = results;
+      callback.apply(null, args)
+    };
+
+  if (typeof opts === 'function') {
+    callback = opts;
+  } else {
+    opts = _.clone(opts);
+  }
+
+  // TODO -- or loop count times each time getting 1 from random part!!
+  // slower but more random.
+
+  // select at random a part to look at
+  var doParts = _.sample(parts, parts.length);
+  tryPart();
+
+  function tryPart(){
+    var rand = 'rand' + doParts.pop();
+    self[ rand ](opts, partCallback);
+  }
+
+  function partCallback(result){
+    if (result) {
+      results = _.uniq(results.concat(result));  // make sure it's unique!
+    }
+
+    //console.log(result);
+    if (results.length < count && doParts.length) {
+      // reduce count for next part -- NO! may get duplicates
+      // opts.count = count - results.length;
+      return tryPart();
+    }
+
+    // trim excess
+    if (results.length > count) {
+      results.length = count;
+    }
+    done();
+  }
+};
+
+
 WordPOS.WNdb = WNdb;
 WordPOS.natural = natural;
-
 
 module.exports = WordPOS;
