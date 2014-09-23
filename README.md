@@ -5,8 +5,25 @@ wordpos is a set of part-of-speech (POS) utilities for Node.js using [natural's]
 
 *Update*: New version 0.1.10 - get random word(s).
 
-## Usage
+## Quick usage
+Command-line:
+```bash
+$ wordpos def git
+git
+  n: a person who is deemed to be despicable or contemptible; "only a rotter would do that"; "kill the rat"; "throw the bum out"; "you cowardly little pukes!"; "the British call a contemptible person a `git'"  
 
+$ wordpos def git | wordpos get --adj
+# Adjective 6:
+despicable
+contemptible
+bum
+cowardly
+little
+British
+
+```
+
+Node.js:
 ```js
 var WordPOS = require('wordpos'),
     wordpos = new WordPOS();
@@ -28,7 +45,7 @@ See `wordpos_spec.js` for full usage.
 
      npm install wordpos
 
-Note: `wordpos-bench.js` requires a [forked uubench](https://github.com/moos/uubench) module.  To use the CLI (see below), it is recommended to installed globally with -g option.
+Note: `wordpos-bench.js` requires a [forked uubench](https://github.com/moos/uubench) module.  To use the CLI (see below), install globally with the `-g` option.
 
 To run spec:
 
@@ -36,6 +53,35 @@ To run spec:
     jasmine-node wordpos_spec.js --verbose
     jasmine-node validate_spec.js --verbose
 
+### Options
+
+```js
+WordPOS.defaults = {
+  /**
+   * enable profiling, time in msec returned as last argument in callback
+   */
+  profile: false,
+
+  /**
+   * use fast index if available
+   */
+  fastIndex: true,
+
+  /**
+   * if true, exclude standard stopwords.
+   * if array, stopwords to exclude, eg, ['all','of','this',...]
+   * if false, do not filter any stopwords.
+   */
+  stopwords: true
+};
+```
+To override, pass an options hash to the constructor. With the `profile` option, all callbacks receive a second argument that is the execution time in msec of the call.
+
+```js
+    wordpos = new WordPOS({profile: true});
+    wordpos.isAdjective('fast', console.log);
+    // true 'fast' 29
+```
 
 ## API
 
@@ -56,9 +102,13 @@ wordpos.getPOS(text, callback) -- callback receives a result object:
       rest:[]         Array of text words that are not in dict or could not be categorized as a POS
     }
     Note: a word may appear in multiple POS (eg, 'great' is both a noun and an adjective)
+
 wordpos.getNouns(text, callback) -- callback receives an array of nouns in text
+
 wordpos.getVerbs(text, callback) -- callback receives an array of verbs in text
+
 wordpos.getAdjectives(text, callback) -- callback receives an array of adjectives in text
+
 wordpos.getAdverbs(text, callback) -- callback receives an array of adverbs in text
 ```
 
@@ -107,10 +157,13 @@ would be considered nouns.  (see http://nltk.googlecode.com/svn/trunk/doc/book/c
 Determine if a word is a particular POS.
 
 ```
-wordpos.isNoun(word, callback) -- callback receives result (true/false) if word is a noun.
-wordpos.isVerb(word, callback) -- callback receives result (true/false) if word is a verb.
-wordpos.isAdjective(word, callback) -- callback receives result (true/false) if word is an adjective.
-wordpos.isAdverb(word, callback) -- callback receives result (true/false) if word is an adverb.
+wordpos.isNoun(word, callback) -- callback receives true/false if word is a noun.
+
+wordpos.isVerb(word, callback) -- callback receives true/false if word is a verb.
+
+wordpos.isAdjective(word, callback) -- callback receives true/false if word is an adjective.
+
+wordpos.isAdverb(word, callback) -- callback receives true/false if word is an adverb.
 ```
 
 isX() methods return the looked-up word as the second argument to the callback.
@@ -138,8 +191,11 @@ already know the POS of the word.
 
 ```
 wordpos.lookupNoun(word, callback) -- callback receives array of lookup objects for a noun
+
 wordpos.lookupVerb(word, callback) -- callback receives array of lookup objects for a verb
+
 wordpos.lookupAdjective(word, callback) -- callback receives array of lookup objects for an adjective
+
 wordpos.lookupAdverb(word, callback) -- callback receives array of lookup objects for an adverb
 ```
 
@@ -174,17 +230,21 @@ wordpos.lookup('great', console.log);
 
 ### randX()
 
-Get random words.
+Get random word(s).  (Introduced in version 0.1.10)
 
+```js
+wordpos.rand(options, callback)
+
+wordpos.randNoun(options, callback)
+
+wordpos.randVerb(options, callback)
+
+wordpos.randAdjective(options, callback)
+
+wordpos.randAdverb(options, callback)
 ```
-wordpos.rand([options,] callback)
-wordpos.randNoun([options,] callback)
-wordpos.randVerb([options,[ callback)
-wordpos.randAdjective([options,] callback)
-wordpos.randAdverb([options,] callback)
-```
-Callback receives array of random words and the startsWith option.
-Options, if given, is:
+Callback receives array of random words and the `startsWith` option.
+`options`, if given, is:
 ```
 {
   startsWith : <string> -- get random words starting with string
@@ -199,13 +259,8 @@ wordpos.rand(console.log)
 wordpos.randNoun(console.log)
 // ['bamboo_palm'] ''
 
-// with options:
-
 wordpos.rand({starstWith: 'foo'}, console.log)
 // ['foot'] 'foo'
-
-wordpos.rand({starstWith: 'foo', count: 3}, console.log)
-// ['footsure', 'foolish', 'footsore'] 'foo'
 
 wordpos.randVerb({starstWith: 'bar', count: 3}, console.log)
 // ['barge', 'barf', 'barter_away'] 'bar'
@@ -215,9 +270,9 @@ wordpos.rand({starsWith: 'zzz'}, console.log)
 ```
 
 Note on performance: random lookups could involve heavy disk reads.  It is better to use the 'count' option to get words
-in batches.  This may benefit from the cached reads of similarly keyed entries as well as shared open/close of the file.
+in batches.  This may benefit from the cached reads of similarly keyed entries as well as shared open/close of the index files.
 
-Getting random POS (randX) is generally faster than rand(), which may look at multiple POS files until 'count' requirement
+Getting random POS (randNoun, etc.) is generally faster than rand(), which may look at multiple POS files until 'count' requirement
 is met.
 
 
@@ -225,41 +280,15 @@ is met.
 
 ```
 WordPOS.WNdb -- access to the WNdb object
+
 WordPOS.natural -- access to underlying 'natural' module
-wordpos.parse(str) -- returns tokenized array of words, less duplicates and stopwords.  This method is called on all getX() calls internally.
+
+wordpos.parse(str) -- returns tokenized array of words, less duplicates and stopwords.  
+   This method is called on all getX() calls internally.
 ```
 E.g., WordPOS.natural.stopwords is the list of stopwords.
 
 
-### Options
-
-```js
-WordPOS.defaults = {
-  /**
-   * enable profiling, time in msec returned as last argument in callback
-   */
-  profile: false,
-
-  /**
-   * use fast index if available
-   */
-  fastIndex: true,
-
-  /**
-   * if true, exclude standard stopwords.
-   * if array, stopwords to exclude, eg, ['all','of','this',...]
-   * if false, do not filter any stopwords.
-   */
-  stopwords: true
-};
-```
-To override, pass an options hash to the constructor. With the `profile` option, all callbacks receive a second argument that is the execution time in msec of the call.
-
-```js
-    wordpos = new WordPOS({profile: true});
-    wordpos.isAdjective('fast', console.log);
-    // true 'fast' 29
-```
 
 ### Fast Index
 
@@ -267,7 +296,7 @@ Version 0.1.4 introduces `fastIndex` option.  This uses a secondary index on the
 
 See blog article [Optimizing WordPos](http://blog.42at.com/optimizing-wordpos).
 
-## CLI
+## Command-line: CLI
 
 Version 0.1.6 introduces the command-line interface (./bin/wordpos-cli.js), available as 'wordpos' if installed globally
 "npm install wordpos -g", otherwise as 'node_modules/.bin/wordpos' if installed without the -g.
@@ -371,17 +400,13 @@ $ wordpos
 
   Commands:
 
-    get
-    get list of words for particular POS
+    get      get list of words for particular POS
+ 
+    def      lookup definitions
 
-    def
-    lookup definitions
+    parse    show parsed words, deduped and less stopwords
 
-    parse
-    show parsed words, deduped and less stopwords
-
-    rand
-    get random words (optionally starting with 'word')
+    rand     get random words (optionally starting with 'word' ...)
 
   Options:
 
