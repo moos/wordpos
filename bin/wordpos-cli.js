@@ -34,13 +34,13 @@ program
   .option('-f, --full', 'full results object')
   .option('-j, --json', 'full results object as JSON')
   .option('-i, --file <file>', 'input file')
-  .option('-s, --stopwords', 'include stopwords')
+  .option('-s, --withStopwords', 'include stopwords (default: stopwords are excluded)')
   .option('-N, --num <num>', 'number of random words to return')
   ;
 
 program.command('get')
-   .description('get list of words for particular POS')
-   .action(exec);
+  .description('get list of words for particular POS')
+  .action(exec);
 
 program.command('def')
   .description('lookup definitions')
@@ -49,13 +49,25 @@ program.command('def')
     exec.apply(this, arguments);
   });
 
-program.command('parse')
-.description('show parsed words, deduped and less stopwords')
-.action(exec);
-
 program.command('rand')
-  .description('get random words (starting with word, optionally)')
+  .description('get random words (starting with <word>, optionally)')
   .action(exec);
+
+program.command('parse')
+  .description('show parsed words, deduped and less stopwords')
+  .action(exec);
+
+program.command('stopwords')
+  .description('show list of stopwords (valid options are -b and -j)')
+  .action(function(){
+    cmd = _.last(arguments)._name;
+    var stopwords = WordPos.natural.stopwords;
+
+    if (program.json)
+      output(stopwords);
+    else
+      console.log(stopwords.join(program.brief ? ' ' : '\n'))
+  });
 
 var
   WordPos = require('../src/wordpos'),
@@ -109,9 +121,9 @@ function optToFn() {
 
 function run(data) {
   var
-    opts = {stopwords: !program.stopwords},
+    opts = {stopwords: !program.withStopwords},
     wordpos = new WordPos(opts),
-    words = wordpos.parse(data.split(' ')),    // make array
+    words = wordpos.parse(data),
     fns = optToFn(),
     plural = (cmd=='get' ? 's':''),
     results = {},
@@ -143,7 +155,7 @@ function run(data) {
       });
     } else {
       words.forEach(function(word){
-        wordpos[method](word, cb);
+        wordpos  [method](word, cb);
       });
     }
   });

@@ -3,7 +3,7 @@ wordpos
 
 wordpos is a set of part-of-speech (POS) utilities for Node.js using [natural's](http://github.com/NaturalNode/natural) WordNet module.
 
-*Update*: New version 0.1.10 - get random word(s).
+*Update*: get random word(s).
 
 ## Quick usage
 Command-line:
@@ -50,6 +50,7 @@ Note: `wordpos-bench.js` requires a [forked uubench](https://github.com/moos/uub
 To run spec:
 
     npm install jasmine-node -g
+    cd spec
     jasmine-node wordpos_spec.js --verbose
     jasmine-node validate_spec.js --verbose
 
@@ -116,7 +117,7 @@ If you're only interested in a certain POS (say, adjectives), using the particul
 than getPOS() which looks up the word in all index files. [stopwords] (https://github.com/NaturalNode/natural/blob/master/lib/natural/util/stopwords.js)
 are stripped out from text before lookup.
 
-If text is an array, all words are looked-up -- no deduplication, stopword filter or tokenization is applied.
+If text is an *array*, all words are looked-up -- no deduplication, stopword filter or tokenization is applied.
 
 getX() functions return the number of parsed words that will be looked up (less duplicates and stopwords).
 
@@ -298,105 +299,11 @@ See blog article [Optimizing WordPos](http://blog.42at.com/optimizing-wordpos).
 
 ## Command-line: CLI
 
-Version 0.1.6 introduces the command-line interface (./bin/wordpos-cli.js), available as 'wordpos' if installed globally
-"npm install wordpos -g", otherwise as 'node_modules/.bin/wordpos' if installed without the -g.
-
-```bash
-$ wordpos get The angry bear chased the frightened little squirrel
-# Noun 4:
-bear
-chased
-little
-squirrel
-
-# Adjective 3:
-angry
-frightened
-little
-
-# Verb 1:
-bear
-
-# Adverb 1:
-little
-```
-Just the nouns, brief output:
-```bash
-$ wordpos get --noun -b The angry bear chased the frightened little squirrel
-bear chased little squirrel
-```
-Just the counts: (nouns, adjectives, verbs, adverbs, total parsed words)
-```bash
-$ wordpos get -c The angry bear chased the frightened little squirrel
-4 3 1 1 7
-```
-Just the adjective count: (0, adjectives, 0, 0, total parsed words)
-```bash
-$ wordpos get --adj -c The angry bear chased the frightened little squirrel
-0 3 0 0 7
-```
-
-Get definitions:
-```bash
-$ wordpos def git
-git
-  n: a person who is deemed to be despicable or contemptible; "only a rotter would do that"; "kill the rat"; "throw the bum out"; "you cowardly little pukes!"; "the British call a contemptible persona `git'"
-```
-Get full result object:
-```bash
-$ wordpos def git -f
-{ git:
-   [ { synsetOffset: 10539715,
-       lexFilenum: 18,
-       pos: 'n',
-       wCnt: 0,
-       lemma: 'rotter',
-       synonyms: [],
-       lexId: '0',
-       ptrs: [],
-       gloss: 'a person who is deemed to be despicable or contemptible; "only a rotter would do that
-"; "kill the rat"; "throw the bum out"; "you cowardly little pukes!"; "the British call a contemptib
-le person a `git\'"  ' } ] }
-```
-As JSON:
-```bash
-$ wordpos def git -j
-{"git":[{"synsetOffset":10539715,"lexFilenum":18,"pos":"n","wCnt":0,"lemma":"rotter","synonyms":[],"
-lexId":"0","ptrs":[],"gloss":"a person who is deemed to be despicable or contemptible; \"only a rotter
-would do that\"; \"kill the rat\"; \"throw the bum out\"; \"you cowardly little pukes!\"; \"the British
-call a contemptible person a `git'\"  "}]}
-```
-
-Get random words:
-```bash
-$ wordpos rand
-#  1:
-hopelessly
-
-$ wordpos rand -N 2 foot
-# foot 2:
-footprint
-footlights
-
-$ wordpos rand -N 2 foot hand
-# foot 2:
-footlocker
-footmark
-
-# hand 2:
-hand-hewn
-handstitched
-
-$ wordpos rand --adj foot
-# foot 1:
-foot-shaped
-```
-
 Usage:
 ```bash
 $ wordpos
 
-  Usage: wordpos-cli.js [options] <command> [word ... | -i <file> | <stdin>]
+  Usage: wordpos [options] <command> [word ... | -i <file> | <stdin>]
 
   Commands:
 
@@ -404,10 +311,12 @@ $ wordpos
  
     def      lookup definitions
 
-    parse    show parsed words, deduped and less stopwords
-
     rand     get random words (optionally starting with 'word' ...)
 
+    parse    show parsed words, deduped and less stopwords
+
+    stopwords  show list of stopwords (valid options are -b and -j)
+    
   Options:
 
     -h, --help         output usage information
@@ -421,9 +330,11 @@ $ wordpos
     -f, --full         full results object
     -j, --json         full results object as JSON
     -i, --file <file>  input file
-    -s, --stopwords    include stopwords
+    -s, --withStopwords  include stopwords (default: stopwords are excluded)
     -N, --num <num>    number of random words to get
 ```
+
+For CLI examples, see [bin/README](bin/README.md). 
 
 ## Benchmark
 
@@ -452,6 +363,21 @@ done in 1375 msecs
 
 220 words are looked-up (less stopwords and duplicates) on a win7/64-bit/dual-core/3GHz.  getPOS() is slowest as it searches through all four index files.
 
+## Changes
+
+v0.1.11 
+- fix stopwords not getting excluded when running with CLI
+- added 'stopwords' CLI *command* to show list of stopwords
+- CLI *option* --stopword now renamed to --withStopwords
+
+v0.1.10 
+- rand functionality added
+
+v0.1.6
+- added command line tool
+
+v0.1.4
+- added fast index 
 
 License
 -------

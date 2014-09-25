@@ -3,7 +3,7 @@
   "author": "Moos <mooster@42at.com>",
   "keywords": ["natural", "language", "wordnet", "adjectives", "nouns", "adverbs", "verbs"],
   "description": "wordpos is a set of part-of-speech utilities for Node.js using natural's WordNet module.",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "homepage": "https://github.com/moos/wordpos",
   "engines": {
     "node": ">=0.6"
