@@ -17,21 +17,6 @@ To run spec:
     jasmine-node validate_spec.js --verbose
 
 ## Quick usage
-Command-line:
-```bash
-$ wordpos def git
-git
-  n: a person who is deemed to be despicable or contemptible; "only a rotter would do that"; "kill the rat"; "throw the bum out"; "you cowardly little pukes!"; "the British call a contemptible person a `git'"  
-
-$ wordpos def git | wordpos get --adj
-# Adjective 6:
-despicable
-contemptible
-bum
-cowardly
-little
-British
-```
 
 Node.js:
 ```js
@@ -47,6 +32,22 @@ wordpos.isAdjective('awesome', function(result){
     console.log(result);
 });
 // true 'awesome'
+```
+
+Command-line:
+```bash
+$ wordpos def git
+git
+  n: a person who is deemed to be despicable or contemptible; "only a rotter would do that"; "kill the rat"; "throw the bum out"; "you cowardly little pukes!"; "the British call a contemptible person a `git'"  
+
+$ wordpos def git | wordpos get --adj
+# Adjective 6:
+despicable
+contemptible
+bum
+cowardly
+little
+British
 ```
 
 ### Options

@@ -1,6 +1,41 @@
 wordpos
 =======
 
+## Usage:
+```bash
+$ wordpos
+
+  Usage: wordpos <command> [options] [word ... | -i <file> | <stdin>]
+
+  Commands:
+
+    get      get list of words for particular POS
+ 
+    def      lookup definitions
+
+    rand     get random words (optionally starting with 'word' ...)
+
+    parse    show parsed words, deduped and less stopwords
+
+    stopwords  show list of stopwords (valid options are -b and -j)
+    
+  Options:
+
+    -h, --help         output usage information
+    -V, --version      output the version number
+    -n, --noun         Get nouns
+    -a, --adj          Get adjectives
+    -v, --verb         Get verbs
+    -r, --adv          Get adverbs
+    -c, --count        get counts only (noun, adj, verb, adv, total parsed words)
+    -b, --brief        brief output (all on one line, no headers)
+    -f, --full         full result object
+    -j, --json         full result object as JSON
+    -i, --file <file>  input file
+    -s, --withStopwords  include stopwords (default: stopwords are excluded)
+    -N, --num <num>    number of random words to get
+```
+
 ## Command-line: CLI
 
 Version 0.1.6 introduces the command-line interface (./bin/wordpos-cli.js), available as 'wordpos' if installed globally
@@ -100,39 +135,4 @@ foot-shaped
 
 $ wordpos stopwords -b
 about after all also am an and another any are as at be because ...
-```
-
-## Usage:
-```bash
-$ wordpos
-
-  Usage: wordpos <command> [options] [word ... | -i <file> | <stdin>]
-
-  Commands:
-
-    get      get list of words for particular POS
- 
-    def      lookup definitions
-
-    rand     get random words (optionally starting with 'word' ...)
-
-    parse    show parsed words, deduped and less stopwords
-
-    stopwords  show list of stopwords (valid options are -b and -j)
-    
-  Options:
-
-    -h, --help         output usage information
-    -V, --version      output the version number
-    -n, --noun         Get nouns
-    -a, --adj          Get adjectives
-    -v, --verb         Get verbs
-    -r, --adv          Get adverbs
-    -c, --count        get counts only (noun, adj, verb, adv, total parsed words)
-    -b, --brief        brief output (all on one line, no headers)
-    -f, --full         full result object
-    -j, --json         full result object as JSON
-    -i, --file <file>  input file
-    -s, --withStopwords  include stopwords (default: stopwords are excluded)
-    -N, --num <num>    number of random words to get
 ```
