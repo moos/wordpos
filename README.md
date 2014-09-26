@@ -302,7 +302,7 @@ For CLI usage and examples, see [bin/README](bin).
 
 ## Benchmark
 
-Note: `wordpos-bench.js` requires a [forked uubench](moos/uubench) module.
+Note: `wordpos-bench.js` requires a [forked uubench](@moos/uubench) module.
 
     cd bench
     node wordpos-bench.js
