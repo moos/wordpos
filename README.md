@@ -89,7 +89,7 @@ Please note: all API are *async* since the underlying WordNet library is async. 
 #### getAdjectives(text, callback)
 #### getAdverbs(text, callback)
 
-Get part-of-speech from `text`.  `callback(results)` receives and array of words for specified POS, or a hash for `getPOS`:
+Get part-of-speech from `text`.  `callback(results)` receives and array of words for specified POS, or a hash for `getPOS()`:
 
 ```
 wordpos.getPOS(text, callback) -- callback receives a result object:
@@ -230,7 +230,7 @@ Returns tokenized array of words in `text`, less duplicates and stopwords. This 
 
 
 #### WordPOS.WNdb 
-Access to the [WNdb](https://github.com/moos/WNdb) object containing the dictionary & index files
+Access to the [WNdb](https://github.com/moos/WNdb) object containing the dictionary & index files.
 
 #### WordPOS.natural
 Access to underlying [natural](http://github.com/NaturalNode/natural) module. For example, WordPOS.natural.stopwords is the list of stopwords.
