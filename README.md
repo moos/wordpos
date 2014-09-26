@@ -81,16 +81,15 @@ To override, pass an options hash to the constructor. With the `profile` option,
 
 ## API
 
-Please note: all API are async since the underlying WordNet library is async. WordPOS is a subclass of natural's [WordNet class](https://github.com/NaturalNode/natural#wordnet) and inherits all its methods.
+Please note: all API are *async* since the underlying WordNet library is async. WordPOS is a subclass of natural's [WordNet class](https://github.com/NaturalNode/natural#wordnet) and inherits all its methods.
 
+#### getPOS(text, callback)
+#### getNouns(text, callback)
+#### getVerbs(text, callback)
+#### getAdjectives(text, callback)
+#### getAdverbs(text, callback)
 
-### getPOS(text, callback)
-### getNouns(text, callback)
-### getVerbs(text, callback)
-### getAdjectives(text, callback)
-### getAdverbs(text, callback)
-
-Get part-of-speech from text.  `callback(results)` receives and array of words for specified POS, or a hash for `getPOS`:
+Get part-of-speech from `text`.  `callback(results)` receives and array of words for specified POS, or a hash for `getPOS`:
 
 ```
 wordpos.getPOS(text, callback) -- callback receives a result object:
@@ -110,7 +109,7 @@ are stripped out from text before lookup.
 
 If `text` is an *array*, all words are looked-up -- no deduplication, stopword filter or tokenization is applied.
 
-getX() functions (immediately) return the number of parsed words that *will be* looked up (less duplicates and stopwords).
+getX() functions (immediately) return the *number* of parsed words that *will be* looked up (less duplicates and stopwords).
 
 Example:
 
@@ -132,12 +131,12 @@ wordpos.getPOS('The angry bear chased the frightened little squirrel.', console.
 This has no relation to correct grammar of given sentence, where here only 'bear' and 'squirrel'
 would be considered nouns. 
 
-### isNoun(word, callback)
-### isVerb(word, callback)
-### isAdjective(word, callback)
-### isAdverb(word, callback)
+#### isNoun(word, callback)
+#### isVerb(word, callback)
+#### isAdjective(word, callback)
+#### isAdverb(word, callback)
 
-Determine if a word is a particular POS.  `callback(result, word)` receives true/false as first argument and the looked-up word as the second argument.
+Determine if `word` is a particular POS.  `callback(result, word)` receives true/false as first argument and the looked-up word as the second argument.
 
 Examples:
 
@@ -155,10 +154,10 @@ wordpos.isAdverb('fishly', console.log);
 // false 'fishly'
 ```
 
-### lookupNoun(word, callback)
-### lookupVerb(word, callback)
-### lookupAdjective(word, callback)
-### lookupAdverb(word, callback)
+#### lookupNoun(word, callback)
+#### lookupVerb(word, callback)
+#### lookupAdjective(word, callback)
+#### lookupAdverb(word, callback)
 
 These calls are similar to natural's [lookup()](https://github.com/NaturalNode/natural#wordnet) call, except they can be faster if you
 already know the POS of the word.  Signature of the callback is `callback(result, word)` where `result` is an *array* of lookup object(s). 
@@ -182,18 +181,18 @@ oul beneath"- Melville; "Westminster Hall\'s awing majesty, so vast, so high, so
 ```
 In this case only one lookup was found.  But there could be several.
 
-Or use WordNet's inherited method:
+Or use WordNet's (slower) inherited method:
 
 ```js
 wordpos.lookup('great', console.log);
 // ...
 ```
 
-### rand(options, callback)
-### randNoun(options, callback)
-### randVerb(options, callback)
-### randAdjective(options, callback)
-### randAdverb(options, callback)
+#### rand(options, callback)
+#### randNoun(options, callback)
+#### randVerb(options, callback)
+#### randAdjective(options, callback)
+#### randAdverb(options, callback)
 
 Get random word(s).  (Introduced in version 0.1.10)  `callback(results, startsWith)` receives array of random words and the `startsWith` option, if one was  given. `options`, if given, is:
 ```
@@ -226,19 +225,15 @@ in batches.  This may benefit from the cached reads of similarly keyed entries a
 Getting random POS (`randNoun()`, etc.) is generally faster than `rand()`, which may look at multiple POS files until `count` requirement
 is met.
 
+#### parse(text) 
+Returns tokenized array of words in `text`, less duplicates and stopwords. This method is called on all getX() calls internally.
 
-### Other methods/properties
 
-```
-WordPOS.WNdb -- access to the [WNdb](https://github.com/moos/WNdb) object containing the dictionary & index files
+#### WordPOS.WNdb 
+Access to the [WNdb](https://github.com/moos/WNdb) object containing the dictionary & index files
 
-WordPOS.natural -- access to underlying [natural](http://github.com/NaturalNode/natural) module
-
-wordpos.parse(str) -- returns tokenized array of words, less duplicates and stopwords.  
-   This method is called on all getX() calls internally.
-```
-E.g., WordPOS.natural.stopwords is the list of stopwords.
-
+#### WordPOS.natural
+Access to underlying [natural](http://github.com/NaturalNode/natural) module. For example, WordPOS.natural.stopwords is the list of stopwords.
 
 
 ### Fast Index
