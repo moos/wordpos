@@ -280,18 +280,21 @@ done in 1375 msecs
 
 ## Changes
 
-v0.1.12 
+0.1.13
+- Fix crlf issue for command-line script
+
+0.1.12 
 - fix stopwords not getting excluded when running with CLI
 - added 'stopwords' CLI *command* to show list of stopwords
 - CLI *option* --stopword now renamed to --withStopwords
 
-v0.1.10 
+0.1.10 
 - rand functionality added
 
-v0.1.6
+0.1.6
 - added command line tool
 
-v0.1.4
+0.1.4
 - added fast index 
 
 License
