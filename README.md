@@ -137,19 +137,7 @@ wordpos.getPOS('The angry bear chased the frightened little squirrel.', console.
 
 ```
 This has no relation to correct grammer of given sentence, where here only 'bear' and 'squirrel'
-would be considered nouns.  (see http://nltk.googlecode.com/svn/trunk/doc/book/ch08.html#ex-recnominals)
-
-[pos-js](https://github.com/fortnightlabs/pos-js), e.g., shows only 'squirrel' as noun:
-
-    The / DT
-    angry / JJ
-    bear / VB
-    chased / VBN
-    the / DT
-    frightened / VBN
-    little / JJ
-    squirrel / NN
-
+would be considered nouns. 
 
 ### isX()...
 
