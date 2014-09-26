@@ -16,6 +16,11 @@ var
   exec = require('child_process').exec,
   cmd = 'node ' + __dirname + '/../tools/validate ';
 
+
+// increase timeout
+jasmine.asyncSpecWait.timeout = 20 * 1000;
+
+
 describe('validate isX() using fastIndex', function() {
 
   it('should validate index.noun', function() {

@@ -3,7 +3,18 @@ wordpos
 
 wordpos is a set of part-of-speech (POS) utilities for Node.js using [natural's](http://github.com/NaturalNode/natural) WordNet module.
 
-*Update*: get random word(s).
+*Update*: get [random](#randx) word(s).
+
+## Installation
+
+     npm install -g wordpos
+
+To run spec:
+
+    npm install -g jasmine-node
+    cd spec
+    jasmine-node wordpos_spec.js --verbose
+    jasmine-node validate_spec.js --verbose
 
 ## Quick usage
 Command-line:
@@ -40,19 +51,6 @@ wordpos.isAdjective('awesome', function(result){
 ```
 
 See `wordpos_spec.js` for full usage.
-
-## Installation
-
-     npm install wordpos
-
-Note: `wordpos-bench.js` requires a [forked uubench](https://github.com/moos/uubench) module.  To use the CLI (see below), install globally with the `-g` option.
-
-To run spec:
-
-    npm install jasmine-node -g
-    cd spec
-    jasmine-node wordpos_spec.js --verbose
-    jasmine-node validate_spec.js --verbose
 
 ### Options
 
@@ -299,45 +297,14 @@ See blog article [Optimizing WordPos](http://blog.42at.com/optimizing-wordpos).
 
 ## Command-line: CLI
 
-Usage:
-```bash
-$ wordpos
+For CLI usage and examples, see [bin/README](bin). 
 
-  Usage: wordpos [options] <command> [word ... | -i <file> | <stdin>]
-
-  Commands:
-
-    get      get list of words for particular POS
- 
-    def      lookup definitions
-
-    rand     get random words (optionally starting with 'word' ...)
-
-    parse    show parsed words, deduped and less stopwords
-
-    stopwords  show list of stopwords (valid options are -b and -j)
-    
-  Options:
-
-    -h, --help         output usage information
-    -V, --version      output the version number
-    -n, --noun         Get nouns
-    -a, --adj          Get adjectives
-    -v, --verb         Get verbs
-    -r, --adv          Get adverbs
-    -c, --count        get counts only (noun, adj, verb, adv, total parsed words)
-    -b, --brief        brief output (all on one line, no headers)
-    -f, --full         full results object
-    -j, --json         full results object as JSON
-    -i, --file <file>  input file
-    -s, --withStopwords  include stopwords (default: stopwords are excluded)
-    -N, --num <num>    number of random words to get
-```
-
-For CLI examples, see [bin/README](bin/README.md). 
 
 ## Benchmark
 
+Note: `wordpos-bench.js` requires a [forked uubench](../uubench) module.
+
+    cd bench
     node wordpos-bench.js
 
 

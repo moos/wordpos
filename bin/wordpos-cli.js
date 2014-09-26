@@ -22,7 +22,7 @@ var program = require('commander'),
 
 program
   .version(version)
-  .usage('[options] <command> [word ... | -i <file> | <stdin>]')
+  .usage('<command> [options] [word ... | -i <file> | <stdin>]')
 
   .option('-n, --noun', 'Get nouns')
   .option('-a, --adj', 'Get adjectives')

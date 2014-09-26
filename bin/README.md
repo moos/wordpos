@@ -4,7 +4,9 @@ wordpos
 ## Command-line: CLI
 
 Version 0.1.6 introduces the command-line interface (./bin/wordpos-cli.js), available as 'wordpos' if installed globally
-"npm install wordpos -g", otherwise as 'node_modules/.bin/wordpos' if installed without the -g.
+`npm install -g wordpos`, otherwise as `node_modules/.bin/wordpos` if installed without the -g.
+
+### Examples:
 
 ```bash
 $ wordpos get The angry bear chased the frightened little squirrel
@@ -104,7 +106,7 @@ about after all also am an and another any are as at be because ...
 ```bash
 $ wordpos
 
-  Usage: wordpos-cli.js [options] <command> [word ... | -i <file> | <stdin>]
+  Usage: wordpos <command> [options] [word ... | -i <file> | <stdin>]
 
   Commands:
 
@@ -128,8 +130,8 @@ $ wordpos
     -r, --adv          Get adverbs
     -c, --count        get counts only (noun, adj, verb, adv, total parsed words)
     -b, --brief        brief output (all on one line, no headers)
-    -f, --full         full results object
-    -j, --json         full results object as JSON
+    -f, --full         full result object
+    -j, --json         full result object as JSON
     -i, --file <file>  input file
     -s, --withStopwords  include stopwords (default: stopwords are excluded)
     -N, --num <num>    number of random words to get
