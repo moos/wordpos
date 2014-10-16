@@ -1,5 +1,10 @@
-wordpos
+wordpos CLI
 =======
+
+## Command-line
+
+Version 0.1.6 introduces the command-line interface (./bin/wordpos-cli.js), available as 'wordpos' if installed globally
+`npm install -g wordpos`, otherwise as `node_modules/.bin/wordpos` if installed without the -g.
 
 ## Usage:
 ```bash
@@ -9,40 +14,40 @@ $ wordpos
 
   Commands:
 
-    get      get list of words for particular POS
+    get        get list of words for particular POS
  
-    def      lookup definitions
+    def        lookup definitions (use -b for brief definition, less examples)
+    
+    syn        lookup synonyms
+    
+    exp        lookup examples
 
-    rand     get random words (optionally starting with 'word' ...)
+    rand       get random words (starting with [word]). If first arg is a number, returns
+               that many random words. Valid options are -b, -f, -j, -s, -i.
 
-    parse    show parsed words, deduped and less stopwords
+    parse      show parsed words, deduped and less stopwords
 
     stopwords  show list of stopwords (valid options are -b and -j)
     
   Options:
 
-    -h, --help         output usage information
-    -V, --version      output the version number
-    -n, --noun         Get nouns
-    -a, --adj          Get adjectives
-    -v, --verb         Get verbs
-    -r, --adv          Get adverbs
-    -c, --count        get counts only (noun, adj, verb, adv, total parsed words)
-    -b, --brief        brief output (all on one line, no headers)
-    -f, --full         full result object
-    -j, --json         full result object as JSON
-    -i, --file <file>  input file
-    -s, --withStopwords  include stopwords (default: stopwords are excluded)
-    -N, --num <num>    number of random words to get
+    -h, --help           output usage information
+    -V, --version        output the version number
+    -n, --noun           get nouns only
+    -a, --adj            get adjectives only
+    -v, --verb           get verbs only
+    -r, --adv            get adverbs only
+    -c, --count          get counts only, used with get
+    -b, --brief          brief output (all on one line, no headers)
+    -f, --full           full result object
+    -j, --json           full result object as JSON string
+    -i, --file <file>    input file
+    -w, --withStopwords  include stopwords (default: stopwords are excluded)
 ```
 
-## Command-line: CLI
-
-Version 0.1.6 introduces the command-line interface (./bin/wordpos-cli.js), available as 'wordpos' if installed globally
-`npm install -g wordpos`, otherwise as `node_modules/.bin/wordpos` if installed without the -g.
 
 ### Examples:
-
+Get part-of-speech:
 ```bash
 $ wordpos get The angry bear chased the frightened little squirrel
 # Noun 4:
@@ -62,29 +67,47 @@ bear
 # Adverb 1:
 little
 ```
-Just the nouns, brief output:
+#### Just the nouns, brief output:
 ```bash
 $ wordpos get --noun -b The angry bear chased the frightened little squirrel
 bear chased little squirrel
 ```
-Just the counts: (nouns, adjectives, verbs, adverbs, total parsed words)
+#### Just the counts:
 ```bash
 $ wordpos get -c The angry bear chased the frightened little squirrel
+# Noun Adjective Verb Adverb Parsed
 4 3 1 1 7
 ```
-Just the adjective count: (0, adjectives, 0, 0, total parsed words)
+#### Just the adjective count:
 ```bash
 $ wordpos get --adj -c The angry bear chased the frightened little squirrel
+# Noun Adjective Verb Adverb Parsed
 0 3 0 0 7
 ```
 
-Get definitions:
+#### Get definitions:
 ```bash
 $ wordpos def git
-git
+git (def)
   n: a person who is deemed to be despicable or contemptible; "only a rotter would do that"; "kill the rat"; "throw the bum out"; "you cowardly little pukes!"; "the British call a contemptible persona `git'"
 ```
-Get full result object:
+#### Brief definition: (excludes examples)
+```bash
+$ wordpos def -b git
+git (def)
+  n: a person who is deemed to be despicable or contemptible
+```
+#### Multiple definitions:
+```bash
+$ wordpos def git gat
+git (def)
+  n: a person who is deemed to be despicable or contemptible
+  
+gat (def)
+  n: a gangster's pistol 
+```
+
+#### Get full result object:
 ```bash
 $ wordpos def git -f
 { git:
@@ -100,7 +123,8 @@ $ wordpos def git -f
 "; "kill the rat"; "throw the bum out"; "you cowardly little pukes!"; "the British call a contemptib
 le person a `git\'"  ' } ] }
 ```
-As JSON:
+
+#### As JSON:
 ```bash
 $ wordpos def git -j
 {"git":[{"synsetOffset":10539715,"lexFilenum":18,"pos":"n","wCnt":0,"lemma":"rotter","synonyms":[],"
@@ -109,30 +133,82 @@ would do that\"; \"kill the rat\"; \"throw the bum out\"; \"you cowardly little 
 call a contemptible person a `git'\"  "}]}
 ```
 
-Get random words:
+#### Get synonyms:
+```
+$ wordpos syn git gat
+git (syn)
+  n: rotter, dirty_dog, rat, skunk, stinker, stinkpot, bum, puke, crumb, lowlife, scum_bag, so-and-so, git
+
+gat (syn)
+  n: gat, rod
+```
+
+#### Get examples:
+```
+$ wordpos syn git
+git (exp)
+  n: "only a rotter would do that", "kill the rat", "throw the bum out", "you cowardly little pukes!", "the British call a contemptible person a `git'"
+```
+
+#### Get random words:
 ```bash
 $ wordpos rand
 #  1:
 hopelessly
-
-$ wordpos rand -N 2 foot
-# foot 2:
+```
+Get 5 random words:
+```sh
+$ wordpos rand 5
+#  5:
+bemire
+swan
+dignify
+jaunt
+daydream
+```
+Get a word staring with "foot":
+```sh
+$ wordpos rand foot
+# foot 1:
 footprint
-footlights
-
-$ wordpos rand -N 2 foot hand
-# foot 2:
+```
+Get 3 random words string with "foot" and "hand" each:
+```sh
+$ wordpos rand 3 foot hand
+# foot 3:
 footlocker
 footmark
+footwall
 
-# hand 2:
+# hand 3:
 hand-hewn
 handstitched
-
+handicap
+```
+Get a random adjective:
+```sh
+$ wordpos rand --adj
+# Adjective 1:
+soaked
+```
+Get a random adjective starting with "foot"
+```sh
 $ wordpos rand --adj foot
 # foot 1:
 foot-shaped
+```
 
+#### Stopwords
+List stopwords:
+```bash
 $ wordpos stopwords -b
 about after all also am an and another any are as at be because ...
+```
+
+Get definition of a stopword:
+```bash
+$ wordpos def both -w
+both (def)
+  s: (used with count nouns) two considered together; the two; "both girls are pretty"
+
 ```

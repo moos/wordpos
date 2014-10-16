@@ -3,7 +3,6 @@ wordpos
 
 wordpos is a set of part-of-speech (POS) utilities for Node.js using [natural's](http://github.com/NaturalNode/natural) WordNet module.
 
-*Update*: get [random](#randx) word(s).
 
 ## Installation
 
@@ -237,11 +236,11 @@ Access to the [WNdb](https://github.com/moos/WNdb) object containing the diction
 Access to underlying [natural](http://github.com/NaturalNode/natural) module. For example, WordPOS.natural.stopwords is the list of stopwords.
 
 
-### Fast Index
+## Fast Index
 
 Version 0.1.4 introduces `fastIndex` option.  This uses a secondary index on the index files and is much faster. It is on by default.  Secondary index files are generated at install time and placed in the same directory as WNdb.path.  Details can be found in tools/stat.js.
 
-See blog article [Optimizing WordPos](http://blog.42at.com/optimizing-wordpos).
+Fast index improves performance **30x** over Natural's native methods. See blog article [Optimizing WordPos](http://blog.42at.com/optimizing-wordpos).
 
 ## Command-line: CLI
 
@@ -256,7 +255,7 @@ Note: `wordpos-bench.js` requires a [forked uubench](https://github.com/moos/uub
     node wordpos-bench.js
 
 
-512-word corpus (< v0.1.4) :
+512-word corpus (< v0.1.4, comparable to Natural) :
 ```
   getPOS : 0 ops/s { iterations: 1, elapsed: 9039 }
   getNouns : 0 ops/s { iterations: 1, elapsed: 2347 }
@@ -279,6 +278,12 @@ done in 1375 msecs
 220 words are looked-up (less stopwords and duplicates) on a win7/64-bit/dual-core/3GHz.  getPOS() is slowest as it searches through all four index files.
 
 ## Changes
+
+0.1.14
+- Added `syn` (synonym) and `exp` (example) CLI commands.
+- Fixed `rand` CLI command when no start word given.
+- Removed -N, --num CLI option.  Use `wordpos rand [N]` to get N random numbers.
+- Changed CLI option -s to -w (include stopwords).
 
 0.1.13
 - Fix crlf issue for command-line script

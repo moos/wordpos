@@ -5,7 +5,7 @@
  * command-line interface to wordpos
  *
  * Usage:
- *    wordpos [options] <get|parse|def|rand> <stdin|words*>
+ *    wordpos [options] <get|parse|def|rand|syn|exp> <stdin|words*>
  *
  * Copyright (c) 2012 mooster@42at.com
  * https://github.com/moos/wordpos
@@ -18,24 +18,26 @@ var program = require('commander'),
   fs = require('fs'),
   POS = {noun:'Noun', adj:'Adjective', verb:'Verb', adv:'Adverb'},
   version = JSON.parse(fs.readFileSync(__dirname + '/../package.json', 'utf8')).version,
+  rawCmd = '',
+  RAND_PLACEHOLDER = '__',
   nWords;
 
 program
   .version(version)
   .usage('<command> [options] [word ... | -i <file> | <stdin>]')
 
-  .option('-n, --noun', 'Get nouns')
-  .option('-a, --adj', 'Get adjectives')
-  .option('-v, --verb', 'Get verbs')
-  .option('-r, --adv', 'Get adverbs')
+  .option('-n, --noun', 'get nouns only')
+  .option('-a, --adj', 'get adjectives only')
+  .option('-v, --verb', 'get verbs only')
+  .option('-r, --adv', 'get adverbs only')
 
-  .option('-c, --count', 'count only (noun, adj, verb, adv, total parsed words)')
+  .option('-c, --count', 'get counts only, used with get')
   .option('-b, --brief', 'brief output (all on one line, no headers)')
   .option('-f, --full', 'full results object')
-  .option('-j, --json', 'full results object as JSON')
+  .option('-j, --json', 'full results object as JSON string')
   .option('-i, --file <file>', 'input file')
-  .option('-s, --withStopwords', 'include stopwords (default: stopwords are excluded)')
-  .option('-N, --num <num>', 'number of random words to return')
+  .option('-w, --withStopwords', 'include stopwords (default: stopwords are excluded)')
+//  .option('-N, --num <num>', 'number of random words to return')
   ;
 
 program.command('get')
@@ -43,15 +45,50 @@ program.command('get')
   .action(exec);
 
 program.command('def')
-  .description('lookup definitions')
+  .description('lookup definitions (use -b for brief definition, less examples)')
   .action(function(){
+    rawCmd = 'def';
+    _.last(arguments)._name = 'lookup';
+    exec.apply(this, arguments);
+  });
+
+program.command('syn')
+  .description('lookup synonyms')
+  .action(function(){
+    rawCmd = 'syn';
+    _.last(arguments)._name = 'lookup';
+    exec.apply(this, arguments);
+  });
+
+program.command('exp')
+  .description('lookup examples')
+  .action(function(){
+    rawCmd = 'exp';
     _.last(arguments)._name = 'lookup';
     exec.apply(this, arguments);
   });
 
 program.command('rand')
-  .description('get random words (starting with <word>, optionally)')
-  .action(exec);
+  .description('get random words (starting with [word]). If first arg is a number, returns ' +
+    'that many random words. Valid options are -b, -f, -j, -s, -i.')
+  .action(function(/* arg, ..., program.command */){
+    var args = _.toArray(arguments),
+      num = args.length > 1 && Number(args[0]);
+    delete program.count;
+
+    // first arg is count?
+    if (num) {
+      args.shift();
+      program.num = num;
+    }
+
+    // no startsWith given, add a placeholder
+    if (args.length === 1){
+      args.unshift(RAND_PLACEHOLDER);
+    }
+
+    exec.apply(this, args);
+  });
 
 program.command('parse')
   .description('show parsed words, deduped and less stopwords')
@@ -61,6 +98,7 @@ program.command('stopwords')
   .description('show list of stopwords (valid options are -b and -j)')
   .action(function(){
     cmd = _.last(arguments)._name;
+    rawCmd = rawCmd || cmd;
     var stopwords = WordPos.natural.stopwords;
 
     if (program.json)
@@ -83,6 +121,7 @@ if (!cmd) console.log(program.helpInformation());
 function exec(/* args, ..., program.command */){
   var args = _.initial(arguments);
   cmd = _.last(arguments)._name;
+  rawCmd = rawCmd || cmd;
 
   if (program.file) {
     fs.readFile(program.file, 'utf8', function(err, data){
@@ -150,6 +189,7 @@ function run(data) {
     if (cmd == 'get') {
       wordpos[method](words, cb);
     } else if (cmd == 'rand') {
+      if (words[0] === RAND_PLACEHOLDER) words[0] = '';
       words.forEach(function(word){
         wordpos[method]({startsWith: word, count: program.num || 1}, cb);
       });
@@ -164,9 +204,10 @@ function run(data) {
 function output(results) {
   var str;
   if (program.count && cmd != 'lookup') {
-    str = (cmd == 'get' && _.reduce(POS, function(memo, v){
+    var label = program.brief ? '' : _.flatten(['#', _.values(POS), 'Parsed\n']).join(' ');
+    str = (cmd == 'get' && (label + _.reduce(POS, function(memo, v){
       return memo + ((results[v] && results[v].length) || 0) +" ";
-    },'')) + nWords;
+    },''))) + nWords;
   } else {
     str = sprint(results);
   }
@@ -184,7 +225,7 @@ function sprint(results) {
   switch (cmd) {
   case 'lookup':
     return _.reduce(results, function(memo, v, k){
-      return memo + (v.length && (k +"\n"+ print_def(v) +"\n") || '');
+      return memo + (v.length && util.format('%s (%s)\n%s\n', k, rawCmd, print_def(v)) || '');
     }, '');
   default:
     return _.reduce(results, function(memo, v, k){
@@ -194,8 +235,18 @@ function sprint(results) {
   }
 
   function print_def(defs) {
+    var proc = {
+      def: _.property(program.brief ? 'def' : 'gloss'),
+      syn: function(res){
+        return res.synonyms.join(', ');
+      },
+      exp: function(res) {
+        return '"' + res.exp.join('", "') + '"';
+      }
+    }[ rawCmd ];
+
     return _.reduce(defs, function(memo, v, k){
-      return memo + util.format('  %s: %s\n', v.pos, v.gloss);
+      return memo + util.format('  %s: %s\n', v.pos, proc(v));
     },'');
   }
 }
