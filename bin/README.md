@@ -1,7 +1,5 @@
-wordpos CLI
+wordpos Command-line
 =======
-
-## Command-line
 
 Version 0.1.6 introduces the command-line interface (./bin/wordpos-cli.js), available as 'wordpos' if installed globally
 `npm install -g wordpos`, otherwise as `node_modules/.bin/wordpos` if installed without the -g.
@@ -47,7 +45,7 @@ $ wordpos
 
 
 ### Examples:
-Get part-of-speech:
+#### Get part-of-speech:
 ```bash
 $ wordpos get The angry bear chased the frightened little squirrel
 # Noun 4:
@@ -67,18 +65,18 @@ bear
 # Adverb 1:
 little
 ```
-#### Just the nouns, brief output:
+Just the nouns, brief output:
 ```bash
 $ wordpos get --noun -b The angry bear chased the frightened little squirrel
 bear chased little squirrel
 ```
-#### Just the counts:
+Just the counts:
 ```bash
 $ wordpos get -c The angry bear chased the frightened little squirrel
 # Noun Adjective Verb Adverb Parsed
 4 3 1 1 7
 ```
-#### Just the adjective count:
+Just the adjective count:
 ```bash
 $ wordpos get --adj -c The angry bear chased the frightened little squirrel
 # Noun Adjective Verb Adverb Parsed
@@ -91,15 +89,15 @@ $ wordpos def git
 git (def)
   n: a person who is deemed to be despicable or contemptible; "only a rotter would do that"; "kill the rat"; "throw the bum out"; "you cowardly little pukes!"; "the British call a contemptible persona `git'"
 ```
-#### Brief definition: (excludes examples)
+Brief definition: (excludes examples)
 ```bash
 $ wordpos def -b git
 git (def)
   n: a person who is deemed to be despicable or contemptible
 ```
-#### Multiple definitions:
-```bash
-$ wordpos def git gat
+Multiple definitions:
+```sh
+$ wordpos def -b git gat
 git (def)
   n: a person who is deemed to be despicable or contemptible
   
@@ -109,28 +107,36 @@ gat (def)
 
 #### Get full result object:
 ```bash
-$ wordpos def git -f
-{ git:
-   [ { synsetOffset: 10539715,
-       lexFilenum: 18,
+$ wordpos def gat -f
+{ gat:
+   [ { synsetOffset: 3432112,
+       lexFilenum: 6,
        pos: 'n',
-       wCnt: 0,
-       lemma: 'rotter',
-       synonyms: [],
+       wCnt: 2,
+       lemma: 'gat',
+       synonyms: [ 'gat', 'rod' ],
        lexId: '0',
-       ptrs: [],
-       gloss: 'a person who is deemed to be despicable or contemptible; "only a rotter would do that
-"; "kill the rat"; "throw the bum out"; "you cowardly little pukes!"; "the British call a contemptib
-le person a `git\'"  ' } ] }
+       ptrs:
+        [ { pointerSymbol: '@',
+            synsetOffset: 3954735,
+            pos: 'n',
+            sourceTarget: '0000' },
+          { pointerSymbol: ';u',
+            synsetOffset: 7171981,
+            pos: 'n',
+            sourceTarget: '0000' } ],
+       gloss: 'a gangster\'s pistol  ',
+       def: 'a gangster\'s pistol  ',
+       exp: [] } ] }
 ```
 
 #### As JSON:
 ```bash
-$ wordpos def git -j
-{"git":[{"synsetOffset":10539715,"lexFilenum":18,"pos":"n","wCnt":0,"lemma":"rotter","synonyms":[],"
-lexId":"0","ptrs":[],"gloss":"a person who is deemed to be despicable or contemptible; \"only a rotter
-would do that\"; \"kill the rat\"; \"throw the bum out\"; \"you cowardly little pukes!\"; \"the British
-call a contemptible person a `git'\"  "}]}
+$ wordpos def gat -j
+{"gat":[{"synsetOffset":3432112,"lexFilenum":6,"pos":"n","wCnt":2,"lemma":"gat","synonyms":["gat","rod"],
+"lexId":"0","ptrs":[{"pointerSymbol":"@","synsetOffset":3954735,"pos":"n","sourceTarget":"0000"},{"pointerSymbol":
+";u","synsetOffset":7171981,"pos":"n","sourceTarget":"0000"}],"gloss":"a gangster's pistol  ","def":
+"a gangster's pistol  ","exp":[]}]}
 ```
 
 #### Get synonyms:
@@ -145,7 +151,7 @@ gat (syn)
 
 #### Get examples:
 ```
-$ wordpos syn git
+$ wordpos exp git
 git (exp)
   n: "only a rotter would do that", "kill the rat", "throw the bum out", "you cowardly little pukes!", "the British call a contemptible person a `git'"
 ```
@@ -166,6 +172,30 @@ dignify
 jaunt
 daydream
 ```
+Brief:
+```sh
+$ wordpos rand -b 5
+hebrew awake urn-shaped afeard obvious
+```
+#### Get random POS:
+Get a random adjective:
+```sh
+$ wordpos rand --adj
+# Adjective 1:
+soaked
+```
+Get 5 random verbs:
+```sh
+$ wordpos rand 5 --verb
+# Verb 5:
+centralise
+abduct
+kneecap
+arise
+rate
+````
+
+#### Get random words starting with:
 Get a word staring with "foot":
 ```sh
 $ wordpos rand foot
@@ -185,12 +215,6 @@ hand-hewn
 handstitched
 handicap
 ```
-Get a random adjective:
-```sh
-$ wordpos rand --adj
-# Adjective 1:
-soaked
-```
 Get a random adjective starting with "foot"
 ```sh
 $ wordpos rand --adj foot
@@ -199,7 +223,7 @@ foot-shaped
 ```
 
 #### Stopwords
-List stopwords:
+List stopwords (brief):
 ```bash
 $ wordpos stopwords -b
 about after all also am an and another any are as at be because ...
