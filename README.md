@@ -279,7 +279,7 @@ done in 1375 msecs
 
 ## Changes
 
-0.1.14
+0.1.15
 - Added `syn` (synonym) and `exp` (example) CLI commands.
 - Fixed `rand` CLI command when no start word given.
 - Removed -N, --num CLI option.  Use `wordpos rand [N]` to get N random numbers.
