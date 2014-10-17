@@ -37,7 +37,6 @@ program
   .option('-j, --json', 'full results object as JSON string')
   .option('-i, --file <file>', 'input file')
   .option('-w, --withStopwords', 'include stopwords (default: stopwords are excluded)')
-//  .option('-N, --num <num>', 'number of random words to return')
   ;
 
 program.command('get')
