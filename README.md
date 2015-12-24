@@ -6,6 +6,8 @@ wordpos
 
 wordpos is a set of *fast* part-of-speech (POS) utilities for Node.js using [natural's](http://github.com/NaturalNode/natural) WordNet module, offering **30x** performance over natural. 
 
+**CAUTION** The WordNet database [wordnet-db](moos/wordnet-db) comprises [155,287 words](http://wordnet.princeton.edu/wordnet/man/wnstats.7WN.html) (3.0 numbers) which uncompress to over **30 MB** of data in several *un*[browserify](substack/node-browserify)-able files.  It is *not* meant for the browser environment.
+
 
 ## Quick usage
 
@@ -107,7 +109,7 @@ wordpos.getPOS(text, callback) -- callback receives a result object:
 ```
 
 If you're only interested in a certain POS (say, adjectives), using the particular getX() is faster
-than getPOS() which looks up the word in all index files. [stopwords] (https://github.com/NaturalNode/natural/blob/master/lib/natural/util/stopwords.js)
+than getPOS() which looks up the word in all index files. [stopwords](https://github.com/NaturalNode/natural/blob/master/lib/natural/util/stopwords.js)
 are stripped out from text before lookup.
 
 If `text` is an *array*, all words are looked-up -- no deduplication, stopword filter or tokenization is applied.
