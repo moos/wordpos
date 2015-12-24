@@ -6,7 +6,7 @@ wordpos
 
 wordpos is a set of *fast* part-of-speech (POS) utilities for Node.js using [natural's](http://github.com/NaturalNode/natural) WordNet module, offering **30x** performance over natural. 
 
-**CAUTION** The WordNet database [wordnet-db](moos/wordnet-db) comprises [155,287 words](http://wordnet.princeton.edu/wordnet/man/wnstats.7WN.html) (3.0 numbers) which uncompress to over **30 MB** of data in several *un*[browserify](substack/node-browserify)-able files.  It is *not* meant for the browser environment.
+**CAUTION** The WordNet database [wordnet-db](https://github.com/moos/wordnet-db) comprises [155,287 words](http://wordnet.princeton.edu/wordnet/man/wnstats.7WN.html) (3.0 numbers) which uncompress to over **30 MB** of data in several *un*[browserify](https://github.com/substack/node-browserify)-able files.  It is *not* meant for the browser environment.
 
 
 ## Quick usage
