@@ -4,7 +4,7 @@ wordpos
 [![NPM version](https://img.shields.io/npm/v/wordpos.svg)](https://www.npmjs.com/package/wordpos)
 [![Build Status](https://img.shields.io/travis/moos/wordpos/master.svg)](https://travis-ci.org/moos/wordpos)
 
-wordpos is a set of *fast* part-of-speech (POS) utilities for Node.js using [natural's](http://github.com/NaturalNode/natural) WordNet module, offering **30x** performance over the natural. 
+wordpos is a set of *fast* part-of-speech (POS) utilities for Node.js using [natural's](http://github.com/NaturalNode/natural) WordNet module, offering **30x** performance over natural. 
 
 
 ## Quick usage
@@ -45,7 +45,7 @@ British
 
      npm install -g wordpos
 
-To run spec:
+To run spec: (or just: npm test)
 
     npm install -g jasmine-node
     cd spec
@@ -312,4 +312,4 @@ License
 
 (The MIT License)
 
-Copyright (c) 2012, 2014 mooster@42at.com
+Copyright (c) 2012, 2014, 2016 mooster@42at.com
