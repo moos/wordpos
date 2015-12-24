@@ -1,19 +1,11 @@
 wordpos
 =======
 
-wordpos is a set of part-of-speech (POS) utilities for Node.js using [natural's](http://github.com/NaturalNode/natural) WordNet module.
+[![NPM version](https://img.shields.io/npm/v/wordpos.svg)](https://www.npmjs.com/package/wordpos)
+[![Build Status](https://img.shields.io/travis/moos/wordpos/master.svg)](https://travis-ci.org/moos/wordpos)
 
+wordpos is a set of *fast* part-of-speech (POS) utilities for Node.js using [natural's](http://github.com/NaturalNode/natural) WordNet module, offering **30x** performance over the natural. 
 
-## Installation
-
-     npm install -g wordpos
-
-To run spec:
-
-    npm install -g jasmine-node
-    cd spec
-    jasmine-node wordpos_spec.js --verbose
-    jasmine-node validate_spec.js --verbose
 
 ## Quick usage
 
@@ -33,7 +25,7 @@ wordpos.isAdjective('awesome', function(result){
 // true 'awesome'
 ```
 
-Command-line:
+Command-line: (see [CLI](bin))
 ```bash
 $ wordpos def git
 git
@@ -48,6 +40,17 @@ cowardly
 little
 British
 ```
+
+## Installation
+
+     npm install -g wordpos
+
+To run spec:
+
+    npm install -g jasmine-node
+    cd spec
+    jasmine-node wordpos_spec.js --verbose
+    jasmine-node validate_spec.js --verbose
 
 ### Options
 
@@ -175,9 +178,8 @@ wordpos.lookupAdjective('awesome', console.log);
     synonyms: [ 'amazing', 'awe-inspiring', 'awesome', 'awful', 'awing' ],
     lexId: '0',
     ptrs: [],
-    gloss: 'inspiring awe or admiration or wonder; "New York is an amazing city"; "the Grand Canyon is an awe-inspiring
-sight"; "the awesome complexity of the universe"; "this sea, whose gently awful stirrings seem to speak of some hidden s
-oul beneath"- Melville; "Westminster Hall\'s awing majesty, so vast, so high, so silent"  ' } ], 'awesome'
+    gloss: 'inspiring awe or admiration or wonder; <snip> awing majesty, so vast, so high, so silent"  ' 
+} ], 'awesome'
 ```
 In this case only one lookup was found.  But there could be several.
 
@@ -230,10 +232,10 @@ Returns tokenized array of words in `text`, less duplicates and stopwords. This 
 
 
 #### WordPOS.WNdb 
-Access to the [WNdb](https://github.com/moos/WNdb) object containing the dictionary & index files.
+Access to the [wordnet-db](https://github.com/moos/wordnet-db) object containing the dictionary & index files.
 
 #### WordPOS.natural
-Access to underlying [natural](http://github.com/NaturalNode/natural) module. For example, WordPOS.natural.stopwords is the list of stopwords.
+Access to underlying [natural](https://github.com/NaturalNode/natural) module. For example, WordPOS.natural.stopwords is the list of stopwords.
 
 
 ## Fast Index
@@ -279,6 +281,9 @@ done in 1375 msecs
 
 ## Changes
 
+0.1.16 
+ - Changed dependency to wordnet-db (renamed from WNdb)
+ 
 0.1.15
 - Added `syn` (synonym) and `exp` (example) CLI commands.
 - Fixed `rand` CLI command when no start word given.

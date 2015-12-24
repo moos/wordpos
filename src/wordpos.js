@@ -15,7 +15,7 @@ var _ = require('underscore')._,
   WordNet = natural.WordNet,
   tokenizer = new natural.WordTokenizer(),
   natural_stopwords = makeStopwordString(natural.stopwords),
-  WNdb = require('WNdb'),
+  WNdb = require('wordnet-db'),
   fastIndex = null;
 
 try {
