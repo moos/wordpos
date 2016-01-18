@@ -98,7 +98,7 @@ program.command('stopwords')
   .action(function(){
     cmd = _.last(arguments)._name;
     rawCmd = rawCmd || cmd;
-    var stopwords = WordPos.natural.stopwords;
+    var stopwords = WordPos.stopwords;
 
     if (program.json)
       output(stopwords);
@@ -184,7 +184,6 @@ function run(data) {
   _(fns).each(function(fn){
     var method = cmd + fn + plural,
       cb = _.bind(collect, null, fn);
-
     if (cmd == 'get') {
       wordpos[method](words, cb);
     } else if (cmd == 'rand') {
@@ -194,7 +193,7 @@ function run(data) {
       });
     } else {
       words.forEach(function(word){
-        wordpos  [method](word, cb);
+        wordpos[method](word, cb);
       });
     }
   });

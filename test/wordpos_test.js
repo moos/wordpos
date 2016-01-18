@@ -1,19 +1,31 @@
 /**
  * wordpos_spec.js
  *
- * spec file for main wordpos functionality
+ *     test file for main wordpos functionality
  *
  * Usage:
- *   npm install jasmine-node -g
- *   jasmine-node wordpos_spec.js --verbose
+ *   npm install mocha -g
+ *   mocha wordpos_spec.js --verbose
  *
- * Copyright (c) 2012 mooster@42at.com
+ *   or
+ *
+ *   npm test
+ *
+ * Copyright (c) 2012-2016 mooster@42at.com
  * https://github.com/moos/wordpos
  *
  * Released under MIT license
  */
-var WordPOS = require('../src/wordpos'),
-  wordpos = new WordPOS();
+
+//import {describe, it} from 'mocha/lib/mocha.js';
+
+var
+  chai = require('chai'),
+  assert = chai.assert,
+  WordPOS = require('../src/wordpos'),
+  wordpos = new WordPOS({profile: false});
+
+chai.config.showDiff = true;
 
 var str = "The angry bear chased the frightened little squirrel",
   expected = {
@@ -21,207 +33,236 @@ var str = "The angry bear chased the frightened little squirrel",
     verbs: [ 'bear' ],
     adjectives: [ 'little', 'angry', 'frightened' ],
     adverbs: [ 'little' ],
-    rest: [ 'the' ]
+    rest: [ 'The' ]
   },
   garble = 'garblegarble';	// expect not to find word
 
 
-function noop(){}
 
-
-describe('getX()...', function() {
-
-  beforeEach(function() {
-    this.addMatchers({
-    // unordered (multiset) comparison -- NOTE: doesn't handle deep!
-    toEqualUnordered: function(expected) {
-      var mismatchKeys=[],
-        mismatchValues=[],
-        result = this.env.compareObjects_(this.actual, expected, mismatchKeys, mismatchValues);
-        return result || (mismatchKeys.length == 0 && mismatchValues.length > 0);
-      }
+describe('lookup', function() {
+  it('with callback', function (done) {
+    wordpos.lookup('hegemony', function (result) {
+      assert.equal(result.length, 1);
+      assert.equal(result[0].pos, 'n');
+      assert.equal(result[0].lemma, 'hegemony');
+      assert.equal(result[0].synonyms.length, 1);
+      done();
     });
   });
 
+  it('with Promise', function (done) {
+    wordpos.lookup('hegemony').then(function (result) {
+      assert.equal(result.length, 1);
+      assert.equal(result[0].pos, 'n');
+      assert.equal(result[0].lemma, 'hegemony');
+      assert.equal(result[0].synonyms.length, 1);
+      done();
+    });
+  });
+});
+
+
+describe('options passed to constructor', function() {
+  var wp,
+    origProfile = WordPOS.defaults.profile;
+
+  it('should override default option', function(){
+    wp = new WordPOS({profile:123});
+    assert.equal(wp.options.profile, 123);
+    assert.equal(WordPOS.defaults.profile, origProfile);
+  });
+
+  it('should not erase default option', function(){
+    wp = new WordPOS({aaa:123});
+    assert.equal(wp.options.aaa, 123);
+    assert.equal(wp.options.profile, WordPOS.defaults.profile);
+  });
+});
+
+
+describe('getX()...', function() {
   it('should get all POS', function(done) {
     wordpos.getPOS(str, function(result) {
-      expect(result.nouns).toEqualUnordered(expected.nouns);
-      expect(result.verbs).toEqualUnordered(expected.verbs);
-      expect(result.adjectives).toEqualUnordered(expected.adjectives);
-      expect(result.adverbs).toEqualUnordered(expected.adverbs);
-      expect(result.rest).toEqualUnordered(expected.rest);
+      assert.sameMembers(result.nouns, expected.nouns);
+      assert.sameMembers(result.verbs, expected.verbs);
+      assert.sameMembers(result.adjectives, expected.adjectives);
+      assert.sameMembers(result.adverbs, expected.adverbs);
+      assert.sameMembers(result.rest, expected.rest);
       done();
     });
   });
 
   it('should get nouns', function(done) {
     wordpos.getNouns(str, function(result) {
-      expect(result).toEqualUnordered(expected.nouns);
+      assert.sameMembers(result, expected.nouns);
       done();
     });
   });
 
   it('should get verbs', function(done) {
     wordpos.getVerbs(str, function(result) {
-      expect(result).toEqualUnordered(expected.verbs);
+      assert.sameMembers(result, expected.verbs);
       done();
     });
   });
 
   it('should get adjectives', function(done) {
     wordpos.getAdjectives(str, function(result) {
-      expect(result).toEqualUnordered(expected.adjectives);
+      assert.sameMembers(result, expected.adjectives);
       done();
     });
   });
 
   it('should get adverbs', function(done) {
     wordpos.getAdverbs(str, function(result) {
-      expect(result).toEqualUnordered(expected.adverbs);
+      assert.sameMembers(result, expected.adverbs);
       done();
     });
   });
 });
 
+
 describe('isX()...', function() {
   it('should check if noun', function(done) {
     wordpos.isNoun(expected.nouns[0], function(result) {
-      expect(result).toBeTruthy();
+      assert.ok(result);
       done();
     });
   });
   it('should check if verb', function(done) {
     wordpos.isVerb(expected.verbs[0], function(result) {
-      expect(result).toBeTruthy();
+      assert.ok(result);
       done();
     });
   });
   it('should check if adjective', function(done) {
     wordpos.isAdjective(expected.adjectives[0], function(result) {
-      expect(result).toBeTruthy();
+      assert.ok(result);
       done();
     });
   });
   it('should check if adverb', function(done) {
     wordpos.isAdverb(expected.adverbs[0], function(result) {
-      expect(result).toBeTruthy();
+      assert.ok(result);
       done();
     });
   });
 });
+
 
 describe('!isX()...', function() {
   it('should check if !noun', function(done) {
     wordpos.isNoun(garble, function(result) {
-      expect(result).not.toBeTruthy();
+      assert.notOk(result);
       done();
     });
   });
+
   it('should check if !verb', function(done) {
     wordpos.isVerb(garble, function(result) {
-      expect(result).not.toBeTruthy();
+      assert.notOk(result);
       done();
     });
   });
+
   it('should check if !adjective', function(done) {
     wordpos.isAdjective(garble, function(result) {
-      expect(result).not.toBeTruthy();
+      assert.notOk(result);
       done();
     });
   });
+
   it('should check if !adverb', function(done) {
     wordpos.isAdverb(garble, function(result) {
-      expect(result).not.toBeTruthy();
+      assert.notOk(result);
       done();
     });
   });
 });
+
 
 describe('lookupX()...', function() {
   it('should lookup noun', function(done) {
     wordpos.lookupNoun('squirrel', function(result) {
-      expect(result[0].pos).toBe('n');
-      expect(result[0].lemma).toBe('squirrel');
+      assert.equal(result.length, 2);
+      assert.equal(result[0].pos, 'n');
+      assert.equal(result[0].lemma, 'squirrel');
       done();
     });
   });
+
   it('should lookup verb', function(done) {
     wordpos.lookupVerb('bear', function(result) {
-      expect(result[0].pos).toBe('v');
-      expect(result[0].lemma).toBe('have_a_bun_in_the_oven');
+      assert.equal(result.length, 13);
+      assert.equal(result[0].pos, 'v');
+      assert.equal(result[0].lemma, 'bear');
       done();
     });
   });
+
   it('should lookup adjective', function(done) {
     wordpos.lookupAdjective('angry', function(result) {
-      expect(result[0].pos).toBe('s');
-      expect(result[0].lemma).toBe('angry');
+      assert.equal(result.length, 3);
+      assert.equal(result[0].pos, 'a');
+      assert.equal(result[0].lemma, 'angry');
       done();
     });
   });
+
   it('should lookup adverb', function(done) {
     wordpos.lookupAdverb('little', function(result) {
-      expect(result[0].pos).toBe('r');
-      expect(result[0].lemma).toBe('little');
+      assert.equal(result.length, 1);
+      assert.equal(result[0].pos, 'r');
+      assert.equal(result[0].lemma, 'little');
       done();
     });
   });
 });
 
-describe('options passed to constructor', function() {
-    var wp, origProfile = WordPOS.defaults.profile;
-
-    it('should override default option', function(){
-      wp = new WordPOS({profile:123});
-      expect(wp.options.profile).toEqual(123);
-      expect(WordPOS.defaults.profile).toEqual(origProfile);
-    });
-
-    it('should not erase default option', function(){
-      wp = new WordPOS({aaa:123});
-      expect(wp.options.aaa).toEqual(123);
-      expect(wp.options.profile).toEqual(WordPOS.defaults.profile);
-    });
-});
 
 describe('profile option', function() {
   var wp = new WordPOS({profile : true});
 
   it('should return time argument for isX()', function(done){
     wp.isNoun(garble, function(result, word, time) {
-      expect(word).toEqual(garble);
-      expect(time).toBeDefined();
+      assert.equal(word, garble);
+      assert.isDefined(time);
       done();
     });
   });
 
   it('should return time argument for getX()', function(done){
     wp.getNouns(garble, function(result, time) {
-      expect(time).toBeDefined();
+      assert.isDefined(time);
       done();
     });
   });
 
   it('should return time argument for lookupX()', function(done){
     wp.isNoun(garble, function(result, time) {
-      expect(time).toBeDefined();
+      assert.isDefined(time);
       done();
     });
   });
 
-  it('should disable stopword filtering', function(){
+  it('should disable stopword filtering', function(done){
     var wp = new WordPOS({stopwords : false}),
       strWithStopwords = 'about after all';  // 3 adjective stopwords
-    expect(wp.getAdjectives(strWithStopwords, noop)).toBe(3);
+    wp.getAdjectives(strWithStopwords, function(result){
+      assert.equal(result.length, 3);
+      done();
+    });
   });
 
-  it('should use custom stopwords', function(){
+  it('should use custom stopwords', function(done){
     var wp = new WordPOS({stopwords : ['all']}),
       strWithStopwords = 'about after all';  // 3 adjective stopwords
     // 'all' should be filtered
-    expect(wp.getAdjectives(strWithStopwords, noop)).toBe(2);
+    wp.getAdjectives(strWithStopwords, function(result){
+      assert.equal(result.length, 2);
+      done();
+    });
   });
-
 });
 
 
@@ -232,11 +273,11 @@ describe('nested callbacks on same index key', function() {
 
   it('should call inner callback', function(done){
     wp.getPOS(word1, function(result) {
-      expect(result.nouns[0]).toEqual(word1);
+      assert.equal(result.nouns[0], word1);
 
       // inner call on word2
       wp.getPOS(word2, function(result) {
-        expect(result.nouns[0]).toEqual(word2);
+        assert.equal(result.nouns[0], word2);
         done();
       });
     });
@@ -246,54 +287,61 @@ describe('nested callbacks on same index key', function() {
 
 describe('rand()...', function() {
   it('should get random word', function(done) {
-    wordpos.randNoun(function(result) {
-      expect(result).toBeTruthy();
+    wordpos.rand(function(result) {
+      assert.equal(result.length, 1);
       done();
     });
   });
+
   it('should get N random words', function(done) {
     wordpos.rand({count: 3}, function(result) {
-      expect(result.length).toEqual(3);
+      assert.equal(result.length, 3);
       done();
     });
   });
+
   it('should get random word starting with', function(done) {
     wordpos.rand({startsWith: 'foo'}, function(result, startsWith) {
-      expect(result[0].indexOf('foo')).toEqual(0);
-      expect(startsWith).toEqual('foo');
+      assert.equal(result[0].indexOf('foo'), 0);
+      assert.equal(startsWith, 'foo');
       done();
     });
   });
-  it('should get nothing starting with not fount', function(done) {
+
+  it('should get nothing starting with not found', function(done) {
     wordpos.rand({startsWith: 'zzzz'}, function(result) {
-      expect(result.length).toEqual(0);
+      assert.equal(result.length, 0);
       done();
     });
   });
 });
 
+
 describe('randX()...', function() {
   it('should get random noun', function(done) {
     wordpos.randNoun(function(result) {
-      expect(result.length).toEqual(1);
+      assert.equal(result.length, 1);
       done();
     });
   });
+
   it('should get random verb', function(done) {
     wordpos.randVerb(function(result) {
-      expect(result.length).toEqual(1);
+      assert.equal(result.length, 1);
       done();
     });
   });
+
   it('should get random adjective', function(done) {
     wordpos.randAdjective(function(result) {
-      expect(result.length).toEqual(1);
+      assert.equal(result.length, 1);
       done();
     });
   });
+
   it('should get random adverb', function(done) {
     wordpos.randAdverb(function(result) {
-      expect(result.length).toEqual(1);
+      assert.equal(result.length, 1);
       done();
     });
   });
@@ -301,9 +349,43 @@ describe('randX()...', function() {
   // not found
   it('should NOT get random noun starting with', function(done) {
     wordpos.randNoun({startsWith: 'zzzz'},function(result, startsWith) {
-      expect(result.length).toEqual(0);
+      assert.equal(result.length, 0);
       done();
     });
   });
+});
 
+
+
+describe('Promise pattern', function() {
+
+  it('lookup()', function () {
+    return wordpos.lookup('hegemony').then(function (result) {
+      assert.equal(result.length, 1);
+    });
+  });
+
+  it('lookupX()', function () {
+    return wordpos.lookupNoun('hegemony').then(function (result) {
+      assert.equal(result.length, 1);
+    });
+  });
+
+  it('getPOS()', function () {
+    return wordpos.getPOS('hegemony').then(function (result) {
+      assert.equal(result.nouns.length, 1);
+    });
+  });
+
+  it('getX()', function () {
+    return wordpos.getVerbs('bear').then(function (result) {
+      assert.equal(result.length, 1);
+    });
+  });
+
+  it('isX()', function () {
+    return wordpos.isAdjective('little').then(function (result) {
+      assert.equal(result, true);
+    });
+  });
 });

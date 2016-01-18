@@ -4,8 +4,10 @@ wordpos
 [![NPM version](https://img.shields.io/npm/v/wordpos.svg)](https://www.npmjs.com/package/wordpos)
 [![Build Status](https://img.shields.io/travis/moos/wordpos/master.svg)](https://travis-ci.org/moos/wordpos)
 
-wordpos is a set of *fast* part-of-speech (POS) utilities for Node.js using [natural's](http://github.com/NaturalNode/natural) WordNet module, offering **30x** performance over natural. 
+wordpos is a set of *fast* part-of-speech (POS) utilities for Node.js using fast lookup in the WordNet database. 
 
+Version 1.x is a mojor update with no direct depedence on [natural's](http://github.com/NaturalNode/natural), with support for Promises, and roughly 5x speed improvement over previous version. 
+ 
 **CAUTION** The WordNet database [wordnet-db](https://github.com/moos/wordnet-db) comprises [155,287 words](http://wordnet.princeton.edu/wordnet/man/wnstats.7WN.html) (3.0 numbers) which uncompress to over **30 MB** of data in several *un*[browserify](https://github.com/substack/node-browserify)-able files.  It is *not* meant for the browser environment.
 
 
@@ -47,12 +49,10 @@ British
 
      npm install -g wordpos
 
-To run spec: (or just: npm test)
+To run test: (or just: npm test)
 
-    npm install -g jasmine-node
-    cd spec
-    jasmine-node wordpos_spec.js --verbose
-    jasmine-node validate_spec.js --verbose
+    npm install -g mocha
+    mocha test
 
 ### Options
 
@@ -62,11 +62,6 @@ WordPOS.defaults = {
    * enable profiling, time in msec returned as last argument in callback
    */
   profile: false,
-
-  /**
-   * use fast index if available
-   */
-  fastIndex: true,
 
   /**
    * if true, exclude standard stopwords.
@@ -86,7 +81,7 @@ To override, pass an options hash to the constructor. With the `profile` option,
 
 ## API
 
-Please note: all API are *async* since the underlying WordNet library is async. WordPOS is a subclass of natural's [WordNet class](https://github.com/NaturalNode/natural#wordnet) and inherits all its methods.
+Please note: all API are *async* since the underlying WordNet library is async.
 
 #### getPOS(text, callback)
 #### getNouns(text, callback)
@@ -99,22 +94,21 @@ Get part-of-speech from `text`.  `callback(results)` receives and array of words
 ```
 wordpos.getPOS(text, callback) -- callback receives a result object:
     {
-      nouns:[],       Array of text words that are nouns
-      verbs:[],       Array of text words that are verbs
-      adjectives:[],  Array of text words that are adjectives
-      adverbs:[],     Array of text words that are adverbs
-      rest:[]         Array of text words that are not in dict or could not be categorized as a POS
+      nouns:[],       Array of words that are nouns
+      verbs:[],       Array of words that are verbs
+      adjectives:[],  Array of words that are adjectives
+      adverbs:[],     Array of words that are adverbs
+      rest:[]         Array of words that are not in dict or could not be categorized as a POS
     }
     Note: a word may appear in multiple POS (eg, 'great' is both a noun and an adjective)
 ```
 
 If you're only interested in a certain POS (say, adjectives), using the particular getX() is faster
-than getPOS() which looks up the word in all index files. [stopwords](https://github.com/NaturalNode/natural/blob/master/lib/natural/util/stopwords.js)
-are stripped out from text before lookup.
+than getPOS() which looks up the word in all index files. [stopwords](https://github.com/moos/wordpos/lib/natural/util/stopwords.js)are stripped out from text before lookup.
 
-If `text` is an *array*, all words are looked-up -- no deduplication, stopword filter or tokenization is applied.
+If `text` is an *array*, all words are looked-up -- no deduplication, stopword filtering or tokenization is applied.
 
-getX() functions (immediately) return the *number* of parsed words that *will be* looked up (less duplicates and stopwords).
+getX() functions return a Promise. 
 
 Example:
 
@@ -141,7 +135,7 @@ would be considered nouns.
 #### isAdjective(word, callback)
 #### isAdverb(word, callback)
 
-Determine if `word` is a particular POS.  `callback(result, word)` receives true/false as first argument and the looked-up word as the second argument.
+Determine if `word` is a particular POS.  `callback(result, word)` receives true/false as first argument and the looked-up word as the second argument. The resolved Promise receives true/false.
 
 Examples:
 
@@ -159,13 +153,13 @@ wordpos.isAdverb('fishly', console.log);
 // false 'fishly'
 ```
 
+#### lookup(word, callback)
 #### lookupNoun(word, callback)
 #### lookupVerb(word, callback)
 #### lookupAdjective(word, callback)
 #### lookupAdverb(word, callback)
 
-These calls are similar to natural's [lookup()](https://github.com/NaturalNode/natural#wordnet) call, except they can be faster if you
-already know the POS of the word.  Signature of the callback is `callback(result, word)` where `result` is an *array* of lookup object(s). 
+Get complete definition object for `word`.  The lookupX() variants can be faster if you already know the POS of the word.  Signature of the callback is `callback(result, word)` where `result` is an *array* of lookup object(s). 
 
 Example:
 
@@ -183,14 +177,8 @@ wordpos.lookupAdjective('awesome', console.log);
     gloss: 'inspiring awe or admiration or wonder; <snip> awing majesty, so vast, so high, so silent"  ' 
 } ], 'awesome'
 ```
-In this case only one lookup was found.  But there could be several.
+In this case only one lookup was found, but there could be several.
 
-Or use WordNet's (slower) inherited method:
-
-```js
-wordpos.lookup('great', console.log);
-// ...
-```
 
 #### rand(options, callback)
 #### randNoun(options, callback)
@@ -223,11 +211,9 @@ wordpos.rand({starsWith: 'zzz'}, console.log)
 // [] 'zzz'
 ```
 
-**Note on performance**: random lookups could involve heavy disk reads.  It is better to use the `count` option to get words
-in batches.  This may benefit from the cached reads of similarly keyed entries as well as shared open/close of the index files.
+**Note on performance**: random lookups could involve heavy disk reads.  It is better to use the `count` option to get words in batches.  This may benefit from the cached reads of similarly keyed entries as well as shared open/close of the index files.
 
-Getting random POS (`randNoun()`, etc.) is generally faster than `rand()`, which may look at multiple POS files until `count` requirement
-is met.
+Getting random POS (`randNoun()`, etc.) is generally faster than `rand()`, which may look at multiple POS files until `count` requirement is met.
 
 #### parse(text) 
 Returns tokenized array of words in `text`, less duplicates and stopwords. This method is called on all getX() calls internally.
@@ -236,15 +222,21 @@ Returns tokenized array of words in `text`, less duplicates and stopwords. This 
 #### WordPOS.WNdb 
 Access to the [wordnet-db](https://github.com/moos/wordnet-db) object containing the dictionary & index files.
 
-#### WordPOS.natural
-Access to underlying [natural](https://github.com/NaturalNode/natural) module. For example, WordPOS.natural.stopwords is the list of stopwords.
+#### WordPOS.stopwords
+Access the array of stopwords.
 
+
+## Promises
+
+TODO
 
 ## Fast Index
 
 Version 0.1.4 introduces `fastIndex` option.  This uses a secondary index on the index files and is much faster. It is on by default.  Secondary index files are generated at install time and placed in the same directory as WNdb.path.  Details can be found in tools/stat.js.
 
 Fast index improves performance **30x** over Natural's native methods. See blog article [Optimizing WordPos](http://blog.42at.com/optimizing-wordpos).
+
+As of version 1.0, the fast index option is always on and cannot be turned off.
 
 ## Command-line: CLI
 
@@ -281,7 +273,45 @@ done in 1375 msecs
 
 220 words are looked-up (less stopwords and duplicates) on a win7/64-bit/dual-core/3GHz.  getPOS() is slowest as it searches through all four index files.
 
+### Version 1.0 Benchmark
+
+Re-run v0.1.16:
+```
+  getPOS : 11 ops/s { iterations: 1, elapsed: 90 }
+  getNouns : 21 ops/s { iterations: 1, elapsed: 47 }
+  getVerbs : 53 ops/s { iterations: 1, elapsed: 19 }
+  getAdjectives : 29 ops/s { iterations: 1, elapsed: 34 }
+  getAdverbs : 83 ops/s { iterations: 1, elapsed: 12 }
+  lookup : 1 ops/s { iterations: 1, elapsed: 720 }
+  lookupNoun : 1 ops/s { iterations: 1, elapsed: 676 }
+
+looked up 220 words
+done in 2459 msecs
+```
+
+V1.0:
+```
+  getPOS : 14 ops/s { iterations: 1, elapsed: 73 }
+  getNouns : 26 ops/s { iterations: 1, elapsed: 38 }
+  getVerbs : 42 ops/s { iterations: 1, elapsed: 24 }
+  getAdjectives : 24 ops/s { iterations: 1, elapsed: 42 }
+  getAdverbs : 26 ops/s { iterations: 1, elapsed: 38 }
+  lookup : 6 ops/s { iterations: 1, elapsed: 159 }
+  lookupNoun : 13 ops/s { iterations: 1, elapsed: 77 }
+
+looked up 221 words
+done in 1274 msecs
+```
+That's roughly **2x** better across the board.  Functions that read the data files see much improved performance: `lookup` about **5x** and `lookupNoun` over **8x**. 
+
+
 ## Changes
+
+1.0.1
+ - Removed direct dependency on Natural.  Certain modules are included in /lib.
+ - Add support for Promises.
+ - Improved data file reads for up to **5x** performance increase.
+ - Tests are now mocha-based with assert interface.
 
 0.1.16 
  - Changed dependency to wordnet-db (renamed from WNdb)

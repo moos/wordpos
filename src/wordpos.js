@@ -1,9 +1,9 @@
 /**
 * wordpos.js
 *
-*    Node.js part-of-speech utilities using natural's WordNet module.
+*    Node.js part-of-speech utilities using WordNet database.
 *
-* Copyright (c) 2012-2014 mooster@42at.com
+* Copyright (c) 2012-2016 mooster@42at.com
 * https://github.com/moos/wordpos
 *
 * Released under MIT license
@@ -11,16 +11,12 @@
 
 var _ = require('underscore')._,
   util = require('util'),
-  natural = require('natural'),
-  WordNet = natural.WordNet,
-  tokenizer = new natural.WordTokenizer(),
-  natural_stopwords = makeStopwordString(natural.stopwords),
+  stopwords = require('../lib/natural/util/stopwords').words,
+  stopwordsStr = makeStopwordString(stopwords),
   WNdb = require('wordnet-db'),
-  fastIndex = null;
+  DataFile = require('./dataFile'),
+  IndexFile = require('./indexFile');
 
-try {
-  fastIndex = require('./fastIndex');
-} catch(e) {}
 
 function normalize(word) {
   return word.toLowerCase().replace(/\s+/g, '_');
@@ -34,138 +30,177 @@ function isStopword(stopwords, word) {
   return stopwords.indexOf(' '+word+' ') >= 0;
 }
 
-function prepText(text) {
-  if (_.isArray(text)) return text;
-  var deduped = _.uniq(tokenizer.tokenize(text));
-  if (!this.options.stopwords) return deduped;
-  return _.reject(deduped, _.bind(isStopword, null,
-      _.isString(this.options.stopwords) ? this.options.stopwords : natural_stopwords
-      ));
+function tokenizer(str) {
+  return str.split(/\W+/); //_.without(results,'',' ')
 }
 
+function prepText(text) {
+  if (_.isArray(text)) return text;
+  var deduped = _.uniq(tokenizer(text));
+  if (!this.options.stopwords) return deduped;
+  return _.reject(deduped, _.bind(isStopword, null,
+    _.isString(this.options.stopwords) ? this.options.stopwords : stopwordsStr
+  ));
+}
+
+/**
+ * factory for main lookup function
+ *
+ * @param pos {string} - n/v/a/r
+ * @returns {Function} - lookup function bound to POS
+ */
 function lookup(pos) {
   return function(word, callback) {
     var profile = this.options.profile,
       start = profile && new Date(),
+      files = this.getFilesFor(pos),
       args = [];
+
     word = normalize(word);
-    this.lookupFromFiles([
-        {index: this.getIndexFile(pos), data: this.getDataFile(pos)}
-        ], [], word, function(results){
+
+    // lookup index
+    return files.index.lookup(word)
+      .then(function(result) {
+        if (result) {
+          // lookup data
+          return files.data.lookup(result).then(done);
+        } else {
+          // not found in index
+          return done([]);
+        }
+      })
+      .catch(done);
+
+    function done(results) {
+      if (results instanceof Error) {
+        args.push([], word);
+      } else {
         args.push(results, word);
-        profile && args.push(new Date() - start);
-        callback.apply(null, args);
-    });
+      }
+      //console.log(3333, args)
+      profile && args.push(new Date() - start);
+      nextTick(callback, args);
+      return results;
+    }
   };
 }
 
+/**
+ * isX() factory function
+ *
+ * @param pos {string} - n/v/a/r
+ * @returns {Function}
+ */
 function is(pos){
   return function(word, callback, _noprofile) {
     // disable profiling when isX() used internally
     var profile = this.options.profile && !_noprofile,
       start = profile && new Date(),
       args = [],
-      index = this.getIndexFile(pos);
+      index = this.getFilesFor(pos).index;
     word = normalize(word);
-    index.lookup(word, function(record) {
-      args.push(!!record, word);
-      profile && args.push(new Date() - start);
-      callback.apply(null, args);
-    });
+
+    return index
+      .lookup(word)
+      .then(function(record) {
+        var result = !!record;
+        args.push(result, word);
+        profile && args.push(new Date() - start);
+        nextTick(callback, args);
+        return result;
+      });
   };
 }
 
 
-function rand(pos){
-  return function(opts, callback, _noprofile) {
-    // disable profiling when isX() used internally
+/**
+ * getX() factory function
+ *
+ * @param isFn {function} - an isX() function
+ * @returns {Function}
+ */
+function get(isFn) {
+  return function(text, callback, _noprofile) {
     var profile = this.options.profile && !_noprofile,
       start = profile && new Date(),
-      args = [],
-      index = this.getIndexFile(pos),
-      startsWith = opts && opts.startsWith || '',
-      count = opts && opts.count || 1;
+      words = this.parse(text),
+      results = [],
+      self = this;
 
-    if (typeof opts === 'function') {
-      callback = opts;
+    //if (!n) return (process.nextTick(done),0);
+    return Promise
+      .all(words.map(exec))
+      .then(done);
+
+    function exec(word) {
+      return self[isFn]
+        .call(self, word, null, /*_noprofile*/ true)
+        .then(function collect(result) {
+          result && results.push(word);
+        });
     }
 
-    index.rand(startsWith, count, function(record) {
-      args.push(record, startsWith);
+    function done(){
+      var args = [results];
       profile && args.push(new Date() - start);
-      callback.apply(null, args);
-    });
+      nextTick(callback, args);
+      return results;
+    }
   };
 }
 
-
-function get(isFn) {
-  return function(text, callback) {
-    var profile = this.options.profile,
-      start = profile && new Date(),
-      words = this.parse(text),
-      n = words.length,
-      i = 0,
-      self = this,
-      results = [],
-      args = [results],
-      done = function(){
-        profile && (args[1] = new Date() - start);
-        callback.apply(null, args)
-      };
-    if (!n) return (process.nextTick(done),0);
-    words.forEach(function(word,j){
-      self[isFn](word, function(yes){
-        yes && results.push(word);
-        (++i==n) && done();
-      }, /*_noprofile*/ true);
+function nextTick(fn, args) {
+  if (fn) {
+    setImmediate(function(){
+      fn.apply(null, args);
     });
-    return n;
-  };
+  }
 }
+
 
 /**
  * @class WordPOS
+ * @param options {object} -- @see WordPOS.defaults
  * @constructor
  */
 var WordPOS = function(options) {
-  if (arguments.length == 0 || _.isObject(options)) {
-    WordPOS.super_.call(this, WNdb.path);
-  } else {
-    WordPOS.super_.apply(this, arguments);
-  }
-  this.options = _.defaults({}, _.isObject(options) && options || {}, WordPOS.defaults);
+  var dictPath;
 
-  if (this.options.fastIndex && fastIndex) {
-    // override find
-    this.nounIndex.find = fastIndex.find(this.nounIndex);
-    this.verbIndex.find = fastIndex.find(this.verbIndex);
-    this.adjIndex.find = fastIndex.find(this.adjIndex);
-    this.advIndex.find = fastIndex.find(this.advIndex);
+  this.options = _.defaults({}, _.isObject(options) && options || {}, {
+    dictPath: WNdb.path
+  }, WordPOS.defaults);
 
-    // rand
-    this.nounIndex.rand = fastIndex.rand(this.nounIndex);
-    this.verbIndex.rand = fastIndex.rand(this.verbIndex);
-    this.adjIndex.rand = fastIndex.rand(this.adjIndex);
-    this.advIndex.rand = fastIndex.rand(this.advIndex);
-  }
+  dictPath = this.options.dictPath;
+
+  this.nounIndex = new IndexFile(dictPath, 'noun');
+  this.verbIndex = new IndexFile(dictPath, 'verb');
+  this.adjIndex = new IndexFile(dictPath, 'adj');
+  this.advIndex = new IndexFile(dictPath, 'adv');
+
+  this.nounData = new DataFile(dictPath, 'noun');
+  this.verbData = new DataFile(dictPath, 'verb');
+  this.adjData = new DataFile(dictPath, 'adj');
+  this.advData = new DataFile(dictPath, 'adv');
+
+  // define randX() functions
+  require('./rand').init(this);
 
   if (_.isArray(this.options.stopwords)) {
     this.options.stopwords = makeStopwordString(this.options.stopwords);
   }
 };
-util.inherits(WordPOS, WordNet);
+
 
 WordPOS.defaults = {
+  /**
+   * path to WordNet data (override only if not using wordnet-db)
+   */
+  dictPath: '',
+
   /**
    * enable profiling, time in msec returned as second argument in callback
    */
   profile: false,
-
-  /**
-   * use fast index if available
-   */
-  fastIndex: true,
 
   /**
    * if true, exclude standard stopwords.
@@ -177,14 +212,123 @@ WordPOS.defaults = {
 
 var wordposProto = WordPOS.prototype;
 
-// fast POS lookups (only look in specified file)
 /**
- * lookupX()
- * Lookup word definition if already know POS
+ * lookup a word in all indexes
  *
- * @param string word - word to lookup in given POS
- * @param function callback receives array of definition objects or empty
- * @return none
+ * @param word {string} - search word
+ * @param callback {Functino} (optional) - callback with (results, word) signature
+ * @returns {Promise}
+ */
+wordposProto.lookup = function(word, callback) {
+  var self = this,
+    results = [],
+    profile = this.options.profile,
+    start = profile && new Date(),
+    methods = ['lookupAdverb', 'lookupAdjective', 'lookupVerb', 'lookupNoun'];
+
+  return Promise
+    .all(methods.map(exec))
+    .then(done)
+    .catch(error);
+
+  function exec(method) {
+    return self[ method ]
+      .call(self, word)
+      .then(function collect(result){
+        results = results.concat(result);
+      });
+  }
+
+  function done() {
+    var args = [results, word];
+    profile && args.push(new Date() - start);
+    nextTick(callback, args);
+    return results;
+  }
+
+  function error(err) {
+    nextTick(callback, [[], word]);
+    throw err;
+  }
+};
+
+
+/**
+ * getPOS() - Find all POS for all words in given string
+ *
+ * @param text {string} - words to lookup for POS
+ * @param callback {function} (optional) - receives object with words broken into POS or 'rest', ie,
+ * 	    Object: {nouns:[], verbs:[], adjectives:[], adverbs:[], rest:[]}
+ * @return Promise - resolve function receives data object
+ */
+wordposProto.getPOS = function(text, callback) {
+  var self = this,
+    data = {nouns:[], verbs:[], adjectives:[], adverbs:[], rest:[]},
+    profile = this.options.profile,
+    start = profile && new Date(),
+    words = this.parse(text),
+    methods = ['getAdverbs', 'getAdjectives', 'getVerbs', 'getNouns'];
+
+  return Promise
+    .all(methods.map(exec))
+    .then(done)
+    .catch(error);
+
+  function exec(method) {
+    return self[ method ]
+      .call(self, text, null, true)
+      .then(function collect(results) {
+        // getAdjectives --> adjectives
+        var pos = method.replace('get','').toLowerCase();
+        data[ pos ] =  results;
+      });
+  }
+
+  function done() {
+    var matches = _(data).chain()
+      .values()
+      .flatten()
+      .uniq()
+      .value(),
+      args = [data];
+
+    data.rest =  _(words).difference(matches);
+
+    profile && args.push(new Date() - start);
+    nextTick(callback, args);
+    return data;
+  }
+
+  function error(err) {
+    nextTick(callback, []);
+    throw err;
+  }
+};
+
+/**
+ * get index and data files for given pos
+ *
+ * @param pos {string} - n/v/a/r
+ * @returns {object} - keys {index, data}
+ */
+wordposProto.getFilesFor = function (pos) {
+  switch(pos) {
+    case 'n':
+      return {index: this.nounIndex, data: this.nounData};
+    case 'v':
+      return {index: this.verbIndex, data: this.verbData};
+    case 'a': case 's':
+    return {index: this.adjIndex, data: this.adjData};
+    case 'r':
+      return {index: this.advIndex, data: this.advData};
+  }
+  return {};
+};
+
+
+/**
+ * lookupX() - Lookup word definition if already know POS
+ * @see lookup
  */
 wordposProto.lookupAdjective = lookup('a');
 wordposProto.lookupAdverb = lookup('r');
@@ -192,12 +336,8 @@ wordposProto.lookupNoun = lookup('n');
 wordposProto.lookupVerb = lookup('v');
 
 /**
- * isX()
- * Test if word is given POS
- *
- * @param string word - word to test for given POS
- * @param function Callback receives true or false if word is given POS
- * @return none
+ * isX() - Test if word is given POS
+ * @see is
  */
 wordposProto.isAdjective = is('a');
 wordposProto.isAdverb = is('r');
@@ -205,155 +345,24 @@ wordposProto.isNoun = is('n');
 wordposProto.isVerb = is('v');
 
 /**
- * randX()
- */
-wordposProto.randAdjective = rand('a');
-wordposProto.randAdverb = rand('r');
-wordposProto.randNoun = rand('n');
-wordposProto.randVerb = rand('v');
-
-
-/**
- * getX()
- * Find all words in string that are given POS
- *
- * @param string Text Words to search
- * @param function callback Receives array of words that are given POS
- * @return none
+ * getX() - Find all words in string that are given POS
+ * @see get
  */
 wordposProto.getAdjectives = get('isAdjective');
 wordposProto.getAdverbs = get('isAdverb');
 wordposProto.getNouns = get('isNoun');
 wordposProto.getVerbs = get('isVerb');
 
-wordposProto.parse = prepText;
-
-if (!wordposProto.getIndexFile) {
-  wordposProto.getIndexFile = function getIndexFile(pos) {
-    switch(pos) {
-      case 'n':
-        return this.nounIndex;
-      case 'v':
-        return this.verbIndex;
-      case 'a': case 's':
-        return this.adjIndex;
-      case 'r':
-        return this.advIndex;
-    }
-};
-}
-
 /**
- * getPOS()
- * Find all POS for all words in given string
+ * parse - get deduped, less stopwords
  *
- * @param {string} text - words to lookup for POS
- * @param {function} callback - receives object with words broken into POS or 'rest', ie,
- * 	    Object: {nouns:[], verbs:[], adjectives:[], adverbs:[], rest:[]}
- * @return none
+ * @param text {string|array} - string of words to parse.  If array is given, it is left in tact.
+ * @returns {array}
  */
-wordposProto.getPOS = function(text, callback) {
-  var data = {nouns:[], verbs:[], adjectives:[], adverbs:[], rest:[]},
-    profile = this.options.profile,
-    start = profile && new Date(),
-    args = [data],
-    testFns = 'isNoun isVerb isAdjective isAdverb'.split(' '),
-    parts = 'nouns verbs adjectives adverbs'.split(' '),
-    words = this.parse(text),
-    nTests = testFns.length,
-    nWords = words.length,
-    self = this,
-    c = 0,
-    done = function(){
-      profile && (args[1] = new Date() - start);
-      callback.apply(null, args)
-    };
-
-  if (!nWords) return (process.nextTick(done),0);
-  words.forEach(lookup);
-
-  function lookup(word){
-    var any = false,
-      t=0;
-    testFns.forEach(lookupPOS);
-
-    function lookupPOS(isFn,i,list){
-      self[isFn](word, function(yes){
-        yes && data[parts[i]].push(word);
-        any |= yes;
-        donePOS();
-      });
-    }
-
-    function donePOS() {
-      if (++t == nTests) {
-        !any && data['rest'].push(word);
-        (++c == nWords) && done();
-      }
-    }
-  }
-  return nWords;
-};
-
-/**
- * rand()
- */
-wordposProto.rand = function(opts, callback) {
-  var
-    profile = this.options.profile,
-    start = profile && new Date(),
-    results = [],
-    startsWith = opts && opts.startsWith || '',
-    count = opts && opts.count || 1,
-    args = [null, startsWith],
-    parts = 'Noun Verb Adjective Adverb'.split(' '),
-    self = this,
-    done = function(){
-      profile && (args.push(new Date() - start));
-      args[0] = results;
-      callback.apply(null, args)
-    };
-
-  if (typeof opts === 'function') {
-    callback = opts;
-  } else {
-    opts = _.clone(opts);
-  }
-
-  // TODO -- or loop count times each time getting 1 from random part!!
-  // slower but more random.
-
-  // select at random a part to look at
-  var doParts = _.sample(parts, parts.length);
-  tryPart();
-
-  function tryPart(){
-    var rand = 'rand' + doParts.pop();
-    self[ rand ](opts, partCallback);
-  }
-
-  function partCallback(result){
-    if (result) {
-      results = _.uniq(results.concat(result));  // make sure it's unique!
-    }
-
-    //console.log(result);
-    if (results.length < count && doParts.length) {
-      // reduce count for next part -- NO! may get duplicates
-      // opts.count = count - results.length;
-      return tryPart();
-    }
-
-    // trim excess
-    if (results.length > count) {
-      results.length = count;
-    }
-    done();
-  }
-};
+wordposProto.parse = prepText;
 
 
 WordPOS.WNdb = WNdb;
-WordPOS.natural = natural;
+WordPOS.stopwords = stopwords;
 
 module.exports = WordPOS;

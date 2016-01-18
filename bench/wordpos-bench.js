@@ -5,9 +5,10 @@ var uubench = require('uubench'), // from: https://github.com/moos/uubench
   WordPOS = require('../src/wordpos'),
   wordpos = new WordPOS();
 
+
 suite = new uubench.Suite({
   type: 'fixed',
-  iterations: 10,
+  iterations: 1,
   sync: true,	// important!
 
   start: function(tests){
@@ -23,7 +24,7 @@ suite = new uubench.Suite({
   },
 
   done: function(time){
-    console.log('looked up %d words', nwords);
+    console.log('looked up %d words, %d found', nwords, found);
     console.log('done in %d msecs', time );
   },
 
@@ -34,20 +35,21 @@ suite = new uubench.Suite({
 
 
 function out(res){
-  return _(res).keys().map(function(k){ return k + ':' + res[k].length });
+  return _(res).keys().map(function(k){
+    return k + ':' + res[k].length
+  });
 }
 
 
-
-var	text1 = 'laksasdf',
-//  text128 = fs.readFileSync('text-128.txt', 'utf8'),
-  text512 = fs.readFileSync('text-512.txt', 'utf8'),
-  text, nwords,
+var
+  text = fs.readFileSync('text-512.txt', 'utf8'),
+  parsedText = wordpos.parse(text),
+  nwords = parsedText.length,
   pos;
 
 
 function getPOS(next){
-  nwords = wordpos.getPOS(text, function(res){
+  wordpos.getPOS(text, function(res){
     pos = res;
     next();
   });
@@ -81,20 +83,31 @@ function getAdverbs(next){
   });
 }
 
-suite.section('--1 word--', function(next){
-  text = text1;
-  next();
-});
-suite.bench('getPOS', getPOS);
-suite.bench('getNouns', getNouns);
-suite.bench('getVerbs', getVerbs);
-suite.bench('getAdjectives', getAdjectives);
-suite.bench('getAdverbs', getAdverbs);
 
+function lookup(next){
+  var count = nwords;
+  found = 0;
+  parsedText.forEach(function(word) {
+    wordpos.lookup(word, function (res) {
+      res.length && ++found;
+      if (--count === 0) next();
+    });
+  });
+}
+
+function lookupNoun(next){
+  var count = nwords;
+  found = 0;
+  parsedText.forEach(function(word) {
+    wordpos.lookupNoun(word, function (res) {
+      res.length && ++found;
+      if (--count === 0) next();
+    });
+  });
+}
 
 suite.section('--512 words--', function(next){
   suite.options.iterations = 1;
-  text = text512;
   next();
 });
 suite.bench('getPOS', getPOS);
@@ -102,6 +115,9 @@ suite.bench('getNouns', getNouns);
 suite.bench('getVerbs', getVerbs);
 suite.bench('getAdjectives', getAdjectives);
 suite.bench('getAdverbs', getAdverbs);
+suite.bench('lookup', lookup);
+suite.bench('lookupNoun', lookupNoun);
+
 
 
 suite.run();
