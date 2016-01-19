@@ -1,4 +1,4 @@
-/**
+/*!
 * wordpos.js
 *
 *    Node.js part-of-speech utilities using WordNet database.
@@ -149,11 +149,11 @@ function get(isFn) {
   };
 }
 
+// setImmediate executes callback AFTER promise handlers.
+// Without it, exceptions in callback may be caught by Promise.
 function nextTick(fn, args) {
   if (fn) {
-    setImmediate(function(){
-      fn.apply(null, args);
-    });
+    fn.apply(null, args);
   }
 }
 
@@ -216,7 +216,7 @@ var wordposProto = WordPOS.prototype;
  * lookup a word in all indexes
  *
  * @param word {string} - search word
- * @param callback {Functino} (optional) - callback with (results, word) signature
+ * @param callback {Function} (optional) - callback with (results, word) signature
  * @returns {Promise}
  */
 wordposProto.lookup = function(word, callback) {
@@ -362,7 +362,17 @@ wordposProto.getVerbs = get('isVerb');
 wordposProto.parse = prepText;
 
 
+/**
+ * access to WordNet DB
+ * @type {object}
+ */
 WordPOS.WNdb = WNdb;
+
+/**
+ * access to stopwords
+ * @type {Array}
+ */
 WordPOS.stopwords = stopwords;
+
 
 module.exports = WordPOS;

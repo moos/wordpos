@@ -36,10 +36,10 @@ function makeRandX(pos){
       callback = opts;
     }
 
-    index.rand(startsWith, count, function(record) {
+    return index.rand(startsWith, count, function (record) {
       args.push(record, startsWith);
       profile && args.push(new Date() - start);
-      callback.apply(null, args);
+      callback && callback.apply(null, args);
     });
   };
 }
@@ -50,6 +50,7 @@ function makeRandX(pos){
  * @param startsWith {string} - get random word(s) that start with this, or ''
  * @param num {number} - number of words to return
  * @param callback {function} - callback function, receives words array and startsWith
+ * @returns Promise
  */
 function rand(startsWith, num, callback){
   var self = this,
@@ -57,102 +58,115 @@ function rand(startsWith, num, callback){
     trie = this.fastIndex.trie,
     key, keys;
 
-  //console.log('-- ', startsWith, num, self.fastIndex.indexKeys.length);
-  if (startsWith){
-    key = startsWith.slice(0, KEY_LENGTH);
+  return new Promise(function(resolve, reject) {
 
-    /**
-     * if key is 'a' or 'ab' (<3 chars), search for ALL keys starting with that.
-     */
-    if (key.length < KEY_LENGTH) {
+    //console.log('-- ', startsWith, num, self.fastIndex.indexKeys.length);
+    if (startsWith) {
+      key = startsWith.slice(0, KEY_LENGTH);
 
-      // calc trie if haven't done so yet
-      if (!trie){
-        trie = new Trie();
-        trie.addStrings(self.fastIndex.indexKeys);
-        this.fastIndex.trie = trie;
-        //console.log(' +++ Trie calc ');
+      /**
+       * if key is 'a' or 'ab' (<3 chars), search for ALL keys starting with that.
+       */
+      if (key.length < KEY_LENGTH) {
+
+        // calc trie if haven't done so yet
+        if (!trie) {
+          trie = new Trie();
+          trie.addStrings(self.fastIndex.indexKeys);
+          self.fastIndex.trie = trie;
+          //console.log(' +++ Trie calc ');
+        }
+
+        try {
+          // trie throws if not found!!!!!
+          keys = trie.keysWithPrefix(startsWith);
+        } catch (e) {
+          keys = [];
+        }
+
+        // read all keys then select random word.
+        // May be large disk read!
+        key = keys[0];
+        nextKey = _.last(keys);
       }
 
-      try{
-        // trie throws if not found!!!!!
-        keys = trie.keysWithPrefix( startsWith );
-      } catch(e){
-        keys = [];
+      if (!key || !(key in self.fastIndex.offsets))  {
+        callback && callback([], startsWith);
+        resolve([]);
       }
 
-      // read all keys then select random word.
-      // May be large disk read!
-      key = keys[0];
-      nextKey = _.last(keys);
+    } else {
+      // no startWith given - random select among keys
+      keys = _.sample(self.fastIndex.indexKeys, num);
+
+      // if num > 1, run each key independently and collect results
+      if (num > 1) {
+        var results = [], ii = 0;
+        _(keys).each(function (startsWith) {
+          self.rand(startsWith, 1, function (result) {
+            results.push(result[0]);
+            if (++ii == num) {
+              callback && callback(results, '');
+              resolve(results);
+            }
+          });
+        });
+        return;
+      }
+      key = keys;
     }
 
-    if (!key || !(key in self.fastIndex.offsets)) return process.nextTick(function(){ callback([], startsWith) });
+    // prepare the piper
+    var args = [key, nextKey, self],
+      task = 'rand:' + key + nextKey,
+      context = [startsWith, num, callback]; // last arg MUST be callback
 
-  } else {
-    // no startWith given - random select among keys
-    keys = _.sample( this.fastIndex.indexKeys, num );
+    // pay the piper
+    self.piper(task, IndexFile.readIndexBetweenKeys, args, context, collector);
 
-    // if num > 1, run each key independently and collect results
-    if (num > 1){
-      var results = [], ii = 0;
-      _(keys).each(function(startsWith){
-        self.rand(startsWith, 1, function(result){
-          results.push(result[0]);
-          if (++ii == num) {
-            callback(results, '');
-          }
-        })
-      });
-      return;
-    }
-    key = keys;
-  }
-//  console.log(' using key', key, nextKey);
+    function collector(key, nextKey, index, startsWith, num, callback, buffer) {
+      var lines = buffer.toString().split('\n'),
+        matches = lines.map(function (line) {
+          return line.substring(0, line.indexOf(' '));
+        });
+      //console.log(' got lines for key ', key, lines.length);
 
-  // prepare the piper
-  var args = [key, nextKey, this],
-    task = 'rand:' + key + nextKey,
-    context = [startsWith, num, callback]; // last arg MUST be callback
+      // we got bunch of matches for key - now search within for startsWith
+      if (startsWith !== key) {
+        // binary search for startsWith within set of matches
+        var ind = _.sortedIndex(matches, startsWith);
+        if (ind >= lines.length || matches[ind].indexOf(startsWith) === -1) {
+          callback && callback([], startsWith);
+          resolve([]);
+          return;
+        }
 
-  // pay the piper
-  this.piper(task, IndexFile.readIndexBetweenKeys, args, context, collector);
-
-  function collector(key, nextKey, index, startsWith, num, callback, buffer){
-    var lines = buffer.toString().split('\n'),
-      matches = lines.map(function(line){
-        return line.substring(0,line.indexOf(' '));
-      });
-
-    //console.log(' got lines for key ', key, lines.length);
-
-    // we got bunch of matches for key - now search within for startsWith
-    if (startsWith !== key){
-
-      // binary search for startsWith within set of matches
-      var ind = _.sortedIndex(matches, startsWith);
-      if (ind >= lines.length || matches[ind].indexOf(startsWith) === -1){
-        return callback([], startsWith);
+        var trie = new Trie();
+        trie.addStrings(matches);
+        //console.log('Trie > ', trie.matchesWithPrefix( startsWith ));
+        matches = trie.keysWithPrefix(startsWith);
       }
 
-      // FIXME --- using Trie's new keysWithPrefix not yet pushed to npm.
-      // see https://github.com/NaturalNode/natural/commit/5fc86c42e41c1314bfc6a37384dd14acf5f4bb7b
-
-      var trie = new Trie();
-
-      trie.addStrings(matches);
-      //console.log('Trie > ', trie.matchesWithPrefix( startsWith ));
-
-      matches = trie.keysWithPrefix( startsWith );
+      var words = _.sample(matches, num);
+      callback && callback(words, startsWith);
+      resolve(words);
     }
 
-    var words = _.sample(matches, num);
-    callback(words, startsWith);
-  }
+  }); // Promise
 }
+
+// relative weight of each POS word count (DB 3.1 numbers)
+var POS_factor = {
+  Noun: 26,
+  Verb: 3,
+  Adjective: 5,
+  Adverb: 1,
+  Total: 37
+};
 
 /**
  * rand() - for all Index files
+ * @returns Promise
  */
 function randAll(opts, callback) {
   var
@@ -163,12 +177,7 @@ function randAll(opts, callback) {
     count = opts && opts.count || 1,
     args = [null, startsWith],
     parts = 'Noun Verb Adjective Adverb'.split(' '),
-    self = this,
-    done = function(){
-      profile && (args.push(new Date() - start));
-      args[0] = results;
-      callback.apply(null, args)
-    };
+    self = this;
 
   if (typeof opts === 'function') {
     callback = opts;
@@ -176,36 +185,45 @@ function randAll(opts, callback) {
     opts = _.clone(opts);
   }
 
-  // TODO -- or loop count times each time getting 1 from random part!!
-  // slower but more random.
 
-  // select at random a part to look at
-  var doParts = _.sample(parts, parts.length);
-  tryPart();
+  return new Promise(function(resolve, reject) {
+    // select at random a POS to look at
+    var doParts = _.sample(parts, parts.length);
+    tryPart();
 
-  function tryPart(){
-    var rand = 'rand' + doParts.pop();
-    self[ rand ](opts, partCallback);
-  }
+    function tryPart() {
+      var part = doParts.pop(),
+        rand = 'rand' + part,
+        factor = POS_factor[part],
+        weight = factor / POS_factor.Total;
 
-  function partCallback(result){
-    if (result) {
-      results = _.uniq(results.concat(result));  // make sure it's unique!
+      // pick count according to relative weight
+      opts.count = Math.ceil(count * weight * 1.1); // guard against dupes
+      self[rand](opts, partCallback);
     }
 
-    //console.log(result);
-    if (results.length < count && doParts.length) {
-      // reduce count for next part -- NO! may get duplicates
-      // opts.count = count - results.length;
-      return tryPart();
+    function partCallback(result) {
+      if (result) {
+        results = _.uniq(results.concat(result));  // make sure it's unique!
+      }
+
+      if (results.length < count && doParts.length) {
+        return tryPart();
+      }
+
+      // final random and trim excess
+      results = _.sample(results, count);
+      done();
     }
 
-    // trim excess
-    if (results.length > count) {
-      results.length = count;
+    function done() {
+      profile && (args.push(new Date() - start));
+      args[0] = results;
+      callback && callback.apply(null, args);
+      resolve(results);
     }
-    done();
-  }
+
+  }); // Promise
 }
 
 /**

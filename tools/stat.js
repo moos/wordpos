@@ -1,7 +1,7 @@
 /**
  * stat.js
  *
- * generate fast index for WordNet index files
+ *     generate fast index for WordNet index files
  *
  * Usage:
  *    node stat [--no-stats] index.adv ...
@@ -40,7 +40,7 @@
  *      read index file between the two offsets
  *  	binary search read data O(log avg)
  *
- * Copyright (c) 2012 mooster@42at.com
+ * Copyright (c) 2012-2016 mooster@42at.com
  * https://github.com/moos/wordpos
  *
  * Released under MIT license
@@ -48,7 +48,7 @@
 var
   WNdb = require('../src/wordpos').WNdb,
   util = require('util'),
-  BufferedReader = require ("./buffered-reader"),
+  BufferedReader = require ('./buffered-reader'),
   _ = require('underscore')._,
   fs = require('fs'),
   path = require('path'),

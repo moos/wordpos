@@ -1,24 +1,41 @@
+/*!
+ * dataFile.js
+ *
+ * Copyright (c) 2012-2016 mooster@42at.com
+ * https://github.com/moos/wordpos
+ *
+ * Portions: Copyright (c) 2011, Chris Umbel
+ *
+ * Released under MIT license
+ */
 
 var fs = require('fs'),
   path = require('path'),
   _ = require('underscore');
 
 
-// courtesy of natural.WordNet
-// TODO link
+/**
+ * parse a single data file line, returning data object
+ *
+ * @param line {string} - a single line from WordNet data file
+ * @returns {object}
+ *
+ * Credit for this routine to https://github.com/NaturalNode/natural
+ */
 function lineDataToJSON(line) {
   var data = line.split('| '),
     tokens = data[0].split(/\s+/),
     ptrs = [],
     wCnt = parseInt(tokens[3], 16),
-    synonyms = [];
+    synonyms = [],
+    i;
 
-  for(var i = 0; i < wCnt; i++) {
+  for(i = 0; i < wCnt; i++) {
     synonyms.push(tokens[4 + i * 2]);
   }
 
   var ptrOffset = (wCnt - 1) * 2 + 6;
-  for(var i = 0; i < parseInt(tokens[ptrOffset], 10); i++) {
+  for(i = 0; i < parseInt(tokens[ptrOffset], 10); i++) {
     ptrs.push({
       pointerSymbol: tokens[ptrOffset + 1 + i * 4],
       synsetOffset: parseInt(tokens[ptrOffset + 2 + i * 4], 10),
@@ -51,10 +68,15 @@ function lineDataToJSON(line) {
   };
 }
 
-
+/**
+ * read data file at location (bound to a data file).
+ * Reads nominal length and checks for EOL.  Continue reading until EOL.
+ *
+ * @param location {Number} - seek location
+ * @param callback {function} - callback function
+ */
 function readLocation(location, callback) {
   //console.log('## read location ', this.fileName, location);
-
   var
     file = this,
     str = '',
@@ -68,8 +90,6 @@ function readLocation(location, callback) {
       return;
     }
     //console.log('  read %d bytes at <%d>', count, location);
-    //console.log(str);
-
     callback(null, lineDataToJSON(str));
   });
 
@@ -77,10 +97,9 @@ function readLocation(location, callback) {
     fs.read(file.fd, buffer, 0, len, pos, function (err, count) {
       str += buffer.toString('ascii');
       var eol = str.indexOf('\n');
-
       //console.log('  -- read %d bytes at <%d>', count, pos, eol);
-
       if (eol === -1 && len < file.maxLineLength) {
+        // continue reading
         return readChunk(pos + count, cb);
       }
 
@@ -90,14 +109,19 @@ function readLocation(location, callback) {
   }
 }
 
+/**
+ * main lookup function
+ *
+ * @param record {object} - record to lookup, obtained from index.find()
+ * @param callback{function} (optional) - callback function
+ * @returns {Promise}
+ */
 function lookup(record, callback) {
   var results = [],
     self = this,
     offsets = record.synsetOffset;
 
   return new Promise(function(resolve, reject) {
-    //console.log('data lookup', record);
-
     offsets
       .map(function (offset) {
         return _.partial(readLocation.bind(self), offset);
@@ -109,7 +133,6 @@ function lookup(record, callback) {
 
     function done(lastResult) {
       closeFile();
-      //console.log('done promise -- ');
       if (lastResult instanceof Error) {
         callback && callback(lastResult, []);
         reject(lastResult);
@@ -129,7 +152,6 @@ function lookup(record, callback) {
       //console.log(' ... opening', self.filePath);
       self.fd = fs.openSync(self.filePath, 'r');
     }
-
     // ref count so we know when to close the main index file
     ++self.refcount;
     return Promise.resolve();
@@ -145,13 +167,17 @@ function lookup(record, callback) {
   }
 }
 
-
+/**
+ * turn ordinary function into a promising one!
+ *
+ * @param collect {Array} - used to collect results
+ * @returns {Function}
+ */
 function promisifyInto(collect) {
   return function(fn) {
     return function() {
       return new Promise(function (resolve, reject) {
-        fn(function (error, result) {               // Note callback signature!
-          //console.log('cb from get', arguments)
+        fn(function (error, result) {   // Note: callback signature!
           if (error) {
             reject(error);
           }
@@ -166,7 +192,13 @@ function promisifyInto(collect) {
 }
 
 
-
+/**
+ * DataFile class
+ *
+ * @param dictPath {string} - path to dict folder
+ * @param name {string} - POS name
+ * @constructor
+ */
 var DataFile = function(dictPath, name) {
   this.dictPath = dictPath;
   this.fileName = 'data.' + name;
@@ -177,18 +209,29 @@ var DataFile = function(dictPath, name) {
   this.refcount = 0;
 };
 
-// maximum read length at a time
+/**
+ * maximum read length at a time
+ * @type {Number}
+ */
 var MAX_SINGLE_READ_LENGTH = 512;
 
-//DataFile.prototype.get = get;
+/**
+ * lookup
+ */
 DataFile.prototype.lookup = lookup;
 
-// e.g.: wc -L data.adv as of v3.1
+
+/**
+ * maximum line length in each data file - used to optimize reads
+ *
+ * wc -L data.adv as of v3.1
+ */
 DataFile.MAX_LINE_LENGTH = {
   noun: 12972,
   verb: 7713,
   adj: 2794,
   adv: 638
 };
+
 
 module.exports = DataFile;

@@ -6,7 +6,7 @@ wordpos
 
 wordpos is a set of *fast* part-of-speech (POS) utilities for Node.js using fast lookup in the WordNet database. 
 
-Version 1.x is a mojor update with no direct depedence on [natural's](http://github.com/NaturalNode/natural), with support for Promises, and roughly 5x speed improvement over previous version. 
+Version 1.x is a major update with no direct dependence on [natural's](http://github.com/NaturalNode/natural), with support for [Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise), and roughly 5x speed improvement over previous version. 
  
 **CAUTION** The WordNet database [wordnet-db](https://github.com/moos/wordnet-db) comprises [155,287 words](http://wordnet.princeton.edu/wordnet/man/wnstats.7WN.html) (3.0 numbers) which uncompress to over **30 MB** of data in several *un*[browserify](https://github.com/substack/node-browserify)-able files.  It is *not* meant for the browser environment.
 
@@ -104,7 +104,7 @@ wordpos.getPOS(text, callback) -- callback receives a result object:
 ```
 
 If you're only interested in a certain POS (say, adjectives), using the particular getX() is faster
-than getPOS() which looks up the word in all index files. [stopwords](https://github.com/moos/wordpos/lib/natural/util/stopwords.js)are stripped out from text before lookup.
+than getPOS() which looks up the word in all index files. [stopwords](lib/natural/util/stopwords.js) are stripped out from text before lookup.
 
 If `text` is an *array*, all words are looked-up -- no deduplication, stopword filtering or tokenization is applied.
 
@@ -127,8 +127,7 @@ wordpos.getPOS('The angry bear chased the frightened little squirrel.', console.
   }
 
 ```
-This has no relation to correct grammar of given sentence, where here only 'bear' and 'squirrel'
-would be considered nouns. 
+This has no relation to correct grammar of given sentence, where here only 'bear' and 'squirrel' would be considered nouns. 
 
 #### isNoun(word, callback)
 #### isVerb(word, callback)
@@ -228,7 +227,33 @@ Access the array of stopwords.
 
 ## Promises
 
-TODO
+As of v1.0, all `get`, `is`, `rand`, and `lookup`  methods return a standard ES6 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise).
+
+```js
+wordpos.isVerb('fish').then(console.log);
+// true
+```
+
+Compound, with error handler:
+
+```js
+wordpos.isVerb('fish')
+  .then(console.log)
+  .then(doSomethingElse)
+  .catch(console.error);
+```
+
+Callbacks, if given, are executed _before_ the Promise is resolved.
+
+```js
+wordpos.isVerb('fish', console.log)
+  .then(console.log)
+  .catch(console.error);
+// true 'fish' 13
+// true
+```
+Note that callback receives full arguments (including profile, if enabled), while the Promise receives only the result of the call.  Also, beware that exceptions in the _callback_ will result in the Promise being _rejected_ and caught by `catch()`, if provided.
+
 
 ## Fast Index
 
@@ -236,7 +261,7 @@ Version 0.1.4 introduces `fastIndex` option.  This uses a secondary index on the
 
 Fast index improves performance **30x** over Natural's native methods. See blog article [Optimizing WordPos](http://blog.42at.com/optimizing-wordpos).
 
-As of version 1.0, the fast index option is always on and cannot be turned off.
+As of version 1.0, fast index is always on and cannot be turned off.
 
 ## Command-line: CLI
 
@@ -245,73 +270,15 @@ For CLI usage and examples, see [bin/README](bin).
 
 ## Benchmark
 
-Note: `wordpos-bench.js` requires a [forked uubench](https://github.com/moos/uubench) module.
-
-    cd bench
-    node wordpos-bench.js
-
-
-512-word corpus (< v0.1.4, comparable to Natural) :
-```
-  getPOS : 0 ops/s { iterations: 1, elapsed: 9039 }
-  getNouns : 0 ops/s { iterations: 1, elapsed: 2347 }
-  getVerbs : 0 ops/s { iterations: 1, elapsed: 2434 }
-  getAdjectives : 1 ops/s { iterations: 1, elapsed: 1698 }
-  getAdverbs : 0 ops/s { iterations: 1, elapsed: 2698 }
-done in 20359 msecs
-```
-
-512-word corpus (as of v0.1.4, with fastIndex) :
-```
-  getPOS : 18 ops/s { iterations: 1, elapsed: 57 }
-  getNouns : 48 ops/s { iterations: 1, elapsed: 21 }
-  getVerbs : 125 ops/s { iterations: 1, elapsed: 8 }
-  getAdjectives : 111 ops/s { iterations: 1, elapsed: 9 }
-  getAdverbs : 143 ops/s { iterations: 1, elapsed: 7 }
-done in 1375 msecs
-```
-
-220 words are looked-up (less stopwords and duplicates) on a win7/64-bit/dual-core/3GHz.  getPOS() is slowest as it searches through all four index files.
-
-### Version 1.0 Benchmark
-
-Re-run v0.1.16:
-```
-  getPOS : 11 ops/s { iterations: 1, elapsed: 90 }
-  getNouns : 21 ops/s { iterations: 1, elapsed: 47 }
-  getVerbs : 53 ops/s { iterations: 1, elapsed: 19 }
-  getAdjectives : 29 ops/s { iterations: 1, elapsed: 34 }
-  getAdverbs : 83 ops/s { iterations: 1, elapsed: 12 }
-  lookup : 1 ops/s { iterations: 1, elapsed: 720 }
-  lookupNoun : 1 ops/s { iterations: 1, elapsed: 676 }
-
-looked up 220 words
-done in 2459 msecs
-```
-
-V1.0:
-```
-  getPOS : 14 ops/s { iterations: 1, elapsed: 73 }
-  getNouns : 26 ops/s { iterations: 1, elapsed: 38 }
-  getVerbs : 42 ops/s { iterations: 1, elapsed: 24 }
-  getAdjectives : 24 ops/s { iterations: 1, elapsed: 42 }
-  getAdverbs : 26 ops/s { iterations: 1, elapsed: 38 }
-  lookup : 6 ops/s { iterations: 1, elapsed: 159 }
-  lookupNoun : 13 ops/s { iterations: 1, elapsed: 77 }
-
-looked up 221 words
-done in 1274 msecs
-```
-That's roughly **2x** better across the board.  Functions that read the data files see much improved performance: `lookup` about **5x** and `lookupNoun` over **8x**. 
-
+See [benchmark](benchmark/README).
 
 ## Changes
 
-1.0.1
- - Removed direct dependency on Natural.  Certain modules are included in /lib.
- - Add support for Promises.
- - Improved data file reads for up to **5x** performance increase.
- - Tests are now mocha-based with assert interface.
+1.0.0
+ - Removed npm dependency on Natural.  Certain modules are included in /lib.
+ - Add support for ES6 Promises.
+ - Improved data file reads for up to **5x** performance increase compared to previous version.
+ - Tests are now [mocha](https://mochajs.org/)-based with [chai](http://chaijs.com/) assert interface.
 
 0.1.16 
  - Changed dependency to wordnet-db (renamed from WNdb)

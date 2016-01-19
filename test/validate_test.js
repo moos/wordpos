@@ -1,7 +1,7 @@
 /**
  * validate_test.js
  *
- * Run validate on all four main index files
+ *     Run validate on all four main index files
  *
  * Copyright (c) 2012-2016 mooster@42at.com
  * https://github.com/moos/wordpos

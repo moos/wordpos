@@ -1,15 +1,23 @@
+/**
+ * wordpos-bench.js
+ *
+ * Copyright (c) 2012-2016 mooster@42at.com
+ * https://github.com/moos/wordpos
+ *
+ * Released under MIT license
+ */
 
-var uubench = require('uubench'), // from: https://github.com/moos/uubench
+var Bench = require('mini-bench'),
   fs = require('fs'),
   _ = require('underscore')._,
   WordPOS = require('../src/wordpos'),
   wordpos = new WordPOS();
 
 
-suite = new uubench.Suite({
+suite = new Bench.Suite({
   type: 'fixed',
   iterations: 1,
-  sync: true,	// important!
+  async: false,	// important!
 
   start: function(tests){
     console.log('starting %d tests', tests.length);
@@ -110,6 +118,7 @@ suite.section('--512 words--', function(next){
   suite.options.iterations = 1;
   next();
 });
+
 suite.bench('getPOS', getPOS);
 suite.bench('getNouns', getNouns);
 suite.bench('getVerbs', getVerbs);
@@ -117,7 +126,5 @@ suite.bench('getAdjectives', getAdjectives);
 suite.bench('getAdverbs', getAdverbs);
 suite.bench('lookup', lookup);
 suite.bench('lookupNoun', lookupNoun);
-
-
 
 suite.run();

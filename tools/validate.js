@@ -1,12 +1,12 @@
 /**
  * validate.js
  *
- * read each index.<pos> file, and look up using wordpos and confirm find all words
+ *    read each index.<pos> file, and look up using wordpos and confirm find all words
  *
  * Usage:
  *    node validate index.adv
  *
- * Copyright (c) 2012 mooster@42at.com
+ * Copyright (c) 2012-2016 mooster@42at.com
  * https://github.com/moos/wordpos
  *
  * Released under MIT license

@@ -1,11 +1,11 @@
 /**
- * wordpos_spec.js
+ * wordpos_test.js
  *
- *     test file for main wordpos functionality
+ *   test file for main wordpos functionality
  *
  * Usage:
  *   npm install mocha -g
- *   mocha wordpos_spec.js --verbose
+ *   mocha wordpos_test.js
  *
  *   or
  *
@@ -386,6 +386,31 @@ describe('Promise pattern', function() {
   it('isX()', function () {
     return wordpos.isAdjective('little').then(function (result) {
       assert.equal(result, true);
+    });
+  });
+
+  it('rand()', function () {
+    return wordpos.rand({count: 5}).then(function (result) {
+      assert.equal(result.length, 5);
+    });
+  });
+
+  it('randNoun()', function () {
+    return wordpos.randNoun().then(function (result) {
+      assert.equal(result.length, 1);
+    });
+  });
+
+  it('randNoun({count: 3})', function () {
+    return wordpos.randNoun({count: 3}).then(function (result) {
+      assert.equal(result.length, 3);
+    });
+  });
+
+  it('randNoun({startsWith: "foo"})', function () {
+    return wordpos.randNoun({startsWith: 'foo'}).then(function (result) {
+      assert.equal(result.length, 1);
+      assert.equal(result[0].indexOf('foo'), 0);
     });
   });
 });

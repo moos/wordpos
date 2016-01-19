@@ -12,7 +12,6 @@
 
 var _ = require('underscore')._,
   util = require('util'),
-  path = require('path'),
   fs = require('fs');
 
 /**
@@ -21,7 +20,7 @@ var _ = require('underscore')._,
  *
  * @param task {string} - task name unique to method!
  * @param method {function} - method to execute, gets (args, ... , callback)
- * @param args {array} - args to pass to method
+ * @param args {Array} - args to pass to method
  * @param context {object} - other params to remember and sent to callback
  * @param callback {function} - result callback
  */

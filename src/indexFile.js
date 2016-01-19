@@ -6,6 +6,8 @@
  * Copyright (c) 2012-2016 mooster@42at.com
  * https://github.com/moos/wordpos
  *
+ * Portions: Copyright (c) 2011, Chris Umbel
+ *
  * Released under MIT license
  */
 
@@ -15,6 +17,7 @@ var _ = require('underscore')._,
   fs = require('fs'),
   piper = require('./piper'),
   KEY_LENGTH = 3;
+
 
 /**
  * load fast index bucket data
@@ -112,7 +115,7 @@ function find(search, callback) {
   // pay the piper
   this.piper(task, readIndexForKey, args, context, collector);
 
-  function collector(key, index, search, callback, buffer){
+  function collector(_key, index, search, callback, buffer){
     var lines = buffer.toString().split('\n'),
       keys = lines.map(function(line){
         return line.substring(0,line.indexOf(' '));
@@ -136,21 +139,24 @@ function find(search, callback) {
  * @param word {string} - search word
  * @param callback {function} - callback function receives result
  * @returns none
+ *
+ * Credit for this routine to https://github.com/NaturalNode/natural
  */
 function lookup(word, callback) {
   var self = this;
 
   return new Promise(function(resolve, reject){
     self.find(word, function (record) {
-      var indexRecord = null;
+      var indexRecord = null,
+        i;
 
       if (record.status == 'hit') {
         var ptrs = [], offsets = [];
 
-        for (var i = 0; i < parseInt(record.tokens[3]); i++)
+        for (i = 0; i < parseInt(record.tokens[3]); i++)
           ptrs.push(record.tokens[i]);
 
-        for (var i = 0; i < parseInt(record.tokens[2]); i++)
+        for (i = 0; i < parseInt(record.tokens[2]); i++)
           offsets.push(parseInt(record.tokens[ptrs.length + 6 + i], 10));
 
         indexRecord = {
