@@ -6,7 +6,7 @@ wordpos
 
 wordpos is a set of *fast* part-of-speech (POS) utilities for Node.js using fast lookup in the WordNet database. 
 
-Version 1.x is a major update with no direct dependence on [natural's](http://github.com/NaturalNode/natural), with support for [Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise), and roughly 5x speed improvement over previous version. 
+Version 1.x is a major update with no direct dependence on [natural's](http://github.com/NaturalNode/natural) WordNet module, with support for [Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise), and roughly 5x speed improvement over previous version. 
  
 **CAUTION** The WordNet database [wordnet-db](https://github.com/moos/wordnet-db) comprises [155,287 words](http://wordnet.princeton.edu/wordnet/man/wnstats.7WN.html) (3.0 numbers) which uncompress to over **30 MB** of data in several *un*[browserify](https://github.com/substack/node-browserify)-able files.  It is *not* meant for the browser environment.
 
@@ -89,7 +89,7 @@ Please note: all API are *async* since the underlying WordNet library is async.
 #### getAdjectives(text, callback)
 #### getAdverbs(text, callback)
 
-Get part-of-speech from `text`.  `callback(results)` receives and array of words for specified POS, or a hash for `getPOS()`:
+Get part-of-speech from `text`.  `callback(results)` receives an array of words for specified POS, or a hash for `getPOS()`:
 
 ```
 wordpos.getPOS(text, callback) -- callback receives a result object:
@@ -222,7 +222,7 @@ Returns tokenized array of words in `text`, less duplicates and stopwords. This 
 Access to the [wordnet-db](https://github.com/moos/wordnet-db) object containing the dictionary & index files.
 
 #### WordPOS.stopwords
-Access the array of stopwords.
+Access the array of [stopwords](lib/natural/util/stopwords.js).
 
 
 ## Promises
@@ -270,7 +270,7 @@ For CLI usage and examples, see [bin/README](bin).
 
 ## Benchmark
 
-See [benchmark](benchmark/README).
+See [bench/README](bench).
 
 ## Changes
 
