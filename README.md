@@ -274,7 +274,7 @@ See [bench/README](bench).
 
 ## Changes
 
-1.0.0
+1.0.1
  - Removed npm dependency on Natural.  Certain modules are included in /lib.
  - Add support for ES6 Promises.
  - Improved data file reads for up to **5x** performance increase compared to previous version.
