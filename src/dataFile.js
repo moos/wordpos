@@ -13,6 +13,17 @@ var fs = require('fs'),
   path = require('path'),
   _ = require('underscore');
 
+/**
+ * sanity check read data - line must start with zero-padded location
+ *
+ * @param line {string} - line data read
+ * @return {boolean} true if line data is good
+ */
+function dataCheck(line, location) {
+  var pad = '00000000', // 8 zeros
+    padded = String(pad + location).slice( - pad.length);
+  return line.indexOf(padded) === 0;
+}
 
 /**
  * parse a single data file line, returning data object
@@ -22,7 +33,9 @@ var fs = require('fs'),
  *
  * Credit for this routine to https://github.com/NaturalNode/natural
  */
-function lineDataToJSON(line) {
+function lineDataToJSON(line, location) {
+  if (!dataCheck(line, location)) return new Error('Bad data at location ' + location);
+
   var data = line.split('| '),
     tokens = data[0].split(/\s+/),
     ptrs = [],
@@ -48,6 +61,7 @@ function lineDataToJSON(line) {
   var glossArray = data[1].split("; ");
   var definition = glossArray[0];
   var examples = glossArray.slice(1);
+  var lexFilenum = parseInt(tokens[1], 10);
 
   for (var k = 0; k < examples.length; k++) {
     examples[k] = examples[k].replace(/\"/g,'').replace(/\s\s+/g,'');
@@ -55,7 +69,8 @@ function lineDataToJSON(line) {
 
   return {
     synsetOffset: parseInt(tokens[0], 10),
-    lexFilenum: parseInt(tokens[1], 10),
+    lexFilenum: lexFilenum,
+    lexName: DataFile.LEX_NAMES[ lexFilenum ],
     pos: tokens[2],
     wCnt: wCnt,
     lemma: tokens[4],
@@ -85,12 +100,12 @@ function readLocation(location, callback) {
 
   readChunk(location, function(err, count) {
     if (err) {
-      console.log(err);
+      //console.log(err);
       callback(err);
       return;
     }
     //console.log('  read %d bytes at <%d>', count, location);
-    callback(null, lineDataToJSON(str));
+    callback(null, lineDataToJSON(str, location));
   });
 
   function readChunk(pos, cb) {
@@ -98,12 +113,13 @@ function readLocation(location, callback) {
       str += buffer.toString('ascii');
       var eol = str.indexOf('\n');
       //console.log('  -- read %d bytes at <%d>', count, pos, eol);
-      if (eol === -1 && len < file.maxLineLength) {
+      if (count && eol === -1 && len < file.maxLineLength) {
         // continue reading
         return readChunk(pos + count, cb);
       }
 
       str = str.substr(0, eol);
+      if (str === '' && !err) err = new Error('no data at offset ' + pos);
       cb(err, count);
     });
   }
@@ -112,15 +128,16 @@ function readLocation(location, callback) {
 /**
  * main lookup function
  *
- * @param record {object} - record to lookup, obtained from index.find()
+ * @param offsets {array} - array of offsets to lookup (obtained from index.find())
  * @param callback{function} (optional) - callback function
  * @returns {Promise}
  */
-function lookup(record, callback) {
+function lookup(offsets, callback) {
   var results = [],
     self = this,
-    offsets = record.synsetOffset;
+    single = !_.isArray(offsets);
 
+  if (single) offsets = [offsets];
   return new Promise(function(resolve, reject) {
     offsets
       .map(function (offset) {
@@ -134,9 +151,10 @@ function lookup(record, callback) {
     function done(lastResult) {
       closeFile();
       if (lastResult instanceof Error) {
-        callback && callback(lastResult, []);
+        callback && callback(lastResult, single ? {} :[]);
         reject(lastResult);
       } else {
+        if (single) results = results[0];
         callback && callback(null, results);
         resolve(results);
       }
@@ -233,5 +251,58 @@ DataFile.MAX_LINE_LENGTH = {
   adv: 638
 };
 
+/**
+ * map of lexFilenum to lex names
+ *
+ * @see https://wordnet.princeton.edu/wordnet/man/lexnames.5WN.html
+ * @type {string[]}
+ */
+DataFile.LEX_NAMES = [
+  'adj.all',
+  'adj.pert',
+  'adv.all',
+  'noun.Tops',
+  'noun.act',
+  'noun.animal',
+  'noun.artifact',
+  'noun.attribute',
+  'noun.body',
+  'noun.cognition',
+  'noun.communication',
+  'noun.event',
+  'noun.feeling',
+  'noun.food',
+  'noun.group',
+  'noun.location',
+  'noun.motive',
+  'noun.object',
+  'noun.person',
+  'noun.phenomenon',
+  'noun.plant',
+  'noun.possession',
+  'noun.process',
+  'noun.quantity',
+  'noun.relation',
+  'noun.shape',
+  'noun.state',
+  'noun.substance',
+  'noun.time',
+  'verb.body',
+  'verb.change',
+  'verb.cognition',
+  'verb.communication',
+  'verb.competition',
+  'verb.consumption',
+  'verb.contact',
+  'verb.creation',
+  'verb.emotion',
+  'verb.motion',
+  'verb.perception',
+  'verb.possession',
+  'verb.social',
+  'verb.stative',
+  'verb.weather',
+  'adj.ppl'
+];
 
 module.exports = DataFile;

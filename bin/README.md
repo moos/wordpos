@@ -19,6 +19,8 @@ $ wordpos
     syn        lookup synonyms
     
     exp        lookup examples
+    
+    seek       get record at synset offset. Must include one of POS -n, -a, -v, -r
 
     rand       get random words (starting with [word]). If first arg is a number, returns
                that many random words. Valid options are -b, -f, -j, -s, -i.
@@ -221,6 +223,49 @@ $ wordpos rand --adj foot
 # foot 1:
 foot-shaped
 ```
+
+#### Seek a synset offset
+Seek offset as adjective:
+```sh
+$ wordpos seek 1285602 -a
+{ '1285602':
+   { synsetOffset: 1285602,
+       lexFilenum: 0,
+       lexName: 'adj.all',
+       pos: 's',
+       wCnt: 5,
+       lemma: 'amazing',
+       synonyms: [ 'amazing', 'awe-inspiring', 'awesome', 'awful', 'awing' ],
+       lexId: '0',
+       ptrs:
+        [ { pointerSymbol: '&',
+            synsetOffset: 1285124,
+            pos: 'a',
+...            
+```
+
+Same as verb (not found!):
+```sh
+$ wordpos seek 1285602 -v
+{ '1285602': {} }
+```
+
+Multiple offsets from same POS:
+```sh
+$ wordpos seek 1285602 1285124 -a
+{ '1285124':
+   { synsetOffset: 1285124,
+       lexFilenum: 0,
+       ...
+   },
+  '1285602':
+    { synsetOffset: 1285602,
+        lexFilenum: 0,
+        ...
+    }
+```
+Note that results are always returned as `--full` format.  To get compact JSON format, add the `-j` option.
+
 
 #### Stopwords
 List stopwords (brief):

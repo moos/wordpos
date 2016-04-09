@@ -63,7 +63,7 @@ function lookup(pos) {
       .then(function(result) {
         if (result) {
           // lookup data
-          return files.data.lookup(result).then(done);
+          return files.data.lookup(result.synsetOffset).then(done);
         } else {
           // not found in index
           return done([]);
@@ -360,6 +360,31 @@ wordposProto.getVerbs = get('isVerb');
  * @returns {array}
  */
 wordposProto.parse = prepText;
+
+
+/**
+ * seek - get record at offset for pos
+ *
+ * @param offset {number} - synset offset
+ * @param pos {string} - POS a/r/n/v
+ * @param callback {function} - optional callback
+ * @returns Promise
+ */
+wordposProto.seek = function(offset, pos, callback){
+  offset = Number(offset);
+  if (_.isNaN(offset) || offset <= 0) return error('offset must be valid positive number.');
+
+  var data = this.getFilesFor(pos).data;
+  if (!data) return error('Incorrect POS - 2nd argument must be a, r, n or v.');
+
+  return data.lookup(offset, callback);
+
+  function error(msg) {
+    var err = new Error(msg);
+    callback && callback(err, {});
+    return Promise.reject(err);
+  }
+};
 
 
 /**

@@ -29,7 +29,7 @@ wordpos.isAdjective('awesome', function(result){
 // true 'awesome'
 ```
 
-Command-line: (see [CLI](bin))
+Command-line: (see [CLI](bin) for full command list)
 ```bash
 $ wordpos def git
 git
@@ -71,7 +71,7 @@ WordPOS.defaults = {
   stopwords: true
 };
 ```
-To override, pass an options hash to the constructor. With the `profile` option, all callbacks receive a last argument that is the execution time in msec of the call.
+To override, pass an options hash to the constructor. With the `profile` option, most callbacks receive a last argument that is the execution time in msec of the call.
 
 ```js
     wordpos = new WordPOS({profile: true});
@@ -165,19 +165,33 @@ Example:
 ```js
 wordpos.lookupAdjective('awesome', console.log);
 // output:
-[ { synsetOffset: 1282510,
+[ { synsetOffset: 1285602,
     lexFilenum: 0,
+    lexName: 'adj.all',
     pos: 's',
     wCnt: 5,
     lemma: 'amazing',
     synonyms: [ 'amazing', 'awe-inspiring', 'awesome', 'awful', 'awing' ],
     lexId: '0',
     ptrs: [],
-    gloss: 'inspiring awe or admiration or wonder; <snip> awing majesty, so vast, so high, so silent"  ' 
+    gloss: 'inspiring awe or admiration or wonder; [...] awing majesty, so vast, so high, so silent"  '
+    def: 'inspiring awe or admiration or wonder',     
+    ...
 } ], 'awesome'
 ```
-In this case only one lookup was found, but there could be several.
+In this case only one lookup was found, but there could be several.  
 
+Version 1.1 adds the `lexName` parameter, which maps the lexFilenum to one of [45 lexicographer domains](https://wordnet.princeton.edu/wordnet/man/lexnames.5WN.html).
+
+
+#### seek(offset, pos, callback)
+Version 1.1 introduces the seek method to lookup a record directly from the synsetOffset for a given POS.  Unlike other methods, callback (if provided) receives `(err, result)` arguments.
+
+Examples:
+```js
+wordpos.seek(1285602, 'a').then(console.log)
+// same result as wordpos.lookupAdjective('awesome', console.log);
+```
 
 #### rand(options, callback)
 #### randNoun(options, callback)
@@ -213,6 +227,7 @@ wordpos.rand({starsWith: 'zzz'}, console.log)
 **Note on performance**: random lookups could involve heavy disk reads.  It is better to use the `count` option to get words in batches.  This may benefit from the cached reads of similarly keyed entries as well as shared open/close of the index files.
 
 Getting random POS (`randNoun()`, etc.) is generally faster than `rand()`, which may look at multiple POS files until `count` requirement is met.
+
 
 #### parse(text) 
 Returns tokenized array of words in `text`, less duplicates and stopwords. This method is called on all getX() calls internally.
@@ -274,6 +289,10 @@ See [bench/README](bench).
 
 ## Changes
 
+1.1 - 
+ - added seek() method
+ - added lexName property
+ 
 1.0.1
  - Removed npm dependency on Natural.  Certain modules are included in /lib.
  - Add support for ES6 Promises.

@@ -5,9 +5,9 @@
  * command-line interface to wordpos
  *
  * Usage:
- *    wordpos [options] <get|parse|def|rand|syn|exp> <stdin|words*>
+ *    wordpos [options] <get|parse|def|rand|syn|exp|seek> <stdin|words*>
  *
- * Copyright (c) 2012 mooster@42at.com
+ * Copyright (c) 2012, 2016 mooster@42at.com
  * https://github.com/moos/wordpos
  *
  * Released under MIT license
@@ -17,6 +17,7 @@ var program = require('commander'),
   _ = require('underscore')._,
   fs = require('fs'),
   POS = {noun:'Noun', adj:'Adjective', verb:'Verb', adv:'Adverb'},
+  POS_abbr = {noun:'n', adj:'a', verb:'v', adv:'r'},
   version = JSON.parse(fs.readFileSync(__dirname + '/../package.json', 'utf8')).version,
   rawCmd = '',
   RAND_PLACEHOLDER = '__',
@@ -67,6 +68,19 @@ program.command('exp')
     exec.apply(this, arguments);
   });
 
+program.command('seek')
+  .description('get record at synset offset. Must include one of POS -n, -a, -v, -r')
+  .action(function(){
+    var one = _.chain(program).pick('noun adj adv verb'.split(' ')).countBy().value().true;
+    if (!one || one > 1) {
+      console.error('Must include one and only one of -n, -a, -v, -r');
+      process.exit(-1);
+    }
+    // force full output mode
+    program.full = 1;
+    exec.apply(this, arguments);
+  });
+
 program.command('rand')
   .description('get random words (starting with [word]). If first arg is a number, returns ' +
     'that many random words. Valid options are -b, -f, -j, -s, -i.')
@@ -80,12 +94,10 @@ program.command('rand')
       args.shift();
       program.num = num;
     }
-
     // no startsWith given, add a placeholder
     if (args.length === 1){
       args.unshift(RAND_PLACEHOLDER);
     }
-
     exec.apply(this, args);
   });
 
@@ -150,23 +162,24 @@ function read_stdin(callback) {
 }
 
 function optToFn() {
-  var fns = _.reject(POS, function(fn, opt) { return !program[opt] });
+  var
+    map = cmd === 'seek' ? POS_abbr : POS,
+    fns = _.reject(map, function(fn, opt) { return !program[opt] });
   if (!fns.length && cmd === 'rand') return fns = ['']; // run rand()
-  if (!fns.length) fns = _.values(POS); //default to all if no POS given
+  if (!fns.length) fns = _.values(map); //default to all if no POS given
   return fns;
 }
-
 
 function run(data) {
   var
     opts = {stopwords: !program.withStopwords},
     wordpos = new WordPos(opts),
-    words = wordpos.parse(data),
+    seek = cmd === 'seek',
+    words = seek ? data.split(' ') : wordpos.parse(data),
     fns = optToFn(),
-    plural = (cmd=='get' ? 's':''),
+    plural = (cmd === 'get' ? 's':''),
     results = {},
-    finale = _.after(
-        plural ? fns.length : words.length * fns.length,
+    finale = _.after(plural ? fns.length : words.length * fns.length,
         _.bind(output, null, results)),
     collect = function(what, result, word){
       if (word) {	// lookup
@@ -184,12 +197,19 @@ function run(data) {
   _(fns).each(function(fn){
     var method = cmd + fn + plural,
       cb = _.bind(collect, null, fn);
-    if (cmd == 'get') {
+    if (cmd === 'get') {
       wordpos[method](words, cb);
-    } else if (cmd == 'rand') {
+    } else if (cmd === 'rand') {
       if (words[0] === RAND_PLACEHOLDER) words[0] = '';
       words.forEach(function(word){
         wordpos[method]({startsWith: word, count: program.num || 1}, cb);
+      });
+    } else if (seek) {
+      words.forEach(function(offset){
+        wordpos.seek(offset, fn, function(err, result){
+          results[offset.trim()] = result;
+          finale();
+        });
       });
     } else {
       words.forEach(function(word){
@@ -227,8 +247,9 @@ function sprint(results) {
     }, '');
   default:
     return _.reduce(results, function(memo, v, k){
-      var pre = program.brief ? '' : util.format('# %s %d:%s', k,  v.length, sep);
-      return memo + (v.length && util.format('%s%s%s\n', pre, v.join(sep), sep) || '');
+      var pre = program.brief ? '' : util.format('# %s %d:%s', k,  v.length, sep),
+        res = v.length ? v.join(sep) : '';
+      return memo + (v.length && util.format('%s%s%s\n', pre, res, sep) || '');
     }, '');
   }
 

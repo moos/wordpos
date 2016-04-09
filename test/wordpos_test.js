@@ -21,6 +21,7 @@
 
 var
   chai = require('chai'),
+  _ = require('underscore'),
   assert = chai.assert,
   WordPOS = require('../src/wordpos'),
   wordpos = new WordPOS({profile: false});
@@ -35,7 +36,9 @@ var str = "The angry bear chased the frightened little squirrel",
     adverbs: [ 'little' ],
     rest: [ 'The' ]
   },
-  garble = 'garblegarble';	// expect not to find word
+  garble = 'garblegarble',	// expect not to find word
+  offset = 1285602,
+  offset_pos ='a';
 
 
 
@@ -356,6 +359,62 @@ describe('randX()...', function() {
 });
 
 
+describe('seek()...', function() {
+
+  it('should handle bad offset', function(done) {
+      wordpos.seek('foobar', 'a', function(err, result){
+        assert(err instanceof Error);
+        assert.equal(err.message, 'offset must be valid positive number.');
+        done();
+      });
+  });
+
+  it('should handle wrong offset', function(done) {
+    var bad_offset = offset + 1;
+    wordpos.seek(bad_offset, offset_pos, function(err, result) {
+      assert(err instanceof Error);
+      assert.equal(err.message, 'Bad data at location ' + bad_offset);
+      assert.deepEqual(result, {});
+      done();
+    });
+  });
+
+  it('should handle very large offset', function(done) {
+    var bad_offset = offset + 100000000;
+    wordpos.seek(bad_offset, offset_pos, function(err, result) {
+      assert(err instanceof Error);
+      assert.equal(err.message, 'no data at offset ' + bad_offset);
+      assert.deepEqual(result, {});
+      done();
+    });
+  });
+
+  it('should handle bad pos', function(done) {
+    wordpos.seek(offset, 'g', function(err, result) {
+      assert(err instanceof Error);
+      assert(/Incorrect POS/.test(err.message));
+      done();
+    });
+  });
+
+  it('should handle wrong pos', function(done) {
+    wordpos.seek(offset, 'v', function(err, result){
+      assert.equal(err.message, 'Bad data at location ' + offset);
+    });
+    done();
+  });
+
+  it('should seek offset', function(done) {
+    wordpos.seek(offset, offset_pos, function(err, result) {
+      assert.equal(result.synsetOffset, offset);
+      assert.equal(result.pos, 's');
+      assert.equal(result.lemma, 'amazing');
+      done();
+    });
+  });
+});
+
+
 
 describe('Promise pattern', function() {
 
@@ -413,4 +472,28 @@ describe('Promise pattern', function() {
       assert.equal(result[0].indexOf('foo'), 0);
     });
   });
+
+  it('seek()', function () {
+    return wordpos.seek(offset, offset_pos).then(function (result) {
+      assert.equal(result.synsetOffset, offset);
+      assert.equal(result.pos, 's');
+      assert.equal(result.lemma, 'amazing');
+
+    });
+  });
+
+  it('seek() - wrong offset', function () {
+    return wordpos.seek(offset + 1, offset_pos).catch(function (err) {
+      assert(err instanceof Error);
+      assert.equal(err.message, 'Bad data at location ' + (offset+1));
+    });
+  });
+
+  it('seek() - bad offset', function () {
+    return wordpos.seek('foobar', offset_pos).catch(function (err) {
+      assert(err instanceof Error);
+      assert.equal(err.message, 'offset must be valid positive number.');
+    });
+  });
+
 });
