@@ -366,7 +366,7 @@ describe('seek()...', function() {
         assert(err instanceof Error);
         assert.equal(err.message, 'offset must be valid positive number.');
         done();
-      });
+      }).catch(_.noop); // UnhandledPromiseRejectionWarning
   });
 
   it('should handle wrong offset', function(done) {
@@ -376,7 +376,7 @@ describe('seek()...', function() {
       assert.equal(err.message, 'Bad data at location ' + bad_offset);
       assert.deepEqual(result, {});
       done();
-    });
+    }).catch(_.noop); // UnhandledPromiseRejectionWarning;
   });
 
   it('should handle very large offset', function(done) {
@@ -386,7 +386,7 @@ describe('seek()...', function() {
       assert.equal(err.message, 'no data at offset ' + bad_offset);
       assert.deepEqual(result, {});
       done();
-    });
+    }).catch(_.noop); // UnhandledPromiseRejectionWarning;
   });
 
   it('should handle bad pos', function(done) {
@@ -394,13 +394,13 @@ describe('seek()...', function() {
       assert(err instanceof Error);
       assert(/Incorrect POS/.test(err.message));
       done();
-    });
+    }).catch(_.noop); // UnhandledPromiseRejectionWarning;
   });
 
   it('should handle wrong pos', function(done) {
     wordpos.seek(offset, 'v', function(err, result){
       assert.equal(err.message, 'Bad data at location ' + offset);
-    });
+    }).catch(_.noop); // UnhandledPromiseRejectionWarning;
     done();
   });
 

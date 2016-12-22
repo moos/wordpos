@@ -289,7 +289,10 @@ See [bench/README](bench).
 
 ## Changes
 
-1.1 - 
+1.1.1
+ - Fix DeprecationWarning for node 7.x
+ 
+1.1.0 
  - added seek() method
  - added lexName property
  

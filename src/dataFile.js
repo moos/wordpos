@@ -178,7 +178,7 @@ function lookup(offsets, callback) {
   function closeFile() {
     if (--self.refcount === 0) {
       //console.log(' ... closing', self.filePath);
-      fs.close(self.fd);
+      fs.closeSync(self.fd);
       self.fd = null;
     }
     return Promise.resolve();

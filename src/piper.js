@@ -72,7 +72,7 @@ piper.wrapper = function(self, task /*, result...*/){
 
   if (--self.refcount === 0) {
     //console.log(' ... closing', self.filePath);
-    fs.close(self.fd);
+    fs.closeSync(self.fd);
     self.fd = null;
   }
 };
