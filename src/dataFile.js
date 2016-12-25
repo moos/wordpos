@@ -96,7 +96,7 @@ function readLocation(location, callback) {
     file = this,
     str = '',
     len = file.nominalLineLength,
-    buffer = new Buffer(len);
+    buffer = new Buffer(len);   // TODO @deprecated as of node 6.0
 
   readChunk(location, function(err, count) {
     if (err) {
@@ -109,7 +109,11 @@ function readLocation(location, callback) {
   });
 
   function readChunk(pos, cb) {
+    var nonDataErr = new Error('no data at offset ' + pos);
+
     fs.read(file.fd, buffer, 0, len, pos, function (err, count) {
+      if (!count) return cb(nonDataErr, count);
+
       str += buffer.toString('ascii');
       var eol = str.indexOf('\n');
       //console.log('  -- read %d bytes at <%d>', count, pos, eol);
@@ -119,7 +123,7 @@ function readLocation(location, callback) {
       }
 
       str = str.substr(0, eol);
-      if (str === '' && !err) err = new Error('no data at offset ' + pos);
+      if (str === '' && !err) err = nonDataErr;
       cb(err, count);
     });
   }
@@ -167,7 +171,7 @@ function lookup(offsets, callback) {
 
   function openFile() {
     if (!self.fd) {
-      //console.log(' ... opening', self.filePath);
+      // console.log(' ... opening', self.filePath);
       self.fd = fs.openSync(self.filePath, 'r');
     }
     // ref count so we know when to close the main index file
@@ -177,7 +181,7 @@ function lookup(offsets, callback) {
 
   function closeFile() {
     if (--self.refcount === 0) {
-      //console.log(' ... closing', self.filePath);
+      // console.log(' ... closing', self.filePath);
       fs.closeSync(self.fd);
       self.fd = null;
     }

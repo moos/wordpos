@@ -37,8 +37,7 @@ var str = "The angry bear chased the frightened little squirrel",
     rest: [ 'The' ]
   },
   garble = 'garblegarble',	// expect not to find word
-  offset = 1285602,
-  offset_pos ='a';
+  offset = 1285602;
 
 
 
@@ -361,6 +360,15 @@ describe('randX()...', function() {
 
 describe('seek()...', function() {
 
+  it('should seek offset', function(done) {
+    wordpos.seek(offset, 'a', function(err, result) {
+      assert.equal(result.synsetOffset, offset);
+      assert.equal(result.pos, 's');
+      assert.equal(result.lemma, 'amazing');
+      done();
+    });
+  });
+
   it('should handle bad offset', function(done) {
       wordpos.seek('foobar', 'a', function(err, result){
         assert(err instanceof Error);
@@ -371,7 +379,7 @@ describe('seek()...', function() {
 
   it('should handle wrong offset', function(done) {
     var bad_offset = offset + 1;
-    wordpos.seek(bad_offset, offset_pos, function(err, result) {
+    wordpos.seek(bad_offset, 'a', function(err, result) {
       assert(err instanceof Error);
       assert.equal(err.message, 'Bad data at location ' + bad_offset);
       assert.deepEqual(result, {});
@@ -381,7 +389,7 @@ describe('seek()...', function() {
 
   it('should handle very large offset', function(done) {
     var bad_offset = offset + 100000000;
-    wordpos.seek(bad_offset, offset_pos, function(err, result) {
+    wordpos.seek(bad_offset, 'a', function(err, result) {
       assert(err instanceof Error);
       assert.equal(err.message, 'no data at offset ' + bad_offset);
       assert.deepEqual(result, {});
@@ -389,7 +397,7 @@ describe('seek()...', function() {
     }).catch(_.noop); // UnhandledPromiseRejectionWarning;
   });
 
-  it('should handle bad pos', function(done) {
+  it('should handle bad POS', function(done) {
     wordpos.seek(offset, 'g', function(err, result) {
       assert(err instanceof Error);
       assert(/Incorrect POS/.test(err.message));
@@ -397,21 +405,13 @@ describe('seek()...', function() {
     }).catch(_.noop); // UnhandledPromiseRejectionWarning;
   });
 
-  it('should handle wrong pos', function(done) {
+  it('should handle wrong POS', function(done) {
     wordpos.seek(offset, 'v', function(err, result){
       assert.equal(err.message, 'Bad data at location ' + offset);
     }).catch(_.noop); // UnhandledPromiseRejectionWarning;
     done();
   });
 
-  it('should seek offset', function(done) {
-    wordpos.seek(offset, offset_pos, function(err, result) {
-      assert.equal(result.synsetOffset, offset);
-      assert.equal(result.pos, 's');
-      assert.equal(result.lemma, 'amazing');
-      done();
-    });
-  });
 });
 
 
@@ -474,7 +474,7 @@ describe('Promise pattern', function() {
   });
 
   it('seek()', function () {
-    return wordpos.seek(offset, offset_pos).then(function (result) {
+    return wordpos.seek(offset, 'a').then(function (result) {
       assert.equal(result.synsetOffset, offset);
       assert.equal(result.pos, 's');
       assert.equal(result.lemma, 'amazing');
@@ -483,14 +483,14 @@ describe('Promise pattern', function() {
   });
 
   it('seek() - wrong offset', function () {
-    return wordpos.seek(offset + 1, offset_pos).catch(function (err) {
+    return wordpos.seek(offset + 1, 'a').catch(function (err) {
       assert(err instanceof Error);
       assert.equal(err.message, 'Bad data at location ' + (offset+1));
     });
   });
 
   it('seek() - bad offset', function () {
-    return wordpos.seek('foobar', offset_pos).catch(function (err) {
+    return wordpos.seek('foobar', 'a').catch(function (err) {
       assert(err instanceof Error);
       assert.equal(err.message, 'offset must be valid positive number.');
     });
