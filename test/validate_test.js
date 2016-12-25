@@ -14,14 +14,14 @@ var
   assert = chai.assert,
   exec = require('child_process').exec,
   cmd = 'node ' + __dirname + '/../tools/validate ',
-  TIMEOUT_SEC = 30 * 1000,
+  TIMEOUT_SEC = 35 * 1000,
   gDone;
 
 
 describe('validate isX() using fastIndex', function() {
 
   this.timeout(TIMEOUT_SEC);
-  this.slow(1500);
+  this.slow(1800);
 
   it('should validate index.verb', function(done) {
     gDone = done;
