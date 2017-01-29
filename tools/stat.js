@@ -103,6 +103,8 @@ _(process.argv.slice(2)).filter(function(arg){
       lastKey = key;
     })
     .on ("end", function (){
+        if (lastKey === null) 
+            return;
 
       // add EOF offset
       offsets[lastKey].push(eofKey);
