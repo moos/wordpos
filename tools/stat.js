@@ -40,18 +40,43 @@
  *      read index file between the two offsets
  *  	binary search read data O(log avg)
  *
- * Copyright (c) 2012-2016 mooster@42at.com
+ * Copyright (c) 2012-2017 mooster@42at.com
  * https://github.com/moos/wordpos
  *
  * Released under MIT license
  */
+
+var
+  fs = require('fs'),
+  path = require('path'),
+  dictPath = path.resolve(__dirname, '..', 'node_modules', 'wordnet-db', 'dict');
+
+
+// TEMP fix for https://github.com/moos/wordpos/issues/19
+// Ensure /dict file before continuing
+var timer = setInterval(check, 750);
+var tries = 10;
+process.stdout.write('checking ' + dictPath);
+function check() {
+  if (fs.existsSync(dictPath)) {
+      clearInterval(timer);
+      process.stdout.write(' ready\n');
+      main();
+  } else if (--tries <= 0) {
+      console.log('\n%s not ready -- see https://github.com/moos/wordpos/issues/19.  Abandoning!', dictPath)
+      process.exit(1);
+  }
+  process.stdout.write(' ' + tries);
+}
+
+
+function main() {
+
 var
   WNdb = require('../src/wordpos').WNdb,
   util = require('util'),
   BufferedReader = require ('./buffered-reader'),
   _ = require('underscore')._,
-  fs = require('fs'),
-  path = require('path'),
   KEY_LENGTH = 3,
   stats = true,
   eofKey = '_EOF_'; // should be unique
@@ -61,6 +86,7 @@ if (process.argv.length < 3) {
   console.log('#Usage:\nnode stat index.adv ...');
   process.exit(1);
 }
+
 
 _(process.argv.slice(2)).filter(function(arg){
   // disable writing stats file
@@ -153,3 +179,5 @@ _(process.argv.slice(2)).filter(function(arg){
     })
     .read();
 });
+
+}
