@@ -289,7 +289,7 @@ See [bench/README](bench).
 
 ## Changes
 
-1.1.3
+1.1.4
  - temporary fix for #19 issue with npm@5
  
 1.1.2

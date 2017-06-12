@@ -47,9 +47,10 @@
  */
 
 var
+  WNdb = require('../src/wordpos').WNdb,
   fs = require('fs'),
   path = require('path'),
-  dictPath = path.resolve(__dirname, '..', 'node_modules', 'wordnet-db', 'dict');
+  dictPath = WNdb.path;
 
 
 // TEMP fix for https://github.com/moos/wordpos/issues/19
@@ -73,7 +74,6 @@ function check() {
 function main() {
 
 var
-  WNdb = require('../src/wordpos').WNdb,
   util = require('util'),
   BufferedReader = require ('./buffered-reader'),
   _ = require('underscore')._,
