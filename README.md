@@ -289,6 +289,9 @@ See [bench/README](bench).
 
 ## Changes
 
+1.1.5
+ - rollback 1.1.4 changes.  Fix is made in [wordnet-db](https://github.com/moos/wordnet-db).
+ 
 1.1.4
  - temporary fix for #19 issue with npm@5
  
