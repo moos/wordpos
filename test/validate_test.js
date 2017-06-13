@@ -14,7 +14,7 @@ var
   assert = chai.assert,
   exec = require('child_process').exec,
   cmd = 'node ' + __dirname + '/../tools/validate ',
-  TIMEOUT_SEC = 35 * 1000,
+  TIMEOUT_SEC = 45 * 1000,
   gDone;
 
 
