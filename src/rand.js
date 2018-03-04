@@ -169,6 +169,14 @@ var POS_factor = {
  * @returns Promise
  */
 function randAll(opts, callback) {
+
+  if (typeof opts === 'function') {
+    callback = opts;
+    opts = {};
+  } else {
+    opts = _.clone(opts || {});
+  }
+
   var
     profile = this.options.profile,
     start = profile && new Date(),
@@ -179,11 +187,6 @@ function randAll(opts, callback) {
     parts = 'Noun Verb Adjective Adverb'.split(' '),
     self = this;
 
-  if (typeof opts === 'function') {
-    callback = opts;
-  } else {
-    opts = _.clone(opts);
-  }
 
 
   return new Promise(function(resolve, reject) {

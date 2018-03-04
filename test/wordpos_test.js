@@ -449,6 +449,12 @@ describe('Promise pattern', function() {
   });
 
   it('rand()', function () {
+    return wordpos.rand().then(function (result) {
+      assert.equal(result.length, 1);
+    });
+  });
+
+  it('rand({count})', function () {
     return wordpos.rand({count: 5}).then(function (result) {
       assert.equal(result.length, 5);
     });
