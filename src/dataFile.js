@@ -1,7 +1,7 @@
 /*!
  * dataFile.js
  *
- * Copyright (c) 2012-2016 mooster@42at.com
+ * Copyright (c) 2012-2018 mooster@42at.com
  * https://github.com/moos/wordpos
  *
  * Portions: Copyright (c) 2011, Chris Umbel
@@ -96,7 +96,7 @@ function readLocation(location, callback) {
     file = this,
     str = '',
     len = file.nominalLineLength,
-    buffer = new Buffer(len);   // TODO @deprecated as of node 6.0
+    buffer = new Buffer.alloc(len);
 
   readChunk(location, function(err, count) {
     if (err) {

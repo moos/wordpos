@@ -3,7 +3,7 @@
  *
  * 		implements fast index lookup of WordNet's index files
  *
- * Copyright (c) 2012-2016 mooster@42at.com
+ * Copyright (c) 2012-2018 mooster@42at.com
  * https://github.com/moos/wordpos
  *
  * Portions: Copyright (c) 2011, Chris Umbel
@@ -53,7 +53,7 @@ function readIndexForKey(key, index, callback) {
     nextKey = data.offsets[key][1],
     nextOffset = data.offsets[nextKey][0],
     len = nextOffset - offset - 1,
-    buffer = new Buffer(len);
+    buffer = new Buffer.alloc(len);
 
   fs.read(index.fd, buffer, 0, len, offset, function(err, count){
      if (err) return console.log(err);
@@ -79,7 +79,7 @@ function readIndexBetweenKeys(keyStart, keyEnd, index, callback) {
     nextKey = data.offsets[end][1],
     nextOffset = data.offsets[nextKey][0],
     len = nextOffset - offset - 1,
-    buffer = new Buffer(len);
+    buffer = new Buffer.alloc(len);
 
   //console.log('### readIndexBetweenKeys', keyStart, keyEnd, nextKey, len)
   fs.read(index.fd, buffer, 0, len, offset, function(err, count){

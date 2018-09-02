@@ -4,10 +4,10 @@ wordpos
 [![NPM version](https://img.shields.io/npm/v/wordpos.svg)](https://www.npmjs.com/package/wordpos)
 [![Build Status](https://img.shields.io/travis/moos/wordpos/master.svg)](https://travis-ci.org/moos/wordpos)
 
-wordpos is a set of *fast* part-of-speech (POS) utilities for Node.js using fast lookup in the WordNet database. 
+wordpos is a set of *fast* part-of-speech (POS) utilities for Node.js using fast lookup in the WordNet database.
 
-Version 1.x is a major update with no direct dependence on [natural's](http://github.com/NaturalNode/natural) WordNet module, with support for [Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise), and roughly 5x speed improvement over previous version. 
- 
+Version 1.x is a major update with no direct dependence on [natural's](http://github.com/NaturalNode/natural) WordNet module, with support for [Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise), and roughly 5x speed improvement over previous version.
+
 **CAUTION** The WordNet database [wordnet-db](https://github.com/moos/wordnet-db) comprises [155,287 words](http://wordnet.princeton.edu/wordnet/man/wnstats.7WN.html) (3.0 numbers) which uncompress to over **30 MB** of data in several *un*[browserify](https://github.com/substack/node-browserify)-able files.  It is *not* meant for the browser environment.
 
 
@@ -108,7 +108,7 @@ than getPOS() which looks up the word in all index files. [stopwords](lib/natura
 
 If `text` is an *array*, all words are looked-up -- no deduplication, stopword filtering or tokenization is applied.
 
-getX() functions return a Promise. 
+getX() functions return a Promise.
 
 Example:
 
@@ -127,7 +127,7 @@ wordpos.getPOS('The angry bear chased the frightened little squirrel.', console.
   }
 
 ```
-This has no relation to correct grammar of given sentence, where here only 'bear' and 'squirrel' would be considered nouns. 
+This has no relation to correct grammar of given sentence, where here only 'bear' and 'squirrel' would be considered nouns.
 
 #### isNoun(word, callback)
 #### isVerb(word, callback)
@@ -158,7 +158,7 @@ wordpos.isAdverb('fishly', console.log);
 #### lookupAdjective(word, callback)
 #### lookupAdverb(word, callback)
 
-Get complete definition object for `word`.  The lookupX() variants can be faster if you already know the POS of the word.  Signature of the callback is `callback(result, word)` where `result` is an *array* of lookup object(s). 
+Get complete definition object for `word`.  The lookupX() variants can be faster if you already know the POS of the word.  Signature of the callback is `callback(result, word)` where `result` is an *array* of lookup object(s).
 
 Example:
 
@@ -229,11 +229,11 @@ wordpos.rand({starsWith: 'zzz'}, console.log)
 Getting random POS (`randNoun()`, etc.) is generally faster than `rand()`, which may look at multiple POS files until `count` requirement is met.
 
 
-#### parse(text) 
+#### parse(text)
 Returns tokenized array of words in `text`, less duplicates and stopwords. This method is called on all getX() calls internally.
 
 
-#### WordPOS.WNdb 
+#### WordPOS.WNdb
 Access to the [wordnet-db](https://github.com/moos/wordnet-db) object containing the dictionary & index files.
 
 #### WordPOS.stopwords
@@ -280,7 +280,7 @@ As of version 1.0, fast index is always on and cannot be turned off.
 
 ## Command-line: CLI
 
-For CLI usage and examples, see [bin/README](bin). 
+For CLI usage and examples, see [bin/README](bin).
 
 
 ## Benchmark
@@ -289,32 +289,36 @@ See [bench/README](bench).
 
 ## Changes
 
+1.2.0
+ - Fix `new Buffer()` deprecation warning.
+ - Fix npm audit vulnerabilities
+
 1.1.6
  - Fix #25 rand().then with no args
- 
+
 1.1.5
  - rollback 1.1.4 changes.  Fix is made in [wordnet-db](https://github.com/moos/wordnet-db).
- 
+
 1.1.4
  - temporary fix for #19 issue with npm@5
- 
+
 1.1.2
  - Fix DeprecationWarning for node 7.x (1.1.1)
  - Fix occasional error for large offsets during seek
- 
-1.1.0 
+
+1.1.0
  - added seek() method
  - added lexName property
- 
+
 1.0.1
  - Removed npm dependency on Natural.  Certain modules are included in /lib.
  - Add support for ES6 Promises.
  - Improved data file reads for up to **5x** performance increase compared to previous version.
  - Tests are now [mocha](https://mochajs.org/)-based with [chai](http://chaijs.com/) assert interface.
 
-0.1.16 
+0.1.16
  - Changed dependency to wordnet-db (renamed from WNdb)
- 
+
 0.1.15
 - Added `syn` (synonym) and `exp` (example) CLI commands.
 - Fixed `rand` CLI command when no start word given.
@@ -324,19 +328,19 @@ See [bench/README](bench).
 0.1.13
 - Fix crlf issue for command-line script
 
-0.1.12 
+0.1.12
 - fix stopwords not getting excluded when running with CLI
 - added 'stopwords' CLI *command* to show list of stopwords
 - CLI *option* --stopword now renamed to --withStopwords
 
-0.1.10 
+0.1.10
 - rand functionality added
 
 0.1.6
 - added command line tool
 
 0.1.4
-- added fast index 
+- added fast index
 
 License
 -------

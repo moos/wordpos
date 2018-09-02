@@ -8,6 +8,7 @@
  * @version 0.2.0
  *
  * Forked: https://github.com/moos/Node-BufferedReader
+ * 2018-09-02: use Buffer.alloc()
  */
 "use strict";
 
@@ -248,7 +249,7 @@ BufferedReader.prototype._readBytes = function (bytes, cb){
   bytes = max < bytes ? max : bytes;
   if (bytes === 0) return cb (null, null, 0);
 
-  var data = new Buffer (bytes);
+  var data = new Buffer.alloc(bytes);
   var len = me._buffer.length;
 
   if (bytes <= len){
@@ -320,7 +321,7 @@ BufferedReader.prototype.readBytes = function (bytes, cb){
       if (error) return cb (error, null, -1);
 
       me._fd = fd;
-      me._buffer = new Buffer (me._settings.bufferSize);
+      me._buffer = new Buffer.alloc(me._settings.bufferSize);
       me._read (function (error){
         if (error) return cb (error, null, -1);
         me._readBytes (bytes, cb);
