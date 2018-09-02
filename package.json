@@ -1,6 +1,6 @@
 {
   "name": "wordpos",
-  "version": "1.2.0-beta.1",
+  "version": "1.2.0",
   "description": "wordpos is a set of part-of-speech utilities for Node.js using the WordNet database.",
   "author": "Moos <mooster@42at.com>",
   "keywords": [
@@ -16,6 +16,7 @@
   "engines": {
     "node": ">=4"
   },
+  "files": ["bench","bin","lib","src","test","tools"],
   "bin": "./bin/wordpos-cli.js",
   "dependencies": {
     "commander": "^2.0.0",
