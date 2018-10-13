@@ -1,6 +1,6 @@
 {
   "name": "wordpos",
-  "version": "1.2.0",
+  "version": "2.0.0-alpha",
   "description": "wordpos is a set of part-of-speech utilities for Node.js using the WordNet database.",
   "author": "Moos <mooster@42at.com>",
   "keywords": [
@@ -16,14 +16,26 @@
   "engines": {
     "node": ">=4"
   },
-  "files": ["bench","bin","lib","src","test","tools"],
+  "files": [
+    "bench",
+    "bin",
+    "lib",
+    "src",
+    "test",
+    "tools"
+  ],
   "bin": "./bin/wordpos-cli.js",
   "dependencies": {
     "commander": "^2.0.0",
+    "dict": "^1.4.0",
     "underscore": ">=1.3.1",
     "wordnet-db": "^3.1.6"
   },
   "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-stage-2": "^6.24.1",
     "chai": "^4.0.2",
     "mini-bench": "^1.0.0",
     "mocha": "^5.2.0"
@@ -35,7 +47,11 @@
   "main": "./src/wordpos.js",
   "scripts": {
     "postinstall": "node tools/stat.js --no-stats index.adv index.adj index.verb index.noun",
-    "test": "mocha test"
+    "postinstall-web": "node scripts/makeJsonDict.js index data",
+    "test": "mocha test",
+    "start": "npm run start-self",
+    "start-self": "parcel samples/self-hosted/index.html",
+    "start-cdn": "parcel samples/cdn/index.html"
   },
   "license": "MIT"
 }
