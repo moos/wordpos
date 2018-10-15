@@ -1,7 +1,7 @@
 /*!
  * dataFile.js
  *
- * Copyright (c) 2012-2018 mooster@42at.com
+ * Copyright (c) 2012-2019 mooster@42at.com
  * https://github.com/moos/wordpos
  *
  * Portions: Copyright (c) 2011, Chris Umbel
@@ -11,7 +11,11 @@
 
 var fs = require('fs'),
   path = require('path'),
-  _ = require('underscore');
+  _ = require('underscore'),
+  {
+    lineDataToJSON,
+    LEX_NAMES
+  } = require('../common');
 
 /**
  * sanity check read data - line must start with zero-padded location
@@ -23,64 +27,6 @@ function dataCheck(line, location) {
   var pad = '00000000', // 8 zeros
     padded = String(pad + location).slice( - pad.length);
   return line.indexOf(padded) === 0;
-}
-
-/**
- * parse a single data file line, returning data object
- *
- * @param line {string} - a single line from WordNet data file
- * @returns {object}
- *
- * Credit for this routine to https://github.com/NaturalNode/natural
- */
-function lineDataToJSON(line, location) {
-  if (!dataCheck(line, location)) return new Error('Bad data at location ' + location);
-
-  var data = line.split('| '),
-    tokens = data[0].split(/\s+/),
-    ptrs = [],
-    wCnt = parseInt(tokens[3], 16),
-    synonyms = [],
-    i;
-
-  for(i = 0; i < wCnt; i++) {
-    synonyms.push(tokens[4 + i * 2]);
-  }
-
-  var ptrOffset = (wCnt - 1) * 2 + 6;
-  for(i = 0; i < parseInt(tokens[ptrOffset], 10); i++) {
-    ptrs.push({
-      pointerSymbol: tokens[ptrOffset + 1 + i * 4],
-      synsetOffset: parseInt(tokens[ptrOffset + 2 + i * 4], 10),
-      pos: tokens[ptrOffset + 3 + i * 4],
-      sourceTarget: tokens[ptrOffset + 4 + i * 4]
-    });
-  }
-
-  // break "gloss" into definition vs. examples
-  var glossArray = data[1].split("; ");
-  var definition = glossArray[0];
-  var examples = glossArray.slice(1);
-  var lexFilenum = parseInt(tokens[1], 10);
-
-  for (var k = 0; k < examples.length; k++) {
-    examples[k] = examples[k].replace(/\"/g,'').replace(/\s\s+/g,'');
-  }
-
-  return {
-    synsetOffset: parseInt(tokens[0], 10),
-    lexFilenum: lexFilenum,
-    lexName: DataFile.LEX_NAMES[ lexFilenum ],
-    pos: tokens[2],
-    wCnt: wCnt,
-    lemma: tokens[4],
-    synonyms: synonyms,
-    lexId: tokens[5],
-    ptrs: ptrs,
-    gloss: data[1],
-    def: definition,
-    exp: examples
-  };
 }
 
 /**
@@ -98,6 +44,7 @@ function readLocation(location, callback) {
     len = file.nominalLineLength,
     buffer = new Buffer.alloc(len);
 
+  location = Number(location);
   readChunk(location, function(err, count) {
     if (err) {
       //console.log(err);
@@ -105,7 +52,11 @@ function readLocation(location, callback) {
       return;
     }
     //console.log('  read %d bytes at <%d>', count, location);
-    callback(null, lineDataToJSON(str, location));
+
+    callback(null, function() {
+      if (!dataCheck(str, location)) return new Error('Bad data at location ' + location);
+      lineDataToJSON(str, location)
+    });
   });
 
   function readChunk(pos, cb) {
@@ -213,7 +164,6 @@ function promisifyInto(collect) {
   }
 }
 
-
 /**
  * DataFile class
  *
@@ -258,55 +208,8 @@ DataFile.MAX_LINE_LENGTH = {
 /**
  * map of lexFilenum to lex names
  *
- * @see https://wordnet.princeton.edu/wordnet/man/lexnames.5WN.html
  * @type {string[]}
  */
-DataFile.LEX_NAMES = [
-  'adj.all',
-  'adj.pert',
-  'adv.all',
-  'noun.Tops',
-  'noun.act',
-  'noun.animal',
-  'noun.artifact',
-  'noun.attribute',
-  'noun.body',
-  'noun.cognition',
-  'noun.communication',
-  'noun.event',
-  'noun.feeling',
-  'noun.food',
-  'noun.group',
-  'noun.location',
-  'noun.motive',
-  'noun.object',
-  'noun.person',
-  'noun.phenomenon',
-  'noun.plant',
-  'noun.possession',
-  'noun.process',
-  'noun.quantity',
-  'noun.relation',
-  'noun.shape',
-  'noun.state',
-  'noun.substance',
-  'noun.time',
-  'verb.body',
-  'verb.change',
-  'verb.cognition',
-  'verb.communication',
-  'verb.competition',
-  'verb.consumption',
-  'verb.contact',
-  'verb.creation',
-  'verb.emotion',
-  'verb.motion',
-  'verb.perception',
-  'verb.possession',
-  'verb.social',
-  'verb.stative',
-  'verb.weather',
-  'adj.ppl'
-];
+DataFile.LEX_NAMES = LEX_NAMES;
 
 module.exports = DataFile;

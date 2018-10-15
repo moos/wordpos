@@ -3,7 +3,7 @@
  *
  * 		define rand() and randX() functions on wordpos
  *
- * Copyright (c) 2012-2016 mooster@42at.com
+ * Copyright (c) 2012-2019 mooster@42at.com
  * https://github.com/moos/wordpos
  *
  * Released under MIT license
@@ -12,7 +12,14 @@
 var _ = require('underscore')._,
   util = require('util'),
   Trie = require('../lib/natural/trie/trie'),
-  IndexFile = require('./indexFile'),
+
+
+// FIXME
+  IndexFile = require('./node/indexFile'),
+
+
+
+
   KEY_LENGTH = 3;
 
 
@@ -264,4 +271,3 @@ module.exports = {
     wordposProto.randVerb = makeRandX('v');
   }
 };
-

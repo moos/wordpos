@@ -1,162 +1,37 @@
 /*!
-* wordpos.js
+* node/index.js
 *
 *    Node.js part-of-speech utilities using WordNet database.
 *
-* Copyright (c) 2012-2016 mooster@42at.com
+* Copyright (c) 2012-2019 mooster@42at.com
 * https://github.com/moos/wordpos
 *
 * Released under MIT license
 */
 
-var _ = require('underscore')._,
+var
+  _ = require('underscore')._,
   util = require('util'),
-  stopwords = require('../lib/natural/util/stopwords').words,
-  stopwordsStr = makeStopwordString(stopwords),
+  stopwordsStr,
   WNdb = require('wordnet-db'),
   DataFile = require('./dataFile'),
-  IndexFile = require('./indexFile');
+  IndexFile = require('./indexFile'),
+  {
+    nextTick,
+    normalize,
+    tokenizer,
+    prepText,
+    makeStopwordString,
+    stopwords
+  } = require('../util'),
+  {
+    is,
+    get,
+    seek,
+    lookup
+  } = require('../common');
 
-
-function normalize(word) {
-  return word.toLowerCase().replace(/\s+/g, '_');
-}
-
-function makeStopwordString(stopwords) {
-  return ' '+ stopwords.join(' ') +' ';
-}
-
-function isStopword(stopwords, word) {
-  return stopwords.indexOf(' '+word+' ') >= 0;
-}
-
-function tokenizer(str) {
-  return str.split(/\W+/); //_.without(results,'',' ')
-}
-
-function prepText(text) {
-  if (_.isArray(text)) return text;
-  var deduped = _.uniq(tokenizer(text));
-  if (!this.options.stopwords) return deduped;
-  return _.reject(deduped, _.bind(isStopword, null,
-    _.isString(this.options.stopwords) ? this.options.stopwords : stopwordsStr
-  ));
-}
-
-/**
- * factory for main lookup function
- *
- * @param pos {string} - n/v/a/r
- * @returns {Function} - lookup function bound to POS
- */
-function lookup(pos) {
-  return function(word, callback) {
-    var profile = this.options.profile,
-      start = profile && new Date(),
-      files = this.getFilesFor(pos),
-      args = [];
-
-    word = normalize(word);
-
-    // lookup index
-    return files.index.lookup(word)
-      .then(function(result) {
-        if (result) {
-          // lookup data
-          return files.data.lookup(result.synsetOffset).then(done);
-        } else {
-          // not found in index
-          return done([]);
-        }
-      })
-      .catch(done);
-
-    function done(results) {
-      if (results instanceof Error) {
-        args.push([], word);
-      } else {
-        args.push(results, word);
-      }
-      //console.log(3333, args)
-      profile && args.push(new Date() - start);
-      nextTick(callback, args);
-      return results;
-    }
-  };
-}
-
-/**
- * isX() factory function
- *
- * @param pos {string} - n/v/a/r
- * @returns {Function}
- */
-function is(pos){
-  return function(word, callback, _noprofile) {
-    // disable profiling when isX() used internally
-    var profile = this.options.profile && !_noprofile,
-      start = profile && new Date(),
-      args = [],
-      index = this.getFilesFor(pos).index;
-    word = normalize(word);
-
-    return index
-      .lookup(word)
-      .then(function(record) {
-        var result = !!record;
-        args.push(result, word);
-        profile && args.push(new Date() - start);
-        nextTick(callback, args);
-        return result;
-      });
-  };
-}
-
-
-/**
- * getX() factory function
- *
- * @param isFn {function} - an isX() function
- * @returns {Function}
- */
-function get(isFn) {
-  return function(text, callback, _noprofile) {
-    var profile = this.options.profile && !_noprofile,
-      start = profile && new Date(),
-      words = this.parse(text),
-      results = [],
-      self = this;
-
-    //if (!n) return (process.nextTick(done),0);
-    return Promise
-      .all(words.map(exec))
-      .then(done);
-
-    function exec(word) {
-      return self[isFn]
-        .call(self, word, null, /*_noprofile*/ true)
-        .then(function collect(result) {
-          result && results.push(word);
-        });
-    }
-
-    function done(){
-      var args = [results];
-      profile && args.push(new Date() - start);
-      nextTick(callback, args);
-      return results;
-    }
-  };
-}
-
-// setImmediate executes callback AFTER promise handlers.
-// Without it, exceptions in callback may be caught by Promise.
-function nextTick(fn, args) {
-  if (fn) {
-    fn.apply(null, args);
-  }
-}
-
+stopwordsStr = makeStopwordString(stopwords);
 
 /**
  * @class WordPOS
@@ -183,7 +58,7 @@ var WordPOS = function(options) {
   this.advData = new DataFile(dictPath, 'adv');
 
   // define randX() functions
-  require('./rand').init(this);
+  require('../rand').init(this);  // FIXME
 
   if (_.isArray(this.options.stopwords)) {
     this.options.stopwords = makeStopwordString(this.options.stopwords);
@@ -361,7 +236,6 @@ wordposProto.getVerbs = get('isVerb');
  */
 wordposProto.parse = prepText;
 
-
 /**
  * seek - get record at offset for pos
  *
@@ -370,22 +244,7 @@ wordposProto.parse = prepText;
  * @param callback {function} - optional callback
  * @returns Promise
  */
-wordposProto.seek = function(offset, pos, callback){
-  offset = Number(offset);
-  if (_.isNaN(offset) || offset <= 0) return error('offset must be valid positive number.');
-
-  var data = this.getFilesFor(pos).data;
-  if (!data) return error('Incorrect POS - 2nd argument must be a, r, n or v.');
-
-  return data.lookup(offset, callback);
-
-  function error(msg) {
-    var err = new Error(msg);
-    callback && callback(err, {});
-    return Promise.reject(err);
-  }
-};
-
+wordposProto.seek = seek;
 
 /**
  * access to WordNet DB

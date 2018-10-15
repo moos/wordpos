@@ -1,9 +1,9 @@
 /*!
- * indexFile.js
+ * node/indexFile.js
  *
  * 		implements fast index lookup of WordNet's index files
  *
- * Copyright (c) 2012-2018 mooster@42at.com
+ * Copyright (c) 2012-2019 mooster@42at.com
  * https://github.com/moos/wordpos
  *
  * Portions: Copyright (c) 2011, Chris Umbel
@@ -16,6 +16,7 @@ var _ = require('underscore')._,
   path = require('path'),
   fs = require('fs'),
   piper = require('./piper'),
+  { indexLookup } = require('../common'),
   KEY_LENGTH = 3;
 
 
@@ -134,49 +135,6 @@ function find(search, callback) {
 }
 
 /**
- * find a word and prepare its lexical record
- *
- * @param word {string} - search word
- * @param callback {function} - callback function receives result
- * @returns none
- *
- * Credit for this routine to https://github.com/NaturalNode/natural
- */
-function lookup(word, callback) {
-  var self = this;
-
-  return new Promise(function(resolve, reject){
-    self.find(word, function (record) {
-      var indexRecord = null,
-        i;
-
-      if (record.status == 'hit') {
-        var ptrs = [], offsets = [];
-
-        for (i = 0; i < parseInt(record.tokens[3]); i++)
-          ptrs.push(record.tokens[i]);
-
-        for (i = 0; i < parseInt(record.tokens[2]); i++)
-          offsets.push(parseInt(record.tokens[ptrs.length + 6 + i], 10));
-
-        indexRecord = {
-          lemma       : record.tokens[0],
-          pos         : record.tokens[1],
-          ptrSymbol   : ptrs,
-          senseCnt    : parseInt(record.tokens[ptrs.length + 4], 10),
-          tagsenseCnt : parseInt(record.tokens[ptrs.length + 5], 10),
-          synsetOffset: offsets
-        };
-      }
-
-      callback && callback(indexRecord);
-      resolve(indexRecord);
-    });
-  });
-}
-
-
-/**
  * loads fast index data and return fast index find function
  *
  * @param index {object} - the IndexFile instance
@@ -216,7 +174,7 @@ var IndexFile = function(dictPath, name) {
   initIndex(this);
 };
 
-IndexFile.prototype.lookup = lookup;
+IndexFile.prototype.lookup = indexLookup;
 IndexFile.prototype.find = find;
 
 /**

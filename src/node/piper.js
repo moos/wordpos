@@ -4,7 +4,7 @@
  *     executes multiple async i/o tasks and pools similar callbacks,
  *     calling i/o open/close when all incoming tasks are done.
  *
- * Copyright (c) 2012-2016 mooster@42at.com
+ * Copyright (c) 2012-2019 mooster@42at.com
  * https://github.com/moos/wordpos
  *
  * Released under MIT license
@@ -79,4 +79,3 @@ piper.wrapper = function(self, task /*, result...*/){
 
 
 module.exports = piper;
-
