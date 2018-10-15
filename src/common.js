@@ -172,8 +172,6 @@ function is(pos){
  * Credit for this routine to https://github.com/NaturalNode/natural
  */
 function lineDataToJSON(line, location) {
-  // if (!dataCheck(line, location)) return new Error('Bad data at location ' + location);
-
   var data = line.split('| '),
     tokens = data[0].split(/\s+/),
     ptrs = [],

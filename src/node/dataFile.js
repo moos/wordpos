@@ -52,11 +52,9 @@ function readLocation(location, callback) {
       return;
     }
     //console.log('  read %d bytes at <%d>', count, location);
+    if (!dataCheck(str, location)) return callback(new Error('Bad data at location ' + location));
 
-    callback(null, function() {
-      if (!dataCheck(str, location)) return new Error('Bad data at location ' + location);
-      lineDataToJSON(str, location)
-    });
+    callback(null, lineDataToJSON(str, location));
   });
 
   function readChunk(pos, cb) {

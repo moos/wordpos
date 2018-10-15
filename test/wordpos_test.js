@@ -372,7 +372,7 @@ describe('seek()...', function() {
   it('should handle bad offset', function(done) {
       wordpos.seek('foobar', 'a', function(err, result){
         assert(err instanceof Error);
-        assert.equal(err.message, 'offset must be valid positive number.');
+        assert.equal(err.message, 'Offset must be valid positive number: foobar');
         done();
       }).catch(_.noop); // UnhandledPromiseRejectionWarning
   });
@@ -498,7 +498,7 @@ describe('Promise pattern', function() {
   it('seek() - bad offset', function () {
     return wordpos.seek('foobar', 'a').catch(function (err) {
       assert(err instanceof Error);
-      assert.equal(err.message, 'offset must be valid positive number.');
+      assert.equal(err.message, 'Offset must be valid positive number: foobar');
     });
   });
 
