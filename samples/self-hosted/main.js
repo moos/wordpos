@@ -1,6 +1,6 @@
-import WordPOS from '../../src/wordpos';
+import WordPOS from '../../src/browser/index';
 
-console.log(__dirname, WordPOS.defaults)
+console.log('WordPOS.defaults:', WordPOS.defaults);
 
 let wordpos = window.wordpos = new WordPOS({
   // preload: true,
@@ -22,7 +22,7 @@ wordpos.isAdverb('likely', (res, ...profile) => console.log('callback with profi
 wordpos.getAdverbs('this is is lately a likely tricky business this is')
   .then(res => {
     console.log('getAdverbs:', res);
-    console.assert(res[0] === 'lately');
+    console.assert(res[0] === 'lately');  // NOTE: order is NOT gauranteed!
     console.assert(res[1] === 'likely');
   });
 
@@ -30,7 +30,6 @@ wordpos.lookupAdverb('likely')
   .then(res => {
     console.log('lookupAdverb:', res);
     assertLikely(res[0]);
-
   });
 // wordpos.lookup('likely').then(res, console.log('lookup ===', res))
 
