@@ -1,5 +1,14 @@
+/**
+* browser/index.js
+*
+* Copyright (c) 2012-2019 mooster@42at.com
+* https://github.com/moos/wordpos
+*
+* Released under MIT license
+*/
+
 import { stopwords, prepText, makeStopwordString } from '../util';
-import { is, get, lookup } from '../common';
+import { is, get, lookup, seek } from '../common';
 import IndexFile from './indexFile';
 import DataFile from './dataFile';
 
@@ -10,7 +19,6 @@ const POS = {
   r: 'adv'
 };
 
-
 class WordPOS {
 
   options = {};
@@ -18,7 +26,6 @@ class WordPOS {
 
   constructor(config) {
     this.options = Object.assign({}, WordPOS.defaults, config);
-    console.log('wpos ctor -- ', this.options)
 
     this.initFiles();
     if (Array.isArray(this.options.stopwords)) {
@@ -80,6 +87,8 @@ class WordPOS {
   }
 
   parse = prepText;
+
+  seek = seek;
 
   /**
    * isX() - Test if word is given POS
@@ -144,7 +153,6 @@ WordPOS.defaults = {
    * include data files in preload
    * @type {boolean}
    */
-
   includeData: false
 
 };
@@ -154,7 +162,7 @@ WordPOS.defaults = {
  * access to WordNet DB
  * @type {object}
  */
-// WordPOS.WNdb = WNdb;
+// WordPOS.WNdb = WNdb;  // FIXME
 
 /**
  * access to stopwords

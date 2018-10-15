@@ -1,6 +1,15 @@
-import { normalize, nextTick } from './util';
+/**
+* common.js
+*
+* Copyright (c) 2012-2019 mooster@42at.com
+* https://github.com/moos/wordpos
+*
+* Portions: Copyright (c) 2011, Chris Umbel
+* 
+* Released under MIT license
+*/
 
-
+var { normalize, nextTick } = require('./util');
 
 /**
  * factory for main lookup function
@@ -57,7 +66,6 @@ function lookup(pos) {
  */
 function indexLookup(word, callback) {
   var self = this;
-
   return new Promise(function(resolve, reject){
     self.find(word, function (record) {
       var indexRecord = null,
@@ -90,8 +98,6 @@ function indexLookup(word, callback) {
     });
   });
 }
-
-
 
 /**
  * getX() factory function
@@ -129,7 +135,6 @@ function get(isFn) {
   };
 }
 
-
 /**
  * isX() factory function
  *
@@ -157,7 +162,6 @@ function is(pos){
       });
   };
 }
-
 
 /**
  * parse a single data file line, returning data object
@@ -218,6 +222,32 @@ function lineDataToJSON(line, location) {
   };
 }
 
+
+/**
+ * seek - get record at offset for pos
+ *
+ * @param offset {number} - synset offset
+ * @param pos {string} - POS a/r/n/v
+ * @param callback {function} - optional callback
+ * @returns Promise
+ * @this WordPOS
+ */
+function seek(offset, pos, callback){
+  var offsetTmp = Number(offset);
+  if (isNaN(offsetTmp) || offsetTmp <= 0) return error('Offset must be valid positive number: ' + offset);
+
+  var data = this.getFilesFor(pos).data;
+  if (!data) return error('Incorrect POS - 2nd argument must be a, r, n or v.');
+
+  return data.lookup(offset, callback);
+
+  function error(msg) {
+    var err = new Error(msg);
+    callback && callback(err, {});
+    return Promise.reject(err);
+  }
+}
+
 const LEX_NAMES = [
  'adj.all',
  'adj.pert',
@@ -266,10 +296,12 @@ const LEX_NAMES = [
  'adj.ppl'
 ];
 
-export {
+// console.log(333, typeof export)
+module.exports= {
   indexLookup,
   is,
   get,
+  seek,
 
   lineDataToJSON,
   LEX_NAMES,

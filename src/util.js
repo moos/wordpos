@@ -1,6 +1,14 @@
+/**
+* util.js
+*
+* Copyright (c) 2012-2019 mooster@42at.com
+* https://github.com/moos/wordpos
+*
+* Released under MIT license
+*/
+
 let stopwords = require('../lib/natural/util/stopwords').words;
 let stopwordsStr = makeStopwordString(stopwords);
-
 
 function makeStopwordString(stopwords) {
   return ' ' + stopwords.join(' ') + ' ';
@@ -18,8 +26,8 @@ function normalize(word) {
   return word.toLowerCase().replace(/\s+/g, '_');
 }
 
-function isStopword(stopwords, word) {
-  return stopwords.indexOf(' '+word+' ') >= 0;
+function isStopword(stopwordsStr, word) {
+  return stopwordsStr.indexOf(' '+word+' ') >= 0;
 }
 
 function tokenizer(str) {
@@ -47,7 +55,8 @@ function prepText(text) {
   ));
 }
 
-export {
+module.exports = {
+  stopwords,
   nextTick,
   normalize,
   tokenizer,

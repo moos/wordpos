@@ -1,51 +1,42 @@
 <!doctype html>
 <html>
 <head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/javascript.min.js"></script>
+
   <script src="./main.js"></script>
-  <script type="ignore-me">
-
-    // import IndexFile from "../../src/browser/indexFile.js";
-    console.log(333, IndexFile)
-
-    let posExt = ['adj', 'adv', 'noun', 'verb'];
-    let dictRoot = '../../dict/';
-    let files = {};
-
-    function loadPos(pos) {
-
-      return import(dictRoot + 'index.' + pos + '.js');
-
-      console.time('load-' + pos);
-      let get = (name) => {
-        let path = dictRoot + name + '.' + pos + '.json';
-
-        return fetch(path).then(res => res.json()).then(obj => {
-          // console.log(`got ${path}: `, text);
-          files[pos] = files[pos] || {};
-          files[pos][name] = obj;
-          console.timeEnd('load-' + pos);
-        });
-
-      };
-
-      // get('data');
-      return get('index');
+  <style>
+    pre {
+      padding: 2em;
+      display: block;
     }
-
-
-    let pos = 'adv';
-    loadPos(pos).then(result => {
-      console.log('got', pos ,result);
-      window.res = result.default;
-    });
-
-  </script>
+  </style>
 </head>
 
 <body>
  <h1>Self-hosted WordPOS sample</h1>
-  <script>
-  </script>
+  Open console to see results.
+
+ <pre><code>
+   var a = "foo"
+ </code></pre>
+
+   <script>
+   var el = document.querySelector('code');
+   if (fetch) {
+     fetch('./main.txt')
+       .then(res => res.text())
+       .then(txt => {
+         // console.log(111, txt)
+         el.innerText = txt;
+         hljs.initHighlightingOnLoad();
+       });
+   } else {
+     el.innerHTML = 'Open <a href=main.txt>main.js</a>.';
+   }
+   </script>
+
 
 </body>
 </html>

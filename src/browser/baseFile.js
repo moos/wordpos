@@ -1,16 +1,23 @@
-
+/**
+ * browser/baseFile.js
+ *
+ * Copyright (c) 2012-2019 mooster@42at.com
+ * https://github.com/moos/wordpos
+ *
+ * Released under MIT license
+ */
 
 class BaseFile {
 
   /**
-   * file contents
+   * file contents - in browser it's just a string & not a file!
    * @type {Object}
    */
   file = {};
 
   constructor(type, dictPath, posName) {
-    this.filePath = `${dictPath}/${type}.${posName}.js`;
     this.type = type;
+    this.filePath = `${dictPath}/${type}.${posName}.js`;
   }
 
   load() {

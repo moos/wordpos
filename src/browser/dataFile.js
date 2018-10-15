@@ -1,5 +1,5 @@
-/*!
- * dataFile.js
+/**
+ * browser/dataFile.js
  *
  * Copyright (c) 2012-2019 mooster@42at.com
  * https://github.com/moos/wordpos
@@ -61,7 +61,7 @@ function lookup(offsets, callback) {
  * DataFile class
  *
  * @param dictPath {string} - path to dict folder
- * @param name {string} - POS name
+ * @param posName {string} - POS name
  * @constructor
  */
 class DataFile extends BaseFile {
@@ -73,13 +73,7 @@ class DataFile extends BaseFile {
   lookup() {
     return this.ready(lookup, arguments);
   }
-
-  seek() {
-    // return this.ready(find, arguments);
-  }
-
 }
-
 
 /**
  * map of lexFilenum to lex names

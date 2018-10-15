@@ -1,12 +1,8 @@
-/*!
- * indexFile.js
- *
- * 		implements fast index lookup of WordNet's index files
+/**
+ * browser/indexFile.js
  *
  * Copyright (c) 2012-2019 mooster@42at.com
  * https://github.com/moos/wordpos
- *
- * Portions: Copyright (c) 2011, Chris Umbel
  *
  * Released under MIT license
  */
@@ -50,7 +46,7 @@ function find(search, callback) {
  * IndexFile class
  *
  * @param dictPath {string} - WordNet db dict path
- * @param name {string} - name of index: noun, verb, adj, adv
+ * @param posName {string} - name of index: noun, verb, adj, adv
  * @constructor
  */
 class IndexFile extends BaseFile {
