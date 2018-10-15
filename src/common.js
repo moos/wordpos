@@ -5,7 +5,7 @@
 * https://github.com/moos/wordpos
 *
 * Portions: Copyright (c) 2011, Chris Umbel
-* 
+*
 * Released under MIT license
 */
 
@@ -296,7 +296,6 @@ const LEX_NAMES = [
  'adj.ppl'
 ];
 
-// console.log(333, typeof export)
 module.exports= {
   indexLookup,
   is,

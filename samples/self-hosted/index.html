@@ -18,9 +18,7 @@
  <h1>Self-hosted WordPOS sample</h1>
   Open console to see results.
 
- <pre><code>
-   var a = "foo"
- </code></pre>
+ <pre><code> </code></pre>
 
    <script>
    var el = document.querySelector('code');
@@ -28,7 +26,6 @@
      fetch('./main.txt')
        .then(res => res.text())
        .then(txt => {
-         // console.log(111, txt)
          el.innerText = txt;
          hljs.initHighlightingOnLoad();
        });
