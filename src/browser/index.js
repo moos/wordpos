@@ -170,4 +170,6 @@ WordPOS.defaults = {
  */
 WordPOS.stopwords = stopwords;
 
-export default WordPOS;
+// Export as CJS handled by Parcel, otherwise will get WordPOS.default
+// if use: export default WordPOS;
+module.exports = WordPOS;

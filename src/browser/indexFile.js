@@ -8,7 +8,7 @@
  */
 
 import { indexLookup } from '../common';
-import BaseFile from './BaseFile';
+import BaseFile from './baseFile';
 
 /**
  * find a search term in an index file (using fast index)

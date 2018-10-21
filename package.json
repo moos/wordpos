@@ -14,11 +14,12 @@
   ],
   "homepage": "https://github.com/moos/wordpos",
   "engines": {
-    "node": ">=4"
+    "node": ">=6"
   },
   "files": [
     "bench",
     "bin",
+    "dist",
     "lib",
     "src",
     "test",
@@ -50,10 +51,16 @@
     "postinstall": "npm run postinstall-web && npm run postinstall-node",
     "postinstall-node": "node tools/stat.js --no-stats index.adv index.adj index.verb index.noun",
     "postinstall-web": "node scripts/makeJsonDict.js index data",
+
+    "build": "parcel build --detailed-report -o wordpos.min.js --global WordPOS -t browser src/browser/index.js",
     "test": "mocha test",
     "test-browser": "mocha test- # TODO",
-    "prestart": "mkdir dist && symlink-dir dict dist/dict && cp samples/self-hosted/main.js dist/main.txt",
-    "start": "npm run start-self",
+
+    "prestart": "symlink-dir dict samples/self-hosted/dict",
+    "start": "npm run build && http-server",
+
+    "prestart-dev": "rm -rf build && mkdir build && symlink-dir dict build/dict && cp samples/self-hosted/main.js build/main.txt",
+    "start-dev": "npm run start-self -- -d build",
     "start-self": "parcel samples/self-hosted/index.html",
     "start-cdn": "parcel samples/cdn/index.html"
   },

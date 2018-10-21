@@ -10,7 +10,7 @@
  */
 
 import { lineDataToJSON, LEX_NAMES } from '../common';
-import BaseFile from './BaseFile';
+import BaseFile from './baseFile';
 
 /**
  * get parsed line from data file

@@ -2,10 +2,11 @@
 <html>
 <head>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/javascript.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/javascript.min.js"></script>
 
-  <script src="./main.js"></script>
+  <script src="../../dist/wordpos.min.js"></script>
+  <script src="./main.js" name="main"></script>
   <style>
     pre {
       padding: 2em;
@@ -23,14 +24,14 @@
    <script>
    var el = document.querySelector('code');
    if (fetch) {
-     fetch('./main.txt')
+     fetch('main.js')
        .then(res => res.text())
        .then(txt => {
          el.innerText = txt;
          hljs.initHighlightingOnLoad();
        });
    } else {
-     el.innerHTML = 'Open <a href=main.txt>main.js</a>.';
+     el.innerHTML = 'Open <a href=main.js>main.js</a>.';
    }
    </script>
 
