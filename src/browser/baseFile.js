@@ -18,13 +18,16 @@ class BaseFile {
   constructor(type, dictPath, posName) {
     this.type = type;
     this.filePath = `${dictPath}/${type}.${posName}.js`;
+    this.loadError = null;
   }
 
   load() {
+    if (this.loadError) return Promise.reject(this.loadError);
     return import(this.filePath)
       .then(exports => this.file = exports.default)
       .catch(err => {
-        console.error(`Error loading ${this.type} file for ${this.filePath}.`, err);
+        console.error(`Error loading "${this.type}" file ${this.filePath}.`, err);
+        this.loadError = err;
         throw err;
       });
   }

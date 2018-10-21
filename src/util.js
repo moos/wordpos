@@ -56,10 +56,11 @@ function prepText(text) {
 }
 
 module.exports = {
+  isString,
   stopwords,
   nextTick,
   normalize,
   tokenizer,
   prepText,
   makeStopwordString
-}
+};

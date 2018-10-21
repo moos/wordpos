@@ -19,6 +19,7 @@
   "files": [
     "bench",
     "bin",
+    "dict",
     "dist",
     "lib",
     "src",

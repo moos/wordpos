@@ -9,7 +9,9 @@
 * Released under MIT license
 */
 
-if (process.browser) {
+console.log(333, process.browser);
+
+if (11 || process.browser) {
   module.exports = require('./browser');
 } else {
   module.exports = require('./node');

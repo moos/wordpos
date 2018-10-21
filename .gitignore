@@ -1,6 +1,7 @@
-dict
 node_modules
 .idea
 *.iml
 .cache
 build
+dict
+dist

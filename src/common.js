@@ -9,7 +9,13 @@
 * Released under MIT license
 */
 
-var { normalize, nextTick } = require('./util');
+var { normalize, nextTick, isString } = require('./util');
+
+function error(err, callback) {
+  if (isString(err)) err = new Error(err);
+  callback && callback(err, {});
+  return Promise.reject(err);
+}
 
 /**
  * factory for main lookup function
@@ -112,11 +118,18 @@ function get(isFn) {
       start = profile && new Date(),
       words = this.parse(text),
       results = [],
-      self = this;
+      self = this,
+      first = words.shift();
 
-    return Promise
-      .all(words.map(exec))
-      .then(done);
+    // test one first & check for error, otherwise
+    // map is inoccuous to errors!
+    return exec(first)
+      .then(() => Promise.all(words.map(exec)))
+      .then(done)
+      .catch(err => {
+        done(); // callback signature is same!
+        return Promise.reject(err);
+      });
 
     function exec(word) {
       return self[isFn]
@@ -232,18 +245,12 @@ function lineDataToJSON(line, location) {
  */
 function seek(offset, pos, callback){
   var offsetTmp = Number(offset);
-  if (isNaN(offsetTmp) || offsetTmp <= 0) return error('Offset must be valid positive number: ' + offset);
+  if (isNaN(offsetTmp) || offsetTmp <= 0) return error('Offset must be valid positive number: ' + offset, callback);
 
   var data = this.getFilesFor(pos).data;
-  if (!data) return error('Incorrect POS - 2nd argument must be a, r, n or v.');
+  if (!data) return error('Incorrect POS - 2nd argument must be a, r, n or v.', callback);
 
   return data.lookup(offset, callback);
-
-  function error(msg) {
-    var err = new Error(msg);
-    callback && callback(err, {});
-    return Promise.reject(err);
-  }
 }
 
 const LEX_NAMES = [

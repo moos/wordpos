@@ -94,8 +94,8 @@ describe('getX()...', function() {
     });
   });
 
-  it('should get nouns', function(done) {
-    wordpos.getNouns(str, function(result) {
+  it.only('should get nouns', function(done) {
+    wordpos.getNouns('foot bar', function(result) {
       assert.sameMembers(result, expected.nouns);
       done();
     });

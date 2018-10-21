@@ -12,6 +12,8 @@ import { is, get, lookup, seek } from '../common';
 import IndexFile from './indexFile';
 import DataFile from './dataFile';
 
+console.log(4545, ' borwser index')
+
 const POS = {
   n: 'noun',
   v: 'verb',
