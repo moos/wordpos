@@ -22,6 +22,12 @@ function nextTick(fn, args) {
   }
 }
 
+// offsets must be zero-padded to 8 chars
+function zeroPad(str) {
+  var pad = '00000000'; // 8 zeros
+  return String(pad + str).slice(-pad.length);
+}
+
 function normalize(word) {
   return word.toLowerCase().replace(/\s+/g, '_');
 }
@@ -36,6 +42,15 @@ function tokenizer(str) {
 
 function uniq(arr) {
   return arr.filter((v, i) => arr.indexOf(v) === i);
+}
+
+function diff(arr, subArr) {
+  return arr.filter(x => !subArr.includes(x));
+}
+
+// flatten an array - 1-deep only!
+function flat(arr) {
+  return [].concat.apply([], arr);
 }
 
 function isString(s) {
@@ -57,10 +72,14 @@ function prepText(text) {
 
 module.exports = {
   isString,
+  zeroPad,
   stopwords,
   nextTick,
   normalize,
   tokenizer,
   prepText,
-  makeStopwordString
+  makeStopwordString,
+  uniq,
+  diff,
+  flat
 };

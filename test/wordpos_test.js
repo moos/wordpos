@@ -23,9 +23,27 @@ var
   chai = require('chai'),
   _ = require('underscore'),
   assert = chai.assert,
+  browser = process.browser = process.argv.includes('@babel/register'),
   WordPOS = require('../src/wordpos'),
-  wordpos = new WordPOS({profile: false});
+  path = require('path'),
+  dictPath = browser ? path.resolve('./test/dict') : undefined,
+  wordpos = new WordPOS({
+    profile: false,
+    dictPath: dictPath
+  });
 
+const assertNoData = (err) => {
+  assert(err instanceof RangeError);
+  assert(/No data at offset/.test(err.message));
+};
+
+const assertOffsetErr = (err) => {
+  assert(err instanceof RangeError);
+  assert.equal(err.message, 'Offset must be valid positive number: foobar');
+};
+
+
+console.log('Running', browser ? 'browser' : 'node', 'tests');
 chai.config.showDiff = true;
 
 var str = "The angry bear chased the frightened little squirrel",
@@ -42,23 +60,22 @@ var str = "The angry bear chased the frightened little squirrel",
 
 
 describe('lookup', function() {
-  it('with callback', function (done) {
-    wordpos.lookup('hegemony', function (result) {
+
+  it('with callback', function () {
+    return wordpos.lookup('hegemony', function (result) {
       assert.equal(result.length, 1);
       assert.equal(result[0].pos, 'n');
       assert.equal(result[0].lemma, 'hegemony');
       assert.equal(result[0].synonyms.length, 1);
-      done();
     });
   });
 
-  it('with Promise', function (done) {
-    wordpos.lookup('hegemony').then(function (result) {
+  it('with Promise', function () {
+    return wordpos.lookup('hegemony').then(function (result) {
       assert.equal(result.length, 1);
       assert.equal(result[0].pos, 'n');
       assert.equal(result[0].lemma, 'hegemony');
       assert.equal(result[0].synonyms.length, 1);
-      done();
     });
   });
 });
@@ -83,42 +100,38 @@ describe('options passed to constructor', function() {
 
 
 describe('getX()...', function() {
-  it('should get all POS', function(done) {
-    wordpos.getPOS(str, function(result) {
+
+  it('should get all POS', function() {
+    return wordpos.getPOS(str, function(result) {
       assert.sameMembers(result.nouns, expected.nouns);
       assert.sameMembers(result.verbs, expected.verbs);
       assert.sameMembers(result.adjectives, expected.adjectives);
       assert.sameMembers(result.adverbs, expected.adverbs);
       assert.sameMembers(result.rest, expected.rest);
-      done();
     });
   });
 
-  it.only('should get nouns', function(done) {
-    wordpos.getNouns('foot bar', function(result) {
+  it('should get nouns', function() {
+    return wordpos.getNouns(str, function(result) {
       assert.sameMembers(result, expected.nouns);
-      done();
     });
   });
 
-  it('should get verbs', function(done) {
-    wordpos.getVerbs(str, function(result) {
+  it('should get verbs', function() {
+    return wordpos.getVerbs(str, function(result) {
       assert.sameMembers(result, expected.verbs);
-      done();
     });
   });
 
-  it('should get adjectives', function(done) {
-    wordpos.getAdjectives(str, function(result) {
+  it('should get adjectives', function() {
+    return wordpos.getAdjectives(str, function(result) {
       assert.sameMembers(result, expected.adjectives);
-      done();
     });
   });
 
-  it('should get adverbs', function(done) {
-    wordpos.getAdverbs(str, function(result) {
+  it('should get adverbs', function() {
+    return wordpos.getAdverbs(str, function(result) {
       assert.sameMembers(result, expected.adverbs);
-      done();
     });
   });
 });
@@ -223,7 +236,7 @@ describe('lookupX()...', function() {
 
 
 describe('profile option', function() {
-  var wp = new WordPOS({profile : true});
+  var wp = new WordPOS({profile : true, dictPath: dictPath});
 
   it('should return time argument for isX()', function(done){
     wp.isNoun(garble, function(result, word, time) {
@@ -248,7 +261,7 @@ describe('profile option', function() {
   });
 
   it('should disable stopword filtering', function(done){
-    var wp = new WordPOS({stopwords : false}),
+    var wp = new WordPOS({stopwords : false, dictPath: dictPath}),
       strWithStopwords = 'about after all';  // 3 adjective stopwords
     wp.getAdjectives(strWithStopwords, function(result){
       assert.equal(result.length, 3);
@@ -257,7 +270,7 @@ describe('profile option', function() {
   });
 
   it('should use custom stopwords', function(done){
-    var wp = new WordPOS({stopwords : ['all']}),
+    var wp = new WordPOS({stopwords : ['all'], dictPath: dictPath}),
       strWithStopwords = 'about after all';  // 3 adjective stopwords
     // 'all' should be filtered
     wp.getAdjectives(strWithStopwords, function(result){
@@ -269,7 +282,7 @@ describe('profile option', function() {
 
 
 describe('nested callbacks on same index key', function() {
-  var wp = new WordPOS(),
+  var wp = new WordPOS({dictPath: dictPath}),
     word1 = 'head',
     word2 =  word1 + 'er';
 
@@ -360,56 +373,38 @@ describe('randX()...', function() {
 
 describe('seek()...', function() {
 
-  it('should seek offset', function(done) {
-    wordpos.seek(offset, 'a', function(err, result) {
+  it('should seek offset', function() {
+    return wordpos.seek(offset, 'a', function(err, result) {
       assert.equal(result.synsetOffset, offset);
       assert.equal(result.pos, 's');
       assert.equal(result.lemma, 'amazing');
-      done();
     });
   });
 
-  it('should handle bad offset', function(done) {
-      wordpos.seek('foobar', 'a', function(err, result){
-        assert(err instanceof Error);
-        assert.equal(err.message, 'Offset must be valid positive number: foobar');
-        done();
-      }).catch(_.noop); // UnhandledPromiseRejectionWarning
+  it('should handle bad offset', function() {
+    return wordpos.seek('foobar', 'a', assertOffsetErr).catch(assertOffsetErr);
   });
 
-  it('should handle wrong offset', function(done) {
-    var bad_offset = offset + 1;
-    wordpos.seek(bad_offset, 'a', function(err, result) {
-      assert(err instanceof Error);
-      assert.equal(err.message, 'Bad data at location ' + bad_offset);
-      assert.deepEqual(result, {});
-      done();
-    }).catch(_.noop); // UnhandledPromiseRejectionWarning;
+  it('should handle wrong offset', function() {
+    const bad_offset = offset + 1;
+    return wordpos.seek(bad_offset, 'a', assertNoData).catch(assertNoData);
   });
 
-  it('should handle very large offset', function(done) {
-    var bad_offset = offset + 100000000;
-    wordpos.seek(bad_offset, 'a', function(err, result) {
-      assert(err instanceof Error);
-      assert.equal(err.message, 'no data at offset ' + bad_offset);
-      assert.deepEqual(result, {});
-      done();
-    }).catch(_.noop); // UnhandledPromiseRejectionWarning;
+  it('should handle very large offset', function() {
+    const bad_offset = offset + 999999999;
+    return wordpos.seek(bad_offset, 'a', assertNoData).catch(assertNoData);
   });
 
-  it('should handle bad POS', function(done) {
-    wordpos.seek(offset, 'g', function(err, result) {
+  it('should handle bad POS', function() {
+    const assertErr = err => {
       assert(err instanceof Error);
       assert(/Incorrect POS/.test(err.message));
-      done();
-    }).catch(_.noop); // UnhandledPromiseRejectionWarning;
+    };
+    return wordpos.seek(offset, 'g', assertErr).catch(assertErr);
   });
 
-  it('should handle wrong POS', function(done) {
-    wordpos.seek(offset, 'v', function(err, result){
-      assert.equal(err.message, 'Bad data at location ' + offset);
-    }).catch(_.noop); // UnhandledPromiseRejectionWarning;
-    done();
+  it('should handle wrong POS', function() {
+    return wordpos.seek(offset, 'v', assertNoData).catch(assertNoData);
   });
 
 });
@@ -489,17 +484,11 @@ describe('Promise pattern', function() {
   });
 
   it('seek() - wrong offset', function () {
-    return wordpos.seek(offset + 1, 'a').catch(function (err) {
-      assert(err instanceof Error);
-      assert.equal(err.message, 'Bad data at location ' + (offset+1));
-    });
+    return wordpos.seek(offset + 1, 'a').catch(assertNoData);
   });
 
   it('seek() - bad offset', function () {
-    return wordpos.seek('foobar', 'a').catch(function (err) {
-      assert(err instanceof Error);
-      assert.equal(err.message, 'Offset must be valid positive number: foobar');
-    });
+    return wordpos.seek('foobar', 'a').catch(assertOffsetErr);
   });
 
 });

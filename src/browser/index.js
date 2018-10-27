@@ -7,12 +7,10 @@
 * Released under MIT license
 */
 
-import { stopwords, prepText, makeStopwordString } from '../util';
-import { is, get, lookup, seek } from '../common';
-import IndexFile from './indexFile';
-import DataFile from './dataFile';
-
-console.log(4545, ' borwser index')
+const { stopwords, prepText, makeStopwordString } = require('../util');
+const { is, get, getPOS, lookup, seek, lookupPOS } = require('../common');
+const IndexFile = require('./indexFile');
+const DataFile = require('./dataFile');
 
 const POS = {
   n: 'noun',
@@ -105,6 +103,7 @@ class WordPOS {
    * getX() - Find all words in string that are given POS
    * @see get
    */
+  getPOS = getPOS;
   getAdjectives = get('isAdjective');
   getAdverbs = get('isAdverb');
   getNouns = get('isNoun');
@@ -114,6 +113,7 @@ class WordPOS {
    * lookupX() - Lookup word definition if already know POS
    * @see lookup
    */
+  lookup = lookupPOS;
   lookupAdjective = lookup('a');
   lookupAdverb = lookup('r');
   lookupNoun = lookup('n');
@@ -158,7 +158,6 @@ WordPOS.defaults = {
   includeData: false
 
 };
-
 
 /**
  * access to WordNet DB

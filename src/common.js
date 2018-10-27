@@ -9,10 +9,10 @@
 * Released under MIT license
 */
 
-var { normalize, nextTick, isString } = require('./util');
+var { normalize, nextTick, isString, uniq, diff, flat } = require('./util');
 
 function error(err, callback) {
-  if (isString(err)) err = new Error(err);
+  if (isString(err)) err = new RangeError(err);
   callback && callback(err, {});
   return Promise.reject(err);
 }
@@ -106,6 +106,47 @@ function indexLookup(word, callback) {
 }
 
 /**
+ * lookup a word in all indexes
+ *
+ * @param word {string} - search word
+ * @param callback {Function} (optional) - callback with (results, word) signature
+ * @returns {Promise}
+ * @this WordPOS
+ */
+function lookupPOS(word, callback) {
+  var self = this,
+    results = [],
+    profile = this.options.profile,
+    start = profile && new Date(),
+    methods = ['lookupAdverb', 'lookupAdjective', 'lookupVerb', 'lookupNoun'];
+
+  return Promise
+    .all(methods.map(exec))
+    .then(done)
+    .catch(error);
+
+  function exec(method) {
+    return self[ method ]
+      .call(self, word)
+      .then(function collect(result){
+        results = results.concat(result);
+      });
+  }
+
+  function done() {
+    var args = [results, word];
+    profile && args.push(new Date() - start);
+    nextTick(callback, args);
+    return results;
+  }
+
+  function error(err) {
+    nextTick(callback, [[], word]);
+    throw err;
+  }
+}
+
+/**
  * getX() factory function
  *
  * @param isFn {function} - an isX() function
@@ -127,7 +168,7 @@ function get(isFn) {
       .then(() => Promise.all(words.map(exec)))
       .then(done)
       .catch(err => {
-        done(); // callback signature is same!
+        // done(); // callback signature is same!  // FIXME
         return Promise.reject(err);
       });
 
@@ -146,6 +187,53 @@ function get(isFn) {
       return results;
     }
   };
+}
+
+/**
+ * getPOS() - Find all POS for all words in given string
+ *
+ * @param text {string} - words to lookup for POS
+ * @param callback {function} (optional) - receives object with words broken into POS or 'rest', ie,
+ * 	    Object: {nouns:[], verbs:[], adjectives:[], adverbs:[], rest:[]}
+ * @return Promise - resolve function receives data object
+ */
+function getPOS(text, callback) {
+  var self = this,
+    data = {nouns:[], verbs:[], adjectives:[], adverbs:[], rest:[]},
+    profile = this.options.profile,
+    start = profile && new Date(),
+    words = this.parse(text),
+    methods = ['getAdverbs', 'getAdjectives', 'getVerbs', 'getNouns'];
+
+  return Promise
+    .all(methods.map(exec))
+    .then(done)
+    .catch(error);
+
+  function exec(method) {
+    return self[ method ]
+      .call(self, text, null, true)
+      .then(function collect(results) {
+        // getAdjectives --> adjectives
+        var pos = method.replace('get','').toLowerCase();
+        data[ pos ] =  results;
+      });
+  }
+
+  function done() {
+    var args = [data];
+    var matches = uniq(flat(Object.values(data)));
+    data.rest = diff(words, matches);
+
+    profile && args.push(new Date() - start);
+    nextTick(callback, args);
+    return data;
+  }
+
+  function error(err) {
+    nextTick(callback, []);
+    throw err;
+  }
 }
 
 /**
@@ -253,6 +341,35 @@ function seek(offset, pos, callback){
   return data.lookup(offset, callback);
 }
 
+/**
+ * factory function for randX()
+ *
+ * @param pos {string} - a,r,n,v
+ * @returns {Function} - rand function bound to an index file
+ * @this WordPOS
+ */
+function makeRandX(pos){
+  return function(opts, callback, _noprofile) {
+    // disable profiling when isX() used internally
+    var profile = this.options.profile && !_noprofile,
+      start = profile && new Date(),
+      args = [],
+      index = this.getFilesFor(pos).index,
+      startsWith = opts && opts.startsWith || '',
+      count = opts && opts.count || 1;
+
+    if (typeof opts === 'function') {
+      callback = opts;
+    }
+
+    return index.rand(startsWith, count, function (record) {
+      args.push(record, startsWith);
+      profile && args.push(new Date() - start);
+      callback && callback.apply(null, args);
+    });
+  };
+}
+
 const LEX_NAMES = [
  'adj.all',
  'adj.pert',
@@ -306,8 +423,11 @@ module.exports= {
   is,
   get,
   seek,
+  getPOS,
+  makeRandX,
 
   lineDataToJSON,
   LEX_NAMES,
-  lookup
+  lookup,
+  lookupPOS
 }

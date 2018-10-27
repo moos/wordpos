@@ -23,8 +23,12 @@ class BaseFile {
 
   load() {
     if (this.loadError) return Promise.reject(this.loadError);
-    return import(this.filePath)
-      .then(exports => this.file = exports.default)
+    let promise = Promise.resolve(require(this.filePath));
+
+    return promise
+      .then(exports => {
+        this.file = exports.default
+      })
       .catch(err => {
         console.error(`Error loading "${this.type}" file ${this.filePath}.`, err);
         this.loadError = err;
@@ -37,4 +41,5 @@ class BaseFile {
   }
 }
 
-export default BaseFile;
+// export default BaseFile;
+module.exports = BaseFile;

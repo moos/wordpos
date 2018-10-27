@@ -7,8 +7,8 @@
  * Released under MIT license
  */
 
-import { indexLookup } from '../common';
-import BaseFile from './baseFile';
+const { indexLookup } = require('../common');
+const BaseFile = require('./baseFile');
 
 /**
  * find a search term in an index file (using fast index)
@@ -64,4 +64,4 @@ class IndexFile extends BaseFile {
   }
 }
 
-export default IndexFile;
+module.exports = IndexFile;

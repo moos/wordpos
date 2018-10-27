@@ -12,6 +12,7 @@
 var fs = require('fs'),
   path = require('path'),
   _ = require('underscore'),
+  { zeroPad } = require('../util'),
   {
     lineDataToJSON,
     LEX_NAMES
@@ -24,9 +25,7 @@ var fs = require('fs'),
  * @return {boolean} true if line data is good
  */
 function dataCheck(line, location) {
-  var pad = '00000000', // 8 zeros
-    padded = String(pad + location).slice( - pad.length);
-  return line.indexOf(padded) === 0;
+  return line.indexOf(zeroPad(location)) === 0;
 }
 
 /**
@@ -52,13 +51,13 @@ function readLocation(location, callback) {
       return;
     }
     //console.log('  read %d bytes at <%d>', count, location);
-    if (!dataCheck(str, location)) return callback(new Error('Bad data at location ' + location));
+    if (!dataCheck(str, location)) return callback(new RangeError('No data at offset ' + location));
 
     callback(null, lineDataToJSON(str, location));
   });
 
   function readChunk(pos, cb) {
-    var nonDataErr = new Error('no data at offset ' + pos);
+    var nonDataErr = new RangeError('No data at offset ' + pos);
 
     fs.read(file.fd, buffer, 0, len, pos, function (err, count) {
       if (!count) return cb(nonDataErr, count);

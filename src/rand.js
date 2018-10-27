@@ -12,44 +12,10 @@
 var _ = require('underscore')._,
   util = require('util'),
   Trie = require('../lib/natural/trie/trie'),
-
-
-// FIXME
-  IndexFile = require('./node/indexFile'),
-
-
-
-
+  indexPath = process.browser ? 'browser' : 'node',
+  IndexFile = require(`./${indexPath}/indexFile`),
   KEY_LENGTH = 3;
 
-
-/**
- * factory function for randX()
- *
- * @param pos {string} - a,r,n,v
- * @returns {Function} - rand function bound to an index file
- */
-function makeRandX(pos){
-  return function(opts, callback, _noprofile) {
-    // disable profiling when isX() used internally
-    var profile = this.options.profile && !_noprofile,
-      start = profile && new Date(),
-      args = [],
-      index = this.getFilesFor(pos).index,
-      startsWith = opts && opts.startsWith || '',
-      count = opts && opts.count || 1;
-
-    if (typeof opts === 'function') {
-      callback = opts;
-    }
-
-    return index.rand(startsWith, count, function (record) {
-      args.push(record, startsWith);
-      profile && args.push(new Date() - start);
-      callback && callback.apply(null, args);
-    });
-  };
-}
 
 /**
  * rand function (bound to index)
@@ -58,6 +24,7 @@ function makeRandX(pos){
  * @param num {number} - number of words to return
  * @param callback {function} - callback function, receives words array and startsWith
  * @returns Promise
+ * @this IndexFile
  */
 function rand(startsWith, num, callback){
   var self = this,

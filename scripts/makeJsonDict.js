@@ -9,6 +9,7 @@ let fs = require('fs');
 let path = require('path');
 
 let outPath = './dict';
+let testPath = './test/dict';
 let posExt = ['adj', 'adv', 'noun', 'verb'];
 let dictRoot = './node_modules/wordnet-db/dict/';
 const fileTypes = {
@@ -30,11 +31,16 @@ function uniq(arr) {
 console.time('Done');
 
 // create out directory
-try {
-  fs.statSync(outPath);
-} catch (e) {
-  fs.mkdirSync(outPath);
-}
+const ensurePath = (path) => {
+  try {
+    fs.statSync(path);
+  } catch (e) {
+    fs.mkdirSync(path);
+  }
+};
+
+ensurePath(outPath);
+ensurePath(testPath);
 
 function processFile(name) {
 
@@ -66,8 +72,13 @@ function processFile(name) {
   function writeFile(pos, obj) {
     console.time('  write');
     let text = JSON.stringify(obj);
-    text = 'export default ' + text;
-    fs.writeFileSync(path.resolve(outPath, name + '.' + pos + '.js'), text);
+    fs.writeFileSync(path.resolve(outPath, name + '.' + pos + '.js'),
+      'export default ' + text);
+
+    // also write for mocha tests
+    fs.writeFileSync(path.resolve(testPath, name + '.' + pos + '.js'),
+      'module.exports.default = ' + text);
+
     console.timeEnd('  write');
   }
 

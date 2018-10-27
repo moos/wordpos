@@ -27,8 +27,10 @@ var
   {
     is,
     get,
+    getPOS,
     seek,
-    lookup
+    lookup,
+    lookupPOS
   } = require('../common');
 
 stopwordsStr = makeStopwordString(stopwords);
@@ -58,7 +60,7 @@ var WordPOS = function(options) {
   this.advData = new DataFile(dictPath, 'adv');
 
   // define randX() functions
-  require('../rand').init(this);  // FIXME
+  require('../rand').init(this);
 
   if (_.isArray(this.options.stopwords)) {
     this.options.stopwords = makeStopwordString(this.options.stopwords);
@@ -94,39 +96,7 @@ var wordposProto = WordPOS.prototype;
  * @param callback {Function} (optional) - callback with (results, word) signature
  * @returns {Promise}
  */
-wordposProto.lookup = function(word, callback) {
-  var self = this,
-    results = [],
-    profile = this.options.profile,
-    start = profile && new Date(),
-    methods = ['lookupAdverb', 'lookupAdjective', 'lookupVerb', 'lookupNoun'];
-
-  return Promise
-    .all(methods.map(exec))
-    .then(done)
-    .catch(error);
-
-  function exec(method) {
-    return self[ method ]
-      .call(self, word)
-      .then(function collect(result){
-        results = results.concat(result);
-      });
-  }
-
-  function done() {
-    var args = [results, word];
-    profile && args.push(new Date() - start);
-    nextTick(callback, args);
-    return results;
-  }
-
-  function error(err) {
-    nextTick(callback, [[], word]);
-    throw err;
-  }
-};
-
+wordposProto.lookup = lookupPOS;
 
 /**
  * getPOS() - Find all POS for all words in given string
@@ -136,49 +106,7 @@ wordposProto.lookup = function(word, callback) {
  * 	    Object: {nouns:[], verbs:[], adjectives:[], adverbs:[], rest:[]}
  * @return Promise - resolve function receives data object
  */
-wordposProto.getPOS = function(text, callback) {
-  var self = this,
-    data = {nouns:[], verbs:[], adjectives:[], adverbs:[], rest:[]},
-    profile = this.options.profile,
-    start = profile && new Date(),
-    words = this.parse(text),
-    methods = ['getAdverbs', 'getAdjectives', 'getVerbs', 'getNouns'];
-
-  return Promise
-    .all(methods.map(exec))
-    .then(done)
-    .catch(error);
-
-  function exec(method) {
-    return self[ method ]
-      .call(self, text, null, true)
-      .then(function collect(results) {
-        // getAdjectives --> adjectives
-        var pos = method.replace('get','').toLowerCase();
-        data[ pos ] =  results;
-      });
-  }
-
-  function done() {
-    var matches = _(data).chain()
-      .values()
-      .flatten()
-      .uniq()
-      .value(),
-      args = [data];
-
-    data.rest =  _(words).difference(matches);
-
-    profile && args.push(new Date() - start);
-    nextTick(callback, args);
-    return data;
-  }
-
-  function error(err) {
-    nextTick(callback, []);
-    throw err;
-  }
-};
+wordposProto.getPOS = getPOS;
 
 /**
  * get index and data files for given pos

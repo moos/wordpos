@@ -9,8 +9,9 @@
  * Released under MIT license
  */
 
-import { lineDataToJSON, LEX_NAMES } from '../common';
-import BaseFile from './baseFile';
+const { lineDataToJSON, LEX_NAMES } = require('../common');
+const { zeroPad } = require('../util');
+const BaseFile = require('./baseFile');
 
 /**
  * get parsed line from data file
@@ -43,7 +44,10 @@ function lookup(offsets, callback) {
 
   if (single) offsets = [offsets];
   return new Promise(function(resolve, reject) {
-    results = offsets.map(readLine).filter(valid);
+    results = offsets
+      .map(zeroPad)
+      .map(readLine)
+      .filter(valid);
 
     if (!results.length) {
       let err = new RangeError(`No data at offsets ${offsets.join()} in ${self.filePath}.`);
@@ -83,4 +87,4 @@ class DataFile extends BaseFile {
  */
 DataFile.LEX_NAMES = LEX_NAMES;
 
-export default DataFile;
+module.exports = DataFile;
