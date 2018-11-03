@@ -9,6 +9,7 @@
 
 const { stopwords, prepText, makeStopwordString } = require('../util');
 const { is, get, getPOS, lookup, seek, lookupPOS } = require('../common');
+const { randX, rand } = require('../rand');
 const IndexFile = require('./indexFile');
 const DataFile = require('./dataFile');
 
@@ -22,7 +23,6 @@ const POS = {
 class WordPOS {
 
   options = {};
-  loaded = Promise.resolve();
 
   constructor(config) {
     this.options = Object.assign({}, WordPOS.defaults, config);
@@ -31,17 +31,11 @@ class WordPOS {
     if (Array.isArray(this.options.stopwords)) {
       this.options.stopwords = makeStopwordString(this.options.stopwords);
     }
-
-    // TODO rand()
-  }
-
-  ready() {
-    return this.loaded;
   }
 
   initFiles() {
     const keys = Object.keys(POS);
-    const loadOne = (Comp, pos) => new Comp(this.options.dictPath, POS[pos]);
+    const loadOne = (Comp, pos) => new Comp(this.options.dictPath, POS[pos], this.options);
     const loader = (Comp) => keys.map(loadOne.bind(null, Comp));
     const reducer = (arr) => arr.reduce((coll, item, i) => (coll[keys[i]] = item, coll), {});
 
@@ -118,6 +112,17 @@ class WordPOS {
   lookupAdverb = lookup('r');
   lookupNoun = lookup('n');
   lookupVerb = lookup('v');
+
+  /**
+   * define randX()
+   * @see makeRandX
+   */
+  rand = rand;
+  randAdjective = randX('a');
+  randAdverb = randX('r');
+  randNoun = randX('n');
+  randVerb = randX('v');
+
 }
 
 WordPOS.defaults = {
@@ -155,7 +160,13 @@ WordPOS.defaults = {
    * include data files in preload
    * @type {boolean}
    */
-  includeData: false
+  includeData: false,
+
+  /**
+   * set to true to enable debug logging
+   * @type {boolean}
+   */
+  debug: false
 
 };
 

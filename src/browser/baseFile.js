@@ -15,15 +15,28 @@ class BaseFile {
    */
   file = {};
 
-  constructor(type, dictPath, posName) {
+  /**
+   * constructor
+   * @param {type} type - 'index' or 'data'
+   * @param {string} dictPath - path to dict db
+   * @param {string} posName - one of 'noun', 'verb', 'adj', 'adv'
+   * @param {object} [options] - @see WordPOS options
+   */
+
+  constructor(type, dictPath, posName, options) {
     this.type = type;
     this.filePath = `${dictPath}/${type}.${posName}.js`;
+    this.posName = posName;
     this.loadError = null;
+    this.options = Object.assign({}, options);
   }
 
   load() {
     if (this.loadError) return Promise.reject(this.loadError);
+
+    this.options.debug && console.time('index load ' + this.posName);
     let promise = Promise.resolve(require(this.filePath));
+    this.options.debug && console.timeEnd('index load ' + this.posName)
 
     return promise
       .then(exports => {

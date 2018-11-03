@@ -1,5 +1,5 @@
 /*!
- * rand.js
+ * node/rand.js
  *
  * 		define rand() and randX() functions on wordpos
  *
@@ -10,12 +10,10 @@
  */
 
 var _ = require('underscore')._,
-  util = require('util'),
-  Trie = require('../lib/natural/trie/trie'),
-  indexPath = process.browser ? 'browser' : 'node',
-  IndexFile = require(`./${indexPath}/indexFile`),
+  { randX, rand } = require('../rand'),
+  Trie = require('../../lib/natural/trie/trie'),
+  IndexFile = require(`./indexFile`),
   KEY_LENGTH = 3;
-
 
 /**
  * rand function (bound to index)
@@ -26,15 +24,14 @@ var _ = require('underscore')._,
  * @returns Promise
  * @this IndexFile
  */
-function rand(startsWith, num, callback){
+function randomizer(startsWith, num, callback){
   var self = this,
     nextKey = null,
     trie = this.fastIndex.trie,
     key, keys;
 
   return new Promise(function(resolve, reject) {
-
-    //console.log('-- ', startsWith, num, self.fastIndex.indexKeys.length);
+    // console.log('-- ', startsWith, num, self.fastIndex.indexKeys.length);
     if (startsWith) {
       key = startsWith.slice(0, KEY_LENGTH);
 
@@ -45,10 +42,12 @@ function rand(startsWith, num, callback){
 
         // calc trie if haven't done so yet
         if (!trie) {
+          // console.time('trie');
           trie = new Trie();
           trie.addStrings(self.fastIndex.indexKeys);
           self.fastIndex.trie = trie;
           //console.log(' +++ Trie calc ');
+          // console.timeEnd('trie')
         }
 
         try {
@@ -129,80 +128,6 @@ function rand(startsWith, num, callback){
   }); // Promise
 }
 
-// relative weight of each POS word count (DB 3.1 numbers)
-var POS_factor = {
-  Noun: 26,
-  Verb: 3,
-  Adjective: 5,
-  Adverb: 1,
-  Total: 37
-};
-
-/**
- * rand() - for all Index files
- * @returns Promise
- */
-function randAll(opts, callback) {
-
-  if (typeof opts === 'function') {
-    callback = opts;
-    opts = {};
-  } else {
-    opts = _.clone(opts || {});
-  }
-
-  var
-    profile = this.options.profile,
-    start = profile && new Date(),
-    results = [],
-    startsWith = opts && opts.startsWith || '',
-    count = opts && opts.count || 1,
-    args = [null, startsWith],
-    parts = 'Noun Verb Adjective Adverb'.split(' '),
-    self = this;
-
-
-
-  return new Promise(function(resolve, reject) {
-    // select at random a POS to look at
-    var doParts = _.sample(parts, parts.length);
-    tryPart();
-
-    function tryPart() {
-      var part = doParts.pop(),
-        rand = 'rand' + part,
-        factor = POS_factor[part],
-        weight = factor / POS_factor.Total;
-
-      // pick count according to relative weight
-      opts.count = Math.ceil(count * weight * 1.1); // guard against dupes
-      self[rand](opts, partCallback);
-    }
-
-    function partCallback(result) {
-      if (result) {
-        results = _.uniq(results.concat(result));  // make sure it's unique!
-      }
-
-      if (results.length < count && doParts.length) {
-        return tryPart();
-      }
-
-      // final random and trim excess
-      results = _.sample(results, count);
-      done();
-    }
-
-    function done() {
-      profile && (args.push(new Date() - start));
-      args[0] = results;
-      callback && callback.apply(null, args);
-      resolve(results);
-    }
-
-  }); // Promise
-}
-
 /**
  * bind rand() to index
  *
@@ -210,31 +135,30 @@ function randAll(opts, callback) {
  * @returns {function} - bound rand function for index
  */
 function randomify(index){
-  if (!index.fastIndex) throw 'rand requires fastIndex';
-  return _.bind(rand, index);
+  if (!index.fastIndex) throw new Error('rand requires fastIndex');
+  index.rand = _.bind(randomizer, index);
 }
-
 
 
 module.exports = {
 
   init: function(wordposProto) {
-    wordposProto.nounIndex.rand = randomify(wordposProto.nounIndex);
-    wordposProto.verbIndex.rand = randomify(wordposProto.verbIndex);
-    wordposProto.adjIndex.rand = randomify(wordposProto.adjIndex);
-    wordposProto.advIndex.rand = randomify(wordposProto.advIndex);
+    randomify(wordposProto.nounIndex);
+    randomify(wordposProto.verbIndex);
+    randomify(wordposProto.adjIndex);
+    randomify(wordposProto.advIndex);
 
     /**
-     * define rand()
+     * define rand() (all POS)
      */
-    wordposProto.rand = randAll;
+    wordposProto.rand = rand;
 
     /**
      * define randX()
      */
-    wordposProto.randAdjective = makeRandX('a');
-    wordposProto.randAdverb = makeRandX('r');
-    wordposProto.randNoun = makeRandX('n');
-    wordposProto.randVerb = makeRandX('v');
+    wordposProto.randAdjective = randX('a');
+    wordposProto.randAdverb = randX('r');
+    wordposProto.randNoun = randX('n');
+    wordposProto.randVerb = randX('v');
   }
 };

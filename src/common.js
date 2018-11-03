@@ -9,7 +9,7 @@
 * Released under MIT license
 */
 
-var { normalize, nextTick, isString, uniq, diff, flat } = require('./util');
+var { normalize, nextTick, isString, uniq, sample, diff, flat } = require('./util');
 
 function error(err, callback) {
   if (isString(err)) err = new RangeError(err);
@@ -341,35 +341,6 @@ function seek(offset, pos, callback){
   return data.lookup(offset, callback);
 }
 
-/**
- * factory function for randX()
- *
- * @param pos {string} - a,r,n,v
- * @returns {Function} - rand function bound to an index file
- * @this WordPOS
- */
-function makeRandX(pos){
-  return function(opts, callback, _noprofile) {
-    // disable profiling when isX() used internally
-    var profile = this.options.profile && !_noprofile,
-      start = profile && new Date(),
-      args = [],
-      index = this.getFilesFor(pos).index,
-      startsWith = opts && opts.startsWith || '',
-      count = opts && opts.count || 1;
-
-    if (typeof opts === 'function') {
-      callback = opts;
-    }
-
-    return index.rand(startsWith, count, function (record) {
-      args.push(record, startsWith);
-      profile && args.push(new Date() - start);
-      callback && callback.apply(null, args);
-    });
-  };
-}
-
 const LEX_NAMES = [
  'adj.all',
  'adj.pert',
@@ -424,7 +395,6 @@ module.exports= {
   get,
   seek,
   getPOS,
-  makeRandX,
 
   lineDataToJSON,
   LEX_NAMES,

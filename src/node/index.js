@@ -60,7 +60,7 @@ var WordPOS = function(options) {
   this.advData = new DataFile(dictPath, 'adv');
 
   // define randX() functions
-  require('../rand').init(this);
+  require('./rand').init(this);
 
   if (_.isArray(this.options.stopwords)) {
     this.options.stopwords = makeStopwordString(this.options.stopwords);

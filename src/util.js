@@ -53,6 +53,24 @@ function flat(arr) {
   return [].concat.apply([], arr);
 }
 
+// get random sample from array (note: count << array.length)
+// https://stackoverflow.com/a/37834217
+function sample(array, count) {
+  var indices = [];
+  var result = new Array(count);
+  for (let i = 0; i < count; i++ ) {
+      let j = Math.floor(Math.random() * (array.length - i) + i);
+      let val = array[indices[j] === undefined ? j : indices[j]];
+      if (val === undefined) {
+        result.length = i;
+        break;
+      }
+      result[i] = val;
+      indices[j] = indices[i] === undefined ? i : indices[i];
+  }
+  return result;
+}
+
 function isString(s) {
   return typeof s === 'string';
 }
@@ -81,5 +99,6 @@ module.exports = {
   makeStopwordString,
   uniq,
   diff,
-  flat
+  flat,
+  sample
 };

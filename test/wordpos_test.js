@@ -1,7 +1,7 @@
 /**
  * wordpos_test.js
  *
- *   test file for main wordpos functionality
+ *   test file for main wordpos functionality (both node and browser)
  *
  * Usage:
  *   npm install mocha -g
@@ -11,13 +11,11 @@
  *
  *   npm test
  *
- * Copyright (c) 2012-2016 mooster@42at.com
+ * Copyright (c) 2012-2019 mooster@42at.com
  * https://github.com/moos/wordpos
  *
  * Released under MIT license
  */
-
-//import {describe, it} from 'mocha/lib/mocha.js';
 
 var
   chai = require('chai'),
@@ -29,7 +27,8 @@ var
   dictPath = browser ? path.resolve('./test/dict') : undefined,
   wordpos = new WordPOS({
     profile: false,
-    dictPath: dictPath
+    dictPath: dictPath,
+    // debug: true
   });
 
 const assertNoData = (err) => {
@@ -56,7 +55,6 @@ var str = "The angry bear chased the frightened little squirrel",
   },
   garble = 'garblegarble',	// expect not to find word
   offset = 1285602;
-
 
 
 describe('lookup', function() {
@@ -301,73 +299,49 @@ describe('nested callbacks on same index key', function() {
 
 
 describe('rand()...', function() {
-  it('should get random word', function(done) {
-    wordpos.rand(function(result) {
+  it('should get random word', function() {
+    return wordpos.rand(function(result) {
       assert.equal(result.length, 1);
-      done();
     });
   });
 
-  it('should get N random words', function(done) {
-    wordpos.rand({count: 3}, function(result) {
+  it('should get N random words', function() {
+    return wordpos.rand({count: 3}, function(result) {
       assert.equal(result.length, 3);
-      done();
     });
   });
 
-  it('should get random word starting with', function(done) {
-    wordpos.rand({startsWith: 'foo'}, function(result, startsWith) {
+  it('should get random word starting with', function() {
+    return wordpos.rand({startsWith: 'foo'}, function(result, startsWith) {
       assert.equal(result[0].indexOf('foo'), 0);
       assert.equal(startsWith, 'foo');
-      done();
     });
   });
 
-  it('should get nothing starting with not found', function(done) {
-    wordpos.rand({startsWith: 'zzzz'}, function(result) {
+  it('should get nothing starting with not found', function() {
+    return wordpos.rand({startsWith: 'zzzz'}, function(result) {
       assert.equal(result.length, 0);
-      done();
     });
   });
 });
 
 
 describe('randX()...', function() {
-  it('should get random noun', function(done) {
-    wordpos.randNoun(function(result) {
-      assert.equal(result.length, 1);
-      done();
-    });
-  });
+  let assertOneResult = (res) => {
+    assert.equal(res.length, 1);
+  };
 
-  it('should get random verb', function(done) {
-    wordpos.randVerb(function(result) {
-      assert.equal(result.length, 1);
-      done();
-    });
-  });
-
-  it('should get random adjective', function(done) {
-    wordpos.randAdjective(function(result) {
-      assert.equal(result.length, 1);
-      done();
-    });
-  });
-
-  it('should get random adverb', function(done) {
-    wordpos.randAdverb(function(result) {
-      assert.equal(result.length, 1);
-      done();
-    });
-  });
+  it('should get random noun', () => wordpos.randNoun(assertOneResult));
+  it('should get random verb', () => wordpos.randVerb(assertOneResult));
+  it('should get random adjective', () => wordpos.randAdjective(assertOneResult));
+  it('should get random adverb', () => wordpos.randAdverb(assertOneResult));
 
   // not found
-  it('should NOT get random noun starting with', function(done) {
-    wordpos.randNoun({startsWith: 'zzzz'},function(result, startsWith) {
-      assert.equal(result.length, 0);
-      done();
-    });
-  });
+  it('should NOT get random noun starting with', () =>
+    wordpos.randNoun({startsWith: 'zzzz'}, (result, startsWith) =>
+      assert.equal(result.length, 0)
+    )
+  );
 });
 
 

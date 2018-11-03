@@ -8,10 +8,11 @@
 let fs = require('fs');
 let path = require('path');
 
-let outPath = './dict';
-let testPath = './test/dict';
+let outPath = './dict';  // browser-use files
+let testPath = './test/dict';  // mocha files in CJS format
+
 let posExt = ['adj', 'adv', 'noun', 'verb'];
-let dictRoot = './node_modules/wordnet-db/dict/';
+let dictRoot = './node_modules/wordnet-db/dict/';  // source files
 const fileTypes = {
   data: true,
   index: true
