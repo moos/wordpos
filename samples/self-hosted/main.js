@@ -1,6 +1,6 @@
 let wordpos = window.wordpos = new WordPOS({
   // preload: true,
-  dictPath: '../samples/self-hosted/dict',
+  dictPath: '/samples/self-hosted/dict',
   profile: true,
   // stopwords: false
 });

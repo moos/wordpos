@@ -17,6 +17,10 @@
  * Released under MIT license
  */
 
+ // used in src code to signal test mode
+global.window = global.window || {};
+global.window.__mocha = true;
+
 var
   chai = require('chai'),
   _ = require('underscore'),
@@ -30,6 +34,7 @@ var
     dictPath: dictPath,
     // debug: true
   });
+
 
 const assertNoData = (err) => {
   assert(err instanceof RangeError);

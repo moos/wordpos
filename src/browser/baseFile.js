@@ -7,6 +7,8 @@
  * Released under MIT license
  */
 
+let isTest = window.__mocha;
+
 class BaseFile {
 
   /**
@@ -33,11 +35,13 @@ class BaseFile {
 
   load() {
     if (this.loadError) return Promise.reject(this.loadError);
-
     this.options.debug && console.time('index load ' + this.posName);
-    let promise = Promise.resolve(require(this.filePath));
-    this.options.debug && console.timeEnd('index load ' + this.posName)
 
+    let promise = isTest
+      ? Promise.resolve(require(this.filePath))
+      : eval(`import('${this.filePath}')`); // prevent parcel from clobbering dynamic import
+
+    this.options.debug && console.timeEnd('index load ' + this.posName)
     return promise
       .then(exports => {
         this.file = exports.default
