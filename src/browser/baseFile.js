@@ -39,7 +39,7 @@ class BaseFile {
 
     let promise = isTest
       ? Promise.resolve(require(this.filePath))
-      : eval(`import('${this.filePath}')`); // prevent parcel from clobbering dynamic import
+      : ES6_IMPORT(`${this.filePath}`); // prevent parcel from clobbering dynamic import
 
     this.options.debug && console.timeEnd('index load ' + this.posName)
     return promise

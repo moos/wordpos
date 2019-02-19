@@ -4,11 +4,13 @@ wordpos
 [![NPM version](https://img.shields.io/npm/v/wordpos.svg)](https://www.npmjs.com/package/wordpos)
 [![Build Status](https://img.shields.io/travis/moos/wordpos/master.svg)](https://travis-ci.org/moos/wordpos)
 
-wordpos is a set of *fast* part-of-speech (POS) utilities for Node.js using fast lookup in the WordNet database.
+wordpos is a set of *fast* part-of-speech (POS) utilities for Node.js **and** browser using fast lookup in the WordNet database.
 
 Version 1.x is a major update with no direct dependence on [natural's](https://github.com/NaturalNode/natural#wordnet) WordNet module, with support for [Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise), and roughly 5x speed improvement over previous version.
 
-**CAUTION** The WordNet database [wordnet-db](https://github.com/moos/wordnet-db) comprises [155,287 words](https://wordnet.princeton.edu/documentation/wnstats7wn) (3.0 numbers) which uncompress to over **30 MB** of data in several *un*[browserify](https://github.com/substack/node-browserify)-able files.  It is *not* meant for the browser environment.
+~~**CAUTION** The WordNet database [wordnet-db](https://github.com/moos/wordnet-db) comprises [155,287 words](https://wordnet.princeton.edu/documentation/wnstats7wn) (3.0 numbers) which uncompress to over **30 MB** of data in several *un*[browserify](https://github.com/substack/node-browserify)-able files.  It is *not* meant for the browser environment.~~
+
+:zap: v2.x can work in browsers -- see below for example.
 
 
 ## Quick usage
@@ -68,7 +70,30 @@ WordPOS.defaults = {
    * if array, stopwords to exclude, eg, ['all','of','this',...]
    * if false, do not filter any stopwords.
    */
-  stopwords: true
+  stopwords: true,
+
+  /**
+   * preload files (in browser only)
+   *    true - preload all POS
+   *    false - do not preload any POS
+   *    'a' - preload adj
+   *    ['a','v'] - preload adj & verb
+   * @type {boolean|string|Array}
+   */
+  preload: false,
+
+  /**
+   * include data files in preload
+   * @type {boolean}
+   */
+  includeData: false,  // WIP
+
+  /**
+   * set to true to enable debug logging
+   * @type {boolean}
+   */
+  debug: false
+
 };
 ```
 To override, pass an options hash to the constructor. With the `profile` option, most callbacks receive a last argument that is the execution time in msec of the call.
@@ -224,7 +249,7 @@ wordpos.rand({starsWith: 'zzz'}, console.log)
 // [] 'zzz'
 ```
 
-**Note on performance**: random lookups could involve heavy disk reads.  It is better to use the `count` option to get words in batches.  This may benefit from the cached reads of similarly keyed entries as well as shared open/close of the index files.
+**Note on performance**: (node only) random lookups could involve heavy disk reads.  It is better to use the `count` option to get words in batches.  This may benefit from the cached reads of similarly keyed entries as well as shared open/close of the index files.
 
 Getting random POS (`randNoun()`, etc.) is generally faster than `rand()`, which may look at multiple POS files until `count` requirement is met.
 
@@ -269,8 +294,31 @@ wordpos.isVerb('fish', console.log)
 ```
 Note that callback receives full arguments (including profile, if enabled), while the Promise receives only the result of the call.  Also, beware that exceptions in the _callback_ will result in the Promise being _rejected_ and caught by `catch()`, if provided.
 
+## Running inside the browsers
 
-## Fast Index
+v2.0 introduces the capability of running wordpos in the browser.  The dictionary files are optimized for fast access (lookup by lemma), but they must be fetched, parsed and loaded into browser memory.  The files are loaded on-demand (unless the option `preload: true` is given).
+
+The dict files can be served locally or from CDN (coming soon).  Include the following scripts in your `index.html`:
+```html
+<script src="wordpos/dist/wordpos.min.js"></script>
+<script>
+  let wordpos = new WordPOS({
+    // preload: true,
+    dictPath: '/wordpos/dict',
+    profile: true
+  });
+
+  wordpos.getAdverbs('this is is lately a likely tricky business this is')
+    .then(res => {
+      console.log(res); // ["lately", "likely"]
+    });
+</script>
+```
+Above assumes wordpos is installed to the directory `./wordpos`.  `./wordpos/dict` holds the index and data WordNet files generated for the web in a postinstall script.
+
+See [samples/self-hosted](samples/self-hosted/main.js).
+
+## Fast Index (node)
 
 Version 0.1.4 introduces `fastIndex` option.  This uses a secondary index on the index files and is much faster. It is on by default.  Secondary index files are generated at install time and placed in the same directory as WNdb.path.  Details can be found in tools/stat.js.
 
@@ -287,7 +335,15 @@ For CLI usage and examples, see [bin/README](bin).
 
 See [bench/README](bench).
 
+
+## TODO
+- implement `includeData` option for preload
+
+
 ## Changes
+
+**2.0.0**
+  - Support for running wordpos in browser (no breaking change for node environment)
 
 1.2.0
  - Fix `new Buffer()` deprecation warning.
@@ -347,4 +403,4 @@ License
 
 (The MIT License)
 
-Copyright (c) 2012, 2014, 2016 mooster@42at.com
+Copyright (c) 2012-2019 mooster@42at.com

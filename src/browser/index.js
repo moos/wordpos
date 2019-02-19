@@ -20,6 +20,7 @@ const POS = {
   r: 'adv'
 };
 
+
 class WordPOS {
 
   options = {};
