@@ -1,10 +1,3 @@
-let wordpos = window.wordpos = new WordPOS({
-  // preload: true,
-  dictPath: '/samples/self-hosted/dict',
-  profile: true,
-  // stopwords: false
-});
-
 let assertLikely = (r) => {
   console.assert(r.def === 'with considerable certainty');
   console.assert(r.pos === 'r');

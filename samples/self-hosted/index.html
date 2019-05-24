@@ -8,8 +8,17 @@
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/javascript.min.js"></script>
 
-  <script src="../../dist/wordpos.min.js"></script>
-  <script src="./main.js" name="main"></script>
+  <script src="/dist/wordpos.min.js"></script>
+  <script>
+    let wordpos = window.wordpos = new WordPOS({
+      // preload: true,
+      dictPath: '/samples/self-hosted/dict',
+      profile: true,
+      // stopwords: false
+    });
+  </script>
+
+  <script src="../main.js" name="main"></script>
   <style>
     pre {
       padding: 2em;
@@ -27,14 +36,14 @@
    <script>
    var el = document.querySelector('code');
    if (fetch) {
-     fetch('main.js')
+     fetch('../main.js')
        .then(res => res.text())
        .then(txt => {
          el.innerText = txt;
          window.hljs && hljs.initHighlightingOnLoad();
        });
    } else {
-     el.innerHTML = 'Open <a href=main.js>main.js</a>.';
+     el.innerHTML = 'Open <a href="../main.js">main.js</a>.';
    }
    </script>
 
