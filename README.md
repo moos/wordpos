@@ -12,6 +12,14 @@ Version 1.x is a major update with no direct dependence on [natural's](https://g
 
 :zap: v2.x can work in browsers -- see below for example.
 
+## Installation
+
+     npm install -g wordpos
+
+To run test: (or just: npm test)
+
+    npm install -g mocha
+    mocha test
 
 ## Quick usage
 
@@ -35,7 +43,7 @@ Command-line: (see [CLI](bin) for full command list)
 ```bash
 $ wordpos def git
 git
-  n: a person who is deemed to be despicable or contemptible; "only a rotter would do that"; "kill the rat"; "throw the bum out"; "you cowardly little pukes!"; "the British call a contemptible person a `git'"  
+  n: a person who is deemed to be despicable or contemptible; "only a rotter would do that"; "kill the rat"; "throw the bum out"; "you cowardly little pukes!"; "the British call a contemptible person a 'git'"  
 
 $ wordpos def git | wordpos get --adj
 # Adjective 6:
@@ -47,16 +55,8 @@ little
 British
 ```
 
-## Installation
 
-     npm install -g wordpos
-
-To run test: (or just: npm test)
-
-    npm install -g mocha
-    mocha test
-
-### Options
+## Options
 
 ```js
 WordPOS.defaults = {
@@ -298,7 +298,7 @@ Note that callback receives full arguments (including profile, if enabled), whil
 
 v2.0 introduces the capability of running wordpos in the browser.  The dictionary files are optimized for fast access (lookup by lemma), but they must be fetched, parsed and loaded into browser memory.  The files are loaded on-demand (unless the option `preload: true` is given).
 
-The dict files can be served locally or from CDN (coming soon).  Include the following scripts in your `index.html`:
+The dict files can be served locally or from CDN (see [samples/cdn](samples/cdn/).).  Include the following scripts in your `index.html`:
 ```html
 <script src="wordpos/dist/wordpos.min.js"></script>
 <script>
@@ -316,7 +316,19 @@ The dict files can be served locally or from CDN (coming soon).  Include the fol
 ```
 Above assumes wordpos is installed to the directory `./wordpos`.  `./wordpos/dict` holds the index and data WordNet files generated for the web in a postinstall script.
 
-See [samples/self-hosted](samples/self-hosted/main.js).
+See [samples/self-hosted](samples/self-hosted/).
+
+To run the samples locally, install [parcel](https://github.com/parcel-bundler/parcel) if you don't already have it (`npm i -g parcel`), then:
+```bash
+$ npm run start-self 
+Server running at http://localhost:1234
+...
+ 
+$ npm run start-cdn
+Server running at http://localhost:1234
+...
+```
+and open your browser to that url.
 
 ## Fast Index (node)
 
@@ -344,6 +356,7 @@ See [bench/README](bench).
 
 **2.0.0**
   - Support for running wordpos in browser (no breaking change for node environment)
+  - Dropped support for node 4.x.
 
 1.2.0
  - Fix `new Buffer()` deprecation warning.

@@ -1,6 +1,6 @@
 {
   "name": "wordpos",
-  "version": "2.0.0-beta",
+  "version": "2.0.0-beta.1",
   "description": "wordpos is a set of part-of-speech utilities for Node.js & browser using the WordNet database.",
   "author": "Moos <mooster@42at.com>",
   "keywords": [
@@ -24,6 +24,7 @@
     "lib",
     "src",
     "test",
+    "!test/dict",
     "tools"
   ],
   "bin": "./bin/wordpos-cli.js",
@@ -31,7 +32,7 @@
     "commander": "^2.0.0",
     "symlink-dir": "1.1.3",
     "underscore": ">=1.3.1",
-    "wordnet-db": "^3.1.6"
+    "wordnet-db": "^3.1.11"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",
@@ -74,7 +75,7 @@
     "test-browser": "mocha test/wordpos_test --require @babel/register",
     "prestart": "symlink-dir dict samples/self-hosted/dict",
     "start": "npm run build && http-server",
-    "prestart-dev": "rm -rf build && mkdir build && symlink-dir dict build/dict && cp samples/self-hosted/main.js build/main.txt",
+    "prestart-dev": "rm -rf build && mkdir build && symlink-dir dict build/dict && cp samples/main.js build/main.txt",
     "start-dev": "npm run start-self -- -d build",
     "start-self": "parcel samples/self-hosted/index.html",
     "start-cdn": "parcel samples/cdn/index.html"
