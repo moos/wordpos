@@ -23,6 +23,7 @@
     "dist",
     "lib",
     "src",
+    "scripts",
     "test",
     "!test/dict",
     "tools"
