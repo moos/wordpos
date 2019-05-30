@@ -12,7 +12,8 @@ let outPath = './dict';  // browser-use files
 let testPath = './test/dict';  // mocha files in CJS format
 
 let posExt = ['adj', 'adv', 'noun', 'verb'];
-let dictRoot = './node_modules/wordnet-db/dict/';  // source files
+let dictRoot = require('wordnet-db').path;  // source files
+
 const fileTypes = {
   data: true,
   index: true
