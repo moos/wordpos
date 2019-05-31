@@ -46,7 +46,7 @@
  * Released under MIT license
  */
 var
-  WNdb = require('../src/wordpos').WNdb,
+  WNdb = require('wordnet-db'),
   util = require('util'),
   BufferedReader = require ('./buffered-reader'),
   _ = require('underscore')._,
