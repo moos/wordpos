@@ -8,9 +8,9 @@ wordpos is a set of *fast* part-of-speech (POS) utilities for Node.js **and** br
 
 Version 1.x is a major update with no direct dependence on [natural's](https://github.com/NaturalNode/natural#wordnet) WordNet module, with support for [Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise), and roughly 5x speed improvement over previous version.
 
-~~**CAUTION** The WordNet database [wordnet-db](https://github.com/moos/wordnet-db) comprises [155,287 words](https://wordnet.princeton.edu/documentation/wnstats7wn) (3.0 numbers) which uncompress to over **30 MB** of data in several *un*[browserify](https://github.com/substack/node-browserify)-able files.  It is *not* meant for the browser environment.~~
+> ~~**CAUTION** The WordNet database [wordnet-db](https://github.com/moos/wordnet-db) comprises [155,287 words](https://wordnet.princeton.edu/documentation/wnstats7wn) (3.0 numbers) which uncompress to over **30 MB** of data in several *un*[browserify](https://github.com/substack/node-browserify)-able files.  It is *not* meant for the browser environment.~~
 
-:zap: v2.x can work in browsers -- see below for example.
+:zap: v2.x can work in browsers -- to try it out `npm i wordpos@beta` or  [see it in action](https://moos.github.io/wordpos). See below for usage.
 
 ## Installation
 
@@ -298,7 +298,7 @@ Note that callback receives full arguments (including profile, if enabled), whil
 
 v2.0 introduces the capability of running wordpos in the browser.  The dictionary files are optimized for fast access (lookup by lemma), but they must be fetched, parsed and loaded into browser memory.  The files are loaded on-demand (unless the option `preload: true` is given).
 
-The dict files can be served locally or from CDN (see [samples/cdn](samples/cdn/).).  Include the following scripts in your `index.html`:
+The dict files can be served locally or from CDN (see [samples/cdn](samples/cdn/) for code, or [see it in action](https://moos.github.io/wordpos)).  Include the following scripts in your `index.html`:
 ```html
 <script src="wordpos/dist/wordpos.min.js"></script>
 <script>
