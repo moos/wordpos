@@ -1,6 +1,6 @@
 {
   "name": "wordpos",
-  "version": "2.0.0-beta.10",
+  "version": "2.0.0-beta.11",
   "description": "wordpos is a set of part-of-speech utilities for Node.js & browser using the WordNet database.",
   "author": "Moos <mooster@42at.com>",
   "keywords": [
@@ -19,6 +19,7 @@
   "files": [
     "bin",
     "dist",
+    "lib",
     "src",
     "test",
     "!test/dict",
@@ -52,7 +53,8 @@
     "babel-plugin-dynamic-import-node": "^2.3.0",
     "chai": "^4.2.0",
     "mini-bench": "^1.0.0",
-    "mocha": "^5.2.0"
+    "mocha": "^5.2.0",
+    "parcel": "^1.12.4"
   },
   "repository": {
     "type": "git",
