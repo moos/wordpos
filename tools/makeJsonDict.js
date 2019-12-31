@@ -5,26 +5,31 @@
  * exported JSON format with lemma as the key.
  */
 
-let fs = require('fs');
-let path = require('path');
+const fs = require('fs');
+const path = require('path');
+const pkg = require('../package.json');
+const wndb = require('wordnet-db');
 
-let outPath = './dict';  // browser-use files
-let testPath = './test/dict';  // mocha files in CJS format
-
-let posExt = ['adj', 'adv', 'noun', 'verb'];
-let dictRoot = require('wordnet-db').path;  // source files
-
+const outPath = './dict';         // browser-use files
+const testPath = './test/dict';   // mocha files in CJS format
+const testOpt = '--no-test';    // don't do test format
+const posExt = ['adj', 'adv', 'noun', 'verb'];
+const dictRoot = wndb.path;  // source files
+const copyright = require('./banner').copyright;
 const fileTypes = {
   data: true,
   index: true
 };
 const [,, ...args] = process.argv;
 
-if (!args.length || args.filter(p => !(p in fileTypes)).length) {
+if (!args.length || args.filter(p => p !== testOpt && !(p in fileTypes)).length) {
   console.log('Converts wordnet-db index & data files to JSON format for use in the browser.');
-  console.log('\nUsage:  makeJsonDict.js index|data');
+  console.log(`\nUsage:  makeJsonDict.js index|data [${testOpt}]`);
   process.exit(1);
 }
+
+const doTest = !args.includes(testOpt);
+if (!doTest) args.splice(args.indexOf(testOpt));
 
 function uniq(arr) {
   return arr.filter((v, i) => arr.indexOf(v) === i);
@@ -42,7 +47,7 @@ const ensurePath = (path) => {
 };
 
 ensurePath(outPath);
-ensurePath(testPath);
+if (doTest) ensurePath(testPath);
 
 function processFile(name) {
 
@@ -75,11 +80,11 @@ function processFile(name) {
     console.time('  write');
     let text = JSON.stringify(obj);
     fs.writeFileSync(path.resolve(outPath, name + '.' + pos + '.js'),
-      'export default ' + text);
+      copyright + 'export default ' + text);
 
     // also write for mocha tests
-    fs.writeFileSync(path.resolve(testPath, name + '.' + pos + '.js'),
-      'module.exports.default = ' + text);
+    if (doTest) fs.writeFileSync(path.resolve(testPath, name + '.' + pos + '.js'),
+      copyright + 'module.exports.default = ' + text);
 
     console.timeEnd('  write');
   }
