@@ -35,6 +35,8 @@ class BaseFile {
 
   load() {
     if (this.loadError) return Promise.reject(this.loadError);
+    if (this.loaded) return this.loaded;
+
     this.options.debug && console.time('index load ' + this.posName);
 
     let promise = isTest
@@ -42,7 +44,7 @@ class BaseFile {
       : ES6_IMPORT(`${this.filePath}`); // prevent parcel from clobbering dynamic import
 
     this.options.debug && console.timeEnd('index load ' + this.posName)
-    return promise
+    return this.loaded = promise
       .then(exports => {
         this.file = exports.default;
         return this;
