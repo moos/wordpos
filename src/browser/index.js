@@ -7,7 +7,7 @@
 * Released under MIT license
 */
 
-const { stopwords, prepText, makeStopwordString } = require('../util');
+const { stopwords, prepText, makeStopwordString, flat } = require('../util');
 const { is, get, getPOS, lookup, seek, lookupPOS } = require('../common');
 const { randX, rand } = require('../rand');
 const IndexFile = require('./indexFile');
@@ -69,7 +69,7 @@ class WordPOS {
     let promise = this._preload(this.indexFiles, pos);
     if (this.options.includeData) {
       promise = Promise.all([].concat(promise, this._preload(this.dataFiles, pos)))
-        .then(res => res.flat());
+        .then(res => flat(res));
     }
     return promise;
   }
