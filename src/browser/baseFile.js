@@ -44,7 +44,8 @@ class BaseFile {
     this.options.debug && console.timeEnd('index load ' + this.posName)
     return promise
       .then(exports => {
-        this.file = exports.default
+        this.file = exports.default;
+        return this;
       })
       .catch(err => {
         console.error(`Error loading "${this.type}" file ${this.filePath}.`, err);
@@ -54,7 +55,7 @@ class BaseFile {
   }
 
   ready(fn, args) {
-    return this.load().then(() => fn.apply(this, args));
+    return this.load().then(res => fn && fn.apply(this, args) || res);
   }
 }
 

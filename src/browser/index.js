@@ -34,6 +34,10 @@ class WordPOS {
     }
   }
 
+  ready() {
+    return this.loaded || Promise.resolve();
+  }
+
   initFiles() {
     const keys = Object.keys(POS);
     const loadOne = (Comp, pos) => new Comp(this.options.dictPath, POS[pos], this.options);
@@ -44,7 +48,7 @@ class WordPOS {
     this.dataFiles = reducer(loader(DataFile));
 
     if (this.options.preload) {
-      this.loaded = this.preloadIndexes(this.options.preload);
+      this.loaded = this.preloadFiles(this.options.preload);
     }
   }
 
@@ -61,23 +65,28 @@ class WordPOS {
    * @param  {string|Array} [pos] POS to load (default: all)
    * @return {Promise.<index data>}
    */
-  preloadIndexes(pos) {
-    let file = this.indexFile[pos];
-    let load = p => file.load();
+  preloadFiles(pos) {
+    let promise = this._preload(this.indexFiles, pos);
+    if (this.options.includeData) {
+      promise = Promise.all([].concat(promise, this._preload(this.dataFiles, pos)))
+        .then(res => res.flat());
+    }
+    return promise;
+  }
+
+  _preload(files, pos) {
+    let load = p => files[p].load();
     let promise;
 
     if (!pos || pos === true) { // preload all
       promise = Promise.all(Object.keys(POS).map(load));
     }
-    else if (typeof pos === 'string' && file) {
+    else if (typeof pos === 'string' && files[pos]) {
       promise = load(pos);
     }
     else if (pos instanceof Array) {
-      promise = pos.forEach(pos => file && load(pos));
+      promise = Promise.all(pos.map(load));
     }
-
-    // TODO includeData
-
     return promise || Promise.reject(new RangeError(`Unknown POS "${pos}" for preload.`));
   }
 
@@ -182,6 +191,8 @@ WordPOS.defaults = {
  * @type {Array}
  */
 WordPOS.stopwords = stopwords;
+
+WordPOS.POS = POS;
 
 // Export as CJS handled by Parcel, otherwise will get WordPOS.default
 // if use: export default WordPOS;

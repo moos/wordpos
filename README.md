@@ -86,7 +86,7 @@ WordPOS.defaults = {
    * include data files in preload
    * @type {boolean}
    */
-  includeData: false,  // WIP
+  includeData: false,
 
   /**
    * set to true to enable debug logging
@@ -314,10 +314,6 @@ For CLI usage and examples, see [bin/README](bin).
 ## Benchmark
 
 See [bench/README](bench).
-
-
-## TODO
-- implement `includeData` option for preload
 
 
 ## Changes

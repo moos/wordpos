@@ -1,6 +1,6 @@
 {
   "name": "wordpos",
-  "version": "2.0.0-beta.11",
+  "version": "2.0.0-beta.13",
   "description": "wordpos is a set of part-of-speech utilities for Node.js & browser using the WordNet database.",
   "author": "Moos <mooster@42at.com>",
   "keywords": [
@@ -69,8 +69,8 @@
     "prepare": "npm run build",
     "pretest": "node tools/makeJsonDict.js index data",
     "test": "npm run test-node && npm run test-browser",
-    "test-node": "mocha test",
-    "test-browser": "mocha test/wordpos_test --require @babel/register"
+    "test-node": "mocha test --exclude test/browser_test.js",
+    "test-browser": "mocha test/browser_test test/wordpos_test  --require @babel/register"
   },
   "license": "MIT"
 }
