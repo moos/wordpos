@@ -10,7 +10,7 @@ Version 1.x is a major update with no direct dependence on [natural's](https://g
 
 > ~~**CAUTION** The WordNet database [wordnet-db](https://github.com/moos/wordnet-db) comprises [155,287 words](https://wordnet.princeton.edu/documentation/wnstats7wn) (3.0 numbers) which uncompress to over **30 MB** of data in several *un*[browserify](https://github.com/substack/node-browserify)-able files.  It is *not* meant for the browser environment.~~
 
-:zap: v2.x can work in browsers -- to try it out `npm i wordpos@beta` or  [see it in action](https://moos.github.io/wordpos/cdn). See below for usage.
+🔥 Version 2.x is totally refactored and **works in browsers** also -- see [wordpos-web](https://github.com/moos/wordpos-web).
 
 ## Installation
 
