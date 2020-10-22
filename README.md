@@ -206,7 +206,7 @@ wordpos.lookupAdjective('awesome', console.log);
 ```
 In this case only one lookup was found, but there could be several.  
 
-Version 1.1 adds the `lexName` parameter, which maps the lexFilenum to one of [45 lexicographer domains](https://wordnet.princeton.edu/wordnet/man/lexnames.5WN.html).
+Version 1.1 adds the `lexName` parameter, which maps the lexFilenum to one of [45 lexicographer domains](https://wordnet.princeton.edu/documentation/lexnames5wn).
 
 
 #### seek(offset, pos, callback)
