@@ -160,12 +160,12 @@ function get(isFn) {
       words = this.parse(text),
       results = [],
       self = this,
-      first = words.shift();
+      first = words[0];
 
     // test one first & check for error, otherwise
     // map is inoccuous to errors!
     return exec(first)
-      .then(() => Promise.all(words.map(exec)))
+      .then(() => Promise.all(words.slice(1).map(exec)))
       .then(done)
       .catch(err => {
         // done(); // callback signature is same!  // FIXME

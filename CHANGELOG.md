@@ -1,5 +1,10 @@
 
-**2.0.0**
+
+2.1.0
+  - Fix CLI script when used without specific POS (#41)
+  - :boom: Stopwords are now case-insensitive, i.e., "The", "And", "Him", etc. are all filtered out.
+    
+2.0.0
   - Support for running wordpos in the **browser** (no breaking change for node environment)
   - Dropped support for node 4.x.
 

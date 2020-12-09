@@ -1,6 +1,6 @@
 {
   "name": "wordpos",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "wordpos is a set of part-of-speech utilities for Node.js & browser using the WordNet database.",
   "author": "Moos <mooster@42at.com>",
   "keywords": [

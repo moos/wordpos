@@ -33,7 +33,7 @@ function normalize(word) {
 }
 
 function isStopword(stopwordsStr, word) {
-  return stopwordsStr.indexOf(' '+word+' ') >= 0;
+  return stopwordsStr.indexOf(' '+ word.toLowerCase() +' ') >= 0;
 }
 
 function tokenizer(str) {
