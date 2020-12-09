@@ -224,13 +224,13 @@ function getPOS(text, callback) {
     var args = [data];
     var matches = uniq(flat(Object.values(data)));
     data.rest = diff(words, matches);
-
     profile && args.push(new Date() - start);
     nextTick(callback, args);
     return data;
   }
 
   function error(err) {
+    console.log('Error >>> ', err);
     nextTick(callback, []);
     throw err;
   }

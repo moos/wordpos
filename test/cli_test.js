@@ -62,11 +62,10 @@ describe('CLI tests', function() {
     it('should get POS', done => {
       exec(cmd + '-b get ' + testStr, (error, stdout, stderr) => {
         assert.isNull(error);
-        assert.equal(stdout.trim(),
-  'bear chased little squirrel \n' +
-  'angry frightened little \n' +
-  'bear \n' +
-  'little');
+        cmp(stdout, 'bear chased squirrel little \n' +
+        'angry frightened little \n' +
+        'bear \n' +
+        'little');
         done();
       });
     });

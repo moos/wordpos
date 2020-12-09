@@ -56,7 +56,7 @@ var str = "The angry bear chased the frightened little squirrel",
     verbs: [ 'bear' ],
     adjectives: [ 'little', 'angry', 'frightened' ],
     adverbs: [ 'little' ],
-    rest: [ 'The' ]
+    rest: []
   },
   garble = 'garblegarble',	// expect not to find word
   offset = 1285602;
